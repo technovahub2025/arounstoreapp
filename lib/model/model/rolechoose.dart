@@ -1,0 +1,40 @@
+
+class User {
+  final String id;
+  final String name;
+  final String ? phone;
+  final String role;
+  final String? token;
+
+  User({
+    required this.id,
+    required this.name,
+    required this.phone,
+    required this.role,
+    this.token,
+  });
+
+  bool get isAdmin => role.toLowerCase() == 'admin';
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'] ?? json['_id'] ?? '',
+      name: json['name'] ?? '',
+      phone: json['phone'] ?? '',
+      role: json['role'] ?? 'user',
+      token: json['token'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'phone': phone,
+      'role': role,
+      'token': token,
+    };
+  }
+
+ 
+}
