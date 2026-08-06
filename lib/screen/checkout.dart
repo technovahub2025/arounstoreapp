@@ -6,6 +6,7 @@ import 'package:arunstore/service/razorpay_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:async';
 import 'package:razorpay_web/razorpay_web.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -49,8 +50,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final TextEditingController _countryController = TextEditingController(text: 'India');
 
   bool _isProcessing = false;
+  bool _isPreparingOrder = false;
   String? _errorMessage;
   RazorpayPaymentVerification? _verification;
+  RazorpayOrderResult? _preparedOrder;
+  String? _preparedOrderSignature;
+  Timer? _prepareDebounce;
 
   @override
   void initState() {
@@ -58,10 +63,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _fullNameController.addListener(_scheduleOrderPreparation);
+    _emailController.addListener(_scheduleOrderPreparation);
+    _phoneController.addListener(_scheduleOrderPreparation);
+    _address1Controller.addListener(_scheduleOrderPreparation);
+    _address2Controller.addListener(_scheduleOrderPreparation);
+    _cityController.addListener(_scheduleOrderPreparation);
+    _stateController.addListener(_scheduleOrderPreparation);
+    _pincodeController.addListener(_scheduleOrderPreparation);
+    _countryController.addListener(_scheduleOrderPreparation);
+    _cart.addListener(_scheduleOrderPreparation);
+    _scheduleOrderPreparation();
   }
 
   @override
   void dispose() {
+    _prepareDebounce?.cancel();
+    _cart.removeListener(_scheduleOrderPreparation);
+    _fullNameController.removeListener(_scheduleOrderPreparation);
+    _emailController.removeListener(_scheduleOrderPreparation);
+    _phoneController.removeListener(_scheduleOrderPreparation);
+    _address1Controller.removeListener(_scheduleOrderPreparation);
+    _address2Controller.removeListener(_scheduleOrderPreparation);
+    _cityController.removeListener(_scheduleOrderPreparation);
+    _stateController.removeListener(_scheduleOrderPreparation);
+    _pincodeController.removeListener(_scheduleOrderPreparation);
+    _countryController.removeListener(_scheduleOrderPreparation);
     _razorpay.clear();
     _fullNameController.dispose();
     _emailController.dispose();
@@ -78,6 +105,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double get _subtotal => _cart.subTotal.toDouble();
   double get _shipping => _cart.total.toDouble() - _subtotal;
   double get _total => _cart.total.toDouble();
+  String? get _effectiveAuthToken => widget.authToken ?? AuthManager().token;
 
   Future<String?> _resolveAuthToken() async {
     final managerToken = widget.authToken ?? AuthManager().token;
@@ -126,6 +154,103 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       pincode: _pincodeController.text.trim(),
       country: _countryController.text.trim(),
     );
+  }
+
+  String _buildOrderSignature() {
+    final authToken = _effectiveAuthToken ?? '';
+    final payload = [
+      _total.toStringAsFixed(2),
+      _fullNameController.text.trim(),
+      _emailController.text.trim(),
+      _phoneController.text.trim(),
+      _address1Controller.text.trim(),
+      _address2Controller.text.trim(),
+      _cityController.text.trim(),
+      _stateController.text.trim(),
+      _pincodeController.text.trim(),
+      _countryController.text.trim(),
+      authToken,
+    ];
+    return payload.join('|');
+  }
+
+  bool _isReadyToPrepareOrder() {
+    return _cart.items.isNotEmpty &&
+        widget.razorpayKeyId.trim().isNotEmpty &&
+        (_effectiveAuthToken != null && _effectiveAuthToken!.isNotEmpty) &&
+        _fullNameController.text.trim().isNotEmpty &&
+        _emailController.text.trim().isNotEmpty &&
+        _phoneController.text.trim().isNotEmpty &&
+        _address1Controller.text.trim().isNotEmpty &&
+        _cityController.text.trim().isNotEmpty &&
+        _stateController.text.trim().isNotEmpty &&
+        _pincodeController.text.trim().isNotEmpty &&
+        _countryController.text.trim().isNotEmpty &&
+        _formKey.currentState != null &&
+        _formKey.currentState!.validate();
+  }
+
+  void _scheduleOrderPreparation() {
+    _prepareDebounce?.cancel();
+    _prepareDebounce = Timer(const Duration(milliseconds: 350), () {
+      if (!mounted) return;
+      _prepareOrderIfNeeded();
+    });
+  }
+
+  Future<void> _prepareOrderIfNeeded() async {
+    if (!_isReadyToPrepareOrder()) {
+      if (mounted) {
+        setState(() {
+          _preparedOrder = null;
+          _preparedOrderSignature = null;
+        });
+      }
+      return;
+    }
+
+    final signature = _buildOrderSignature();
+    if (_preparedOrder != null && _preparedOrderSignature == signature) {
+      return;
+    }
+
+    if (_isPreparingOrder) return;
+
+    setState(() {
+      _isPreparingOrder = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final token = await _resolveAuthToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('Not authenticated. Please log in again before paying.');
+      }
+
+      final order = await RazorpayService.createOrder(
+        endpoint: widget.createOrderUrl,
+        amount: (_total * 100).round(),
+        currency: 'INR',
+        cartItems: _cartItemsPayload,
+        shippingDetails: _shippingPayload,
+        authToken: token,
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _preparedOrder = order;
+        _preparedOrderSignature = signature;
+        _isPreparingOrder = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _preparedOrder = null;
+        _preparedOrderSignature = null;
+        _isPreparingOrder = false;
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {
@@ -277,47 +402,38 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
-    if (widget.razorpayKeyId.trim().isEmpty) {
-      setState(() {
-        _errorMessage =
-            'Missing Razorpay key id. Pass RAZORPAY_KEY_ID with --dart-define.';
-      });
-      return;
-    }
-
-    final effectiveAuthToken = await _resolveAuthToken();
-
-    if (effectiveAuthToken == null || effectiveAuthToken.isEmpty) {
-      setState(() {
-        _isProcessing = false;
-        _errorMessage = 'Not authenticated. Please log in again before paying.';
-      });
-      return;
-    }
-
-    setState(() {
-      _isProcessing = true;
-    });
-
     try {
-      final order = await RazorpayService.createOrder(
-        endpoint: widget.createOrderUrl,
-        amount: (_total * 100).round(),
-        currency: 'INR',
-        cartItems: _cartItemsPayload,
-        shippingDetails: _shippingPayload,
-        authToken: effectiveAuthToken,
-      );
+      if (widget.razorpayKeyId.trim().isEmpty) {
+        throw Exception(
+          'Missing Razorpay key id. Pass RAZORPAY_KEY_ID with --dart-define.',
+        );
+      }
 
-      if (!mounted) return;
+      final effectiveAuthToken = await _resolveAuthToken();
+      if (effectiveAuthToken == null || effectiveAuthToken.isEmpty) {
+        throw Exception('Not authenticated. Please log in again before paying.');
+      }
+
+      final signature = _buildOrderSignature();
+      if (_preparedOrder == null || _preparedOrderSignature != signature) {
+        await _prepareOrderIfNeeded();
+      }
+
+      if (_preparedOrder == null) {
+        throw Exception('Payment order is still being prepared. Please try again.');
+      }
+
+      setState(() {
+        _isProcessing = true;
+      });
 
       final options = <String, dynamic>{
         'key': widget.razorpayKeyId,
-        'amount': order.amount,
-        'currency': order.currency,
+        'amount': _preparedOrder!.amount,
+        'currency': _preparedOrder!.currency,
         'name': 'Arun Store',
         'description': 'E-commerce checkout',
-        'order_id': order.orderId,
+        'order_id': _preparedOrder!.orderId,
         'prefill': {
           'name': _fullNameController.text.trim(),
           'email': _emailController.text.trim(),
