@@ -41,7 +41,8 @@ class RazorpayOrderResult {
       response,
       keys: const ['currency', 'order_currency', 'orderCurrency'],
       defaultValue: 'INR',
-    );
+    ) ??
+        'INR';
 
     if (orderId.isEmpty) {
       throw FormatException(
