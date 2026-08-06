@@ -653,7 +653,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isProcessing ? null : _startPayment,
+                onPressed: (_isProcessing || _isPreparingOrder || _preparedOrder == null) ? null : _startPayment,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
@@ -671,10 +671,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           color: Colors.white,
                         ),
                       )
-                    : Text(
-                        'Pay now â€¢ ${_money.format(_total)}',
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                      ),
+                    : _isPreparingOrder
+                        ? const Text(
+                            'Preparing payment...',
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                          )
+                        : _preparedOrder == null
+                            ? const Text(
+                                'Fill details to continue',
+                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                              )
+                            : Text(
+                                'Pay now • ${_money.format(_total)}',
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                              ),),
               ),
             ),
           ],
@@ -1101,4 +1111,5 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 }
+
 
