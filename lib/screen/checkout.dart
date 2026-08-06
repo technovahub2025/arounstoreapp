@@ -144,34 +144,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _errorMessage = verification.success ? null : verification.message;
       });
 
-      final orderSnapshot = _cart.items
-          .map(
-            (item) => CartItem(
-              product: item.product,
-              quantity: item.quantity,
-            ),
-          )
-          .toList();
-
-      OrderHistoryService.instance.addOrder(
-        CompletedOrder(
-          orderId: response.orderId ?? '',
-          paymentId: response.paymentId,
-          signature: response.signature,
-          customerName: _fullNameController.text.trim(),
-          items: orderSnapshot,
-          subtotal: _subtotal,
-          shipping: _shipping,
-          total: _total,
-          createdAt: DateTime.now(),
-        ),
-      );
-
-      if (widget.clearCartOnSuccess) {
-        _cart.clearCart();
-      }
-
       if (verification.success) {
+        final orderSnapshot = _cart.items
+            .map(
+              (item) => CartItem(
+                product: item.product,
+                quantity: item.quantity,
+              ),
+            )
+            .toList();
+
+        OrderHistoryService.instance.addOrder(
+          CompletedOrder(
+            orderId: response.orderId ?? '',
+            paymentId: response.paymentId,
+            signature: response.signature,
+            customerName: _fullNameController.text.trim(),
+            items: orderSnapshot,
+            subtotal: _subtotal,
+            shipping: _shipping,
+            total: _total,
+            createdAt: DateTime.now(),
+          ),
+        );
+
+        if (widget.clearCartOnSuccess) {
+          _cart.clearCart();
+        }
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Payment verified successfully.')),
         );
