@@ -1,196 +1,516 @@
 import 'package:arunstore/cart/allorder.dart';
+import 'package:arunstore/model/cartmanager.dart';
+import 'package:arunstore/service/razorpay_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  const CheckoutScreen({super.key});
+  const CheckoutScreen({
+    super.key,
+    this.createOrderUrl = '/api/payment/create-order',
+    this.verifyUrl = '/api/payment/verify',
+    this.authToken,
+    this.razorpayKeyId = const String.fromEnvironment('RAZORPAY_KEY_ID'),
+    this.clearCartOnSuccess = true,
+  });
+
+  final String createOrderUrl;
+  final String verifyUrl;
+  final String? authToken;
+  final String razorpayKeyId;
+  final bool clearCartOnSuccess;
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
 }
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
-  String paymentMethod = 'cod';
-
   final _formKey = GlobalKey<FormState>();
-  
-  // Controllers for form fields
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
+  final CartManager _cart = CartManager.instance;
+  final Razorpay _razorpay = Razorpay();
+  final NumberFormat _money = NumberFormat.currency(
+    locale: 'en_IN',
+    symbol: 'INR ',
+    decimalDigits: 0,
+  );
+
+  final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _streetController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _address1Controller = TextEditingController();
+  final TextEditingController _address2Controller = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
   final TextEditingController _stateController = TextEditingController();
-  final TextEditingController _zipCodeController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _pincodeController = TextEditingController();
+  final TextEditingController _countryController = TextEditingController(text: 'India');
+
+  bool _isProcessing = false;
+  String? _errorMessage;
+  RazorpayPaymentVerification? _verification;
+  Map<String, dynamic>? _lastPayment;
+
+  @override
+  void initState() {
+    super.initState();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  }
 
   @override
   void dispose() {
-    // Dispose controllers when not needed
-    _firstNameController.dispose();
-    _lastNameController.dispose();
+    _razorpay.clear();
+    _fullNameController.dispose();
     _emailController.dispose();
-    _streetController.dispose();
+    _phoneController.dispose();
+    _address1Controller.dispose();
+    _address2Controller.dispose();
     _cityController.dispose();
     _stateController.dispose();
-    _zipCodeController.dispose();
-    _phoneController.dispose();
+    _pincodeController.dispose();
+    _countryController.dispose();
     super.dispose();
+  }
+
+  double get _subtotal => _cart.subTotal.toDouble();
+  double get _shipping => _cart.total.toDouble() - _subtotal;
+  double get _total => _cart.total.toDouble();
+
+  List<Map<String, dynamic>> get _cartItemsPayload {
+    return _cart.items
+        .map(
+          (item) => {
+            'id': item.product.id,
+            'name': item.product.name,
+            'price': item.product.price,
+            'quantity': item.quantity,
+            'image': item.product.imageUrl,
+            'category': item.product.category,
+          },
+        )
+        .toList();
+  }
+
+  Map<String, dynamic> get _shippingPayload {
+    return buildShippingPayload(
+      fullName: _fullNameController.text.trim(),
+      email: _emailController.text.trim(),
+      phone: _phoneController.text.trim(),
+      addressLine1: _address1Controller.text.trim(),
+      addressLine2: _address2Controller.text.trim(),
+      city: _cityController.text.trim(),
+      state: _stateController.text.trim(),
+      pincode: _pincodeController.text.trim(),
+      country: _countryController.text.trim(),
+    );
+  }
+
+  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    if (!mounted) return;
+
+    setState(() {
+      _errorMessage = null;
+      _lastPayment = {
+        'razorpay_order_id': response.orderId,
+        'razorpay_payment_id': response.paymentId,
+        'razorpay_signature': response.signature,
+      };
+    });
+
+    try {
+      final verification = await RazorpayService.verifyPayment(
+        endpoint: widget.verifyUrl,
+        authToken: widget.authToken,
+        payload: {
+          'razorpay_order_id': response.orderId,
+          'razorpay_payment_id': response.paymentId,
+          'razorpay_signature': response.signature,
+          'amount': (_total * 100).round(),
+          'currency': 'INR',
+          'customer': _shippingPayload['customer'],
+          'shippingAddress': _shippingPayload['shippingAddress'],
+          'cartItems': _cartItemsPayload,
+        },
+      );
+
+      if (!mounted) return;
+
+      setState(() {
+        _verification = verification;
+        _isProcessing = false;
+        _errorMessage = verification.success ? null : verification.message;
+      });
+
+      if (widget.clearCartOnSuccess) {
+        _cart.clearCart();
+      }
+
+      if (verification.success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment verified successfully.')),
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Payment succeeded, but verification failed: $error';
+      });
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+
+    setState(() {
+      _isProcessing = false;
+      _errorMessage = response.message.isNotEmpty
+          ? response.message
+          : 'Payment failed. Please try again.';
+    });
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (!mounted) return;
+
+    setState(() {
+      _errorMessage = 'External wallet selected: ${response.walletName}.';
+      _isProcessing = false;
+    });
+  }
+
+  String? _requiredValidator(String? value, String label) {
+    if (value == null || value.trim().isEmpty) {
+      return '$label is required.';
+    }
+    return null;
+  }
+
+  String? _emailValidator(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'Email address is required.';
+    final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+    if (!emailRegex.hasMatch(text)) {
+      return 'Enter a valid email address.';
+    }
+    return null;
+  }
+
+  String? _phoneValidator(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'Phone number is required.';
+    final phoneRegex = RegExp(r'^[0-9+\-\s]{8,15}$');
+    if (!phoneRegex.hasMatch(text)) {
+      return 'Enter a valid phone number.';
+    }
+    return null;
+  }
+
+  String? _pincodeValidator(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'PIN code is required.';
+    if (!RegExp(r'^[0-9]{4,10}$').hasMatch(text)) {
+      return 'Enter a valid PIN code.';
+    }
+    return null;
+  }
+
+  Future<void> _startPayment() async {
+    FocusScope.of(context).unfocus();
+    setState(() {
+      _errorMessage = null;
+      _verification = null;
+    });
+
+    if (_cart.items.isEmpty) {
+      setState(() {
+        _errorMessage = 'Your cart is empty.';
+      });
+      return;
+    }
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() {
+        _errorMessage = 'Please fix the highlighted fields.';
+      });
+      return;
+    }
+
+    if (widget.razorpayKeyId.trim().isEmpty) {
+      setState(() {
+        _errorMessage =
+            'Missing Razorpay key id. Pass RAZORPAY_KEY_ID with --dart-define.';
+      });
+      return;
+    }
+
+    setState(() {
+      _isProcessing = true;
+    });
+
+    try {
+      final order = await RazorpayService.createOrder(
+        endpoint: widget.createOrderUrl,
+        amount: (_total * 100).round(),
+        currency: 'INR',
+        cartItems: _cartItemsPayload,
+        shippingDetails: _shippingPayload,
+        authToken: widget.authToken,
+      );
+
+      if (!mounted) return;
+
+      final options = <String, dynamic>{
+        'key': widget.razorpayKeyId,
+        'amount': order.amount,
+        'currency': order.currency,
+        'name': 'Arun Store',
+        'description': 'E-commerce checkout',
+        'order_id': order.orderId,
+        'prefill': {
+          'name': _fullNameController.text.trim(),
+          'email': _emailController.text.trim(),
+          'contact': _phoneController.text.trim(),
+        },
+        'notes': {
+          'customer_name': _fullNameController.text.trim(),
+          'shipping_city': _cityController.text.trim(),
+          'shipping_state': _stateController.text.trim(),
+          'shipping_pincode': _pincodeController.text.trim(),
+        },
+        'theme': {'color': '#0f172a'},
+        'retry': {'enabled': true, 'max_count': 2},
+        'modal': {
+          'ondismiss': () {
+            if (!mounted) return;
+            setState(() {
+              _isProcessing = false;
+              _errorMessage = 'Payment cancelled before completion.';
+            });
+          }
+        },
+      };
+
+      _razorpay.open(options);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+    return AnimatedBuilder(
+      animation: _cart,
+      builder: (context, _) {
+        return Scaffold(
+          backgroundColor: const Color(0xFFF4F7FB),
+          appBar: AppBar(
+            title: const Text('Checkout'),
+            backgroundColor: Colors.white,
+            foregroundColor: const Color(0xFF0F172A),
+            elevation: 0,
+          ),
+          body: SingleChildScrollView(
+            child: Container(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFFF4F7FB), Color(0xFFE8EEF7)],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildHeader(),
+                        if (_errorMessage != null) ...[
+                          const SizedBox(height: 16),
+                          _buildBanner(
+                            color: const Color(0xFFFFE4E6),
+                            textColor: const Color(0xFF9F1239),
+                            borderColor: const Color(0xFFFDA4AF),
+                            message: _errorMessage!,
+                          ),
+                        ],
+                        if (_verification != null && _verification!.success) ...[
+                          const SizedBox(height: 16),
+                          _buildBanner(
+                            color: const Color(0xFFDCFCE7),
+                            textColor: const Color(0xFF166534),
+                            borderColor: const Color(0xFF86EFAC),
+                            message: _verification!.message,
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final isWide = constraints.maxWidth >= 960;
+                            final children = [
+                              Expanded(flex: 3, child: _buildShippingCard()),
+                              const SizedBox(width: 20, height: 20),
+                              Expanded(flex: 2, child: _buildSummaryCard()),
+                            ];
+
+                            if (isWide) {
+                              return Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: children,
+                              );
+                            }
+
+                            return Column(
+                              children: [
+                                _buildShippingCard(),
+                                const SizedBox(height: 20),
+                                _buildSummaryCard(),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Secure checkout',
+            style: TextStyle(
+              color: Color(0xFF2563EB),
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.4,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Complete your order with Razorpay',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+            ),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            'Order creation happens on your backend, and payment verification happens after the checkout modal returns.',
+            style: TextStyle(
+              color: Colors.grey.shade700,
+              height: 1.45,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBanner({
+    required Color color,
+    required Color textColor,
+    required Color borderColor,
+    required String message,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: borderColor),
+      ),
+      child: Text(
+        message,
+        style: TextStyle(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildShippingCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _formKey,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            /// ================= DELIVERY INFO =================
-            const Text(
-              'DELIVERY INFORMATION',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
-            _card(
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _input(
-                            'First Name',
-                            controller: _firstNameController,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _input(
-                            'Last Name',
-                            controller: _lastNameController,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _input(
-                      'Email Address',
-                      controller: _emailController,
-                      keyboardType: TextInputType.emailAddress,
-                    ),
-                    const SizedBox(height: 12),
-                    _input(
-                      'Street Address',
-                      controller: _streetController,
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _input(
-                            'City',
-                            controller: _cityController,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _input(
-                            'State',
-                            controller: _stateController,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _input(
-                            'Zip Code',
-                            controller: _zipCodeController,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _input(
-                            'Country',
-                            enabled: false,
-                            initialValue: 'India',
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 12),
-                    _input(
-                      'Phone Number',
-                      controller: _phoneController,
-                      keyboardType: TextInputType.phone,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 24),
-
-            /// ================= PAYMENT =================
-            const Text(
-              'PAYMENT METHOD',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-
-            _card(
-              child: Column(
-                children: [
-                  _paymentTile(
-                    title: 'UPI Payment',
-                    subtitle: 'Pay using UPI apps like GPay, PhonePe, Paytm',
-                    value: 'upi',
-                  ),
-                  const Divider(),
-                  _paymentTile(
-                    title: 'Credit/Debit Card',
-                    subtitle: 'Pay securely using your card',
-                    value: 'card',
-                  ),
-                  const Divider(),
-                  _paymentTile(
-                    title: 'Cash on Delivery',
-                    subtitle: 'Pay when your order is delivered',
-                    value: 'cod',
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 30),
-
-            /// ================= PLACE ORDER =================
+            _sectionTitle('Shipping details', 'Enter the address where we should deliver your order.'),
+            const SizedBox(height: 18),
+            _buildGridFields(),
+            const SizedBox(height: 16),
+            _buildPaymentNote(),
+            const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                onPressed: _isProcessing ? null : _startPayment,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: const Color(0xFF0F172A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    // Show loading or process payment here
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Allorder()),
-                    );
-                  }
-                },
-                child: const Text(
-                  'Place Order',
-                  style: TextStyle(fontSize: 16,color: Colors.white),
-                ),
+                child: _isProcessing
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        'Pay now • ${_money.format(_total)}',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                      ),
               ),
             ),
           ],
@@ -199,94 +519,422 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  /// ================= WIDGETS =================
+  Widget _buildGridFields() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth >= 680;
+        final children = [
+          Expanded(
+            child: _inputField(
+              controller: _fullNameController,
+              label: 'Full name *',
+              hintText: 'Aarav Sharma',
+              validator: (value) => _requiredValidator(value, 'Full name'),
+            ),
+          ),
+          const SizedBox(width: 14, height: 14),
+          Expanded(
+            child: _inputField(
+              controller: _emailController,
+              label: 'Email *',
+              hintText: 'aarav@example.com',
+              keyboardType: TextInputType.emailAddress,
+              validator: _emailValidator,
+            ),
+          ),
+        ];
 
-  Widget _input(
-    String hint, {
-    TextEditingController? controller,
+        final phoneAndAddress = [
+          Expanded(
+            child: _inputField(
+              controller: _phoneController,
+              label: 'Phone *',
+              hintText: '+91 98765 43210',
+              keyboardType: TextInputType.phone,
+              validator: _phoneValidator,
+            ),
+          ),
+          const SizedBox(width: 14, height: 14),
+          Expanded(
+            child: _inputField(
+              controller: _pincodeController,
+              label: 'PIN code *',
+              hintText: '560001',
+              keyboardType: TextInputType.number,
+              validator: _pincodeValidator,
+            ),
+          ),
+        ];
+
+        final cityState = [
+          Expanded(
+            child: _inputField(
+              controller: _cityController,
+              label: 'City *',
+              hintText: 'Bengaluru',
+              validator: (value) => _requiredValidator(value, 'City'),
+            ),
+          ),
+          const SizedBox(width: 14, height: 14),
+          Expanded(
+            child: _inputField(
+              controller: _stateController,
+              label: 'State *',
+              hintText: 'Karnataka',
+              validator: (value) => _requiredValidator(value, 'State'),
+            ),
+          ),
+        ];
+
+        final addressRows = [
+          _inputField(
+            controller: _address1Controller,
+            label: 'Address line 1 *',
+            hintText: 'House number, street name',
+            validator: (value) => _requiredValidator(value, 'Address line 1'),
+          ),
+          const SizedBox(height: 14),
+          _inputField(
+            controller: _address2Controller,
+            label: 'Address line 2',
+            hintText: 'Apartment, landmark, etc.',
+          ),
+        ];
+
+        final countryField = _inputField(
+          controller: _countryController,
+          label: 'Country *',
+          hintText: 'India',
+          validator: (value) => _requiredValidator(value, 'Country'),
+        );
+
+        if (isWide) {
+          return Column(
+            children: [
+              Row(children: children),
+              const SizedBox(height: 14),
+              ...addressRows,
+              const SizedBox(height: 14),
+              Row(children: cityState),
+              const SizedBox(height: 14),
+              Row(children: [...phoneAndAddress]),
+              const SizedBox(height: 14),
+              countryField,
+            ],
+          );
+        }
+
+        return Column(
+          children: [
+            _inputField(
+              controller: _fullNameController,
+              label: 'Full name *',
+              hintText: 'Aarav Sharma',
+              validator: (value) => _requiredValidator(value, 'Full name'),
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _emailController,
+              label: 'Email *',
+              hintText: 'aarav@example.com',
+              keyboardType: TextInputType.emailAddress,
+              validator: _emailValidator,
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _phoneController,
+              label: 'Phone *',
+              hintText: '+91 98765 43210',
+              keyboardType: TextInputType.phone,
+              validator: _phoneValidator,
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _address1Controller,
+              label: 'Address line 1 *',
+              hintText: 'House number, street name',
+              validator: (value) => _requiredValidator(value, 'Address line 1'),
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _address2Controller,
+              label: 'Address line 2',
+              hintText: 'Apartment, landmark, etc.',
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _cityController,
+              label: 'City *',
+              hintText: 'Bengaluru',
+              validator: (value) => _requiredValidator(value, 'City'),
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _stateController,
+              label: 'State *',
+              hintText: 'Karnataka',
+              validator: (value) => _requiredValidator(value, 'State'),
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _pincodeController,
+              label: 'PIN code *',
+              hintText: '560001',
+              keyboardType: TextInputType.number,
+              validator: _pincodeValidator,
+            ),
+            const SizedBox(height: 14),
+            _inputField(
+              controller: _countryController,
+              label: 'Country *',
+              hintText: 'India',
+              validator: (value) => _requiredValidator(value, 'Country'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSummaryCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 24,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _sectionTitle('Order summary', 'Review the items and totals before paying.'),
+          const SizedBox(height: 18),
+          if (_cart.items.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFE2E8F0)),
+              ),
+              child: const Text('Your cart is empty. Add products to continue.'),
+            )
+          else
+            Column(
+              children: _cart.items.map((item) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF8FAFC),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE2E8F0)),
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(12),
+                          child: Image.network(
+                            item.product.imageUrl ?? '',
+                            width: 72,
+                            height: 72,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              width: 72,
+                              height: 72,
+                              color: const Color(0xFFE2E8F0),
+                              alignment: Alignment.center,
+                              child: const Icon(Icons.shopping_bag_outlined),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                item.product.name ?? 'Unnamed product',
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF0F172A),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Qty ${item.quantity}',
+                                style: TextStyle(color: Colors.grey.shade600),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                _money.format((item.product.price ?? 0) * item.quantity),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  color: Color(0xFF16A34A),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ),
+          const SizedBox(height: 12),
+          _totalRow('Subtotal', _subtotal),
+          _totalRow('Shipping', _shipping),
+          const Divider(height: 28),
+          _totalRow('Total', _total, bold: true),
+          const SizedBox(height: 18),
+          _supportCard(),
+        ],
+      ),
+    );
+  }
+
+  Widget _supportCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Secure payment flow',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+              fontSize: 16,
+            ),
+          ),
+          SizedBox(height: 10),
+          Text(
+            '1. Create order on backend\n2. Open Razorpay checkout\n3. Verify payment signature\n4. Clear cart and continue',
+            style: TextStyle(
+              color: Color(0xFFCBD5E1),
+              height: 1.5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _totalRow(String label, double value, {bool bold = false}) {
+    final style = TextStyle(
+      fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
+      fontSize: bold ? 18 : 15,
+      color: const Color(0xFF0F172A),
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(_money.format(value), style: style),
+        ],
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title, String subtitle) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+        const SizedBox(height: 6),
+        Text(
+          subtitle,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            height: 1.4,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentNote() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEFF6FF),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0xFFBFDBFE)),
+      ),
+      child: const Text(
+        'Only the Razorpay Key ID is used on the client. The secret key stays on your backend.',
+        style: TextStyle(
+          color: Color(0xFF1E3A8A),
+          fontWeight: FontWeight.w600,
+          height: 1.4,
+        ),
+      ),
+    );
+  }
+
+  Widget _inputField({
+    required TextEditingController controller,
+    required String label,
+    required String hintText,
     TextInputType keyboardType = TextInputType.text,
-    bool enabled = true,
-    String? initialValue,
+    String? Function(String?)? validator,
   }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
-      enabled: enabled,
-      initialValue: controller == null ? initialValue : null,
+      validator: validator,
       decoration: InputDecoration(
-        hintText: hint,
-        contentPadding:
-            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        labelText: label,
+        hintText: hintText,
+        filled: true,
+        fillColor: const Color(0xFFF8FAFC),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.4),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: Color(0xFFEF4444)),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       ),
-      validator: (value) {
-        if (enabled && (value == null || value.isEmpty)) {
-          return 'Required';
-        }
-        
-        // Email validation
-        if (keyboardType == TextInputType.emailAddress && value!.isNotEmpty) {
-          final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-          if (!emailRegex.hasMatch(value)) {
-            return 'Enter a valid email';
-          }
-        }
-        
-        // Phone number validation
-        if (keyboardType == TextInputType.phone && value!.isNotEmpty) {
-          final phoneRegex = RegExp(r'^[0-9]{10}$');
-          if (!phoneRegex.hasMatch(value)) {
-            return 'Enter a valid 10-digit phone number';
-          }
-        }
-        
-        // Zip code validation
-        if (keyboardType == TextInputType.number && hint == 'Zip Code') {
-          if (value!.isNotEmpty && value.length < 6) {
-            return 'Enter a valid 6-digit zip code';
-          }
-        }
-        
-        return null;
-      },
-    );
-  }
-
-  Widget _paymentTile({
-    required String title,
-    required String subtitle,
-    required String value,
-  }) {
-    return RadioListTile<String>(
-      value: value,
-      groupValue: paymentMethod,
-      onChanged: (val) {
-        setState(() {
-          paymentMethod = val!;
-        });
-      },
-      title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
-      subtitle: Text(subtitle),
-    );
-  }
-
-  Widget _card({required Widget child}) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.15),
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 }
+
