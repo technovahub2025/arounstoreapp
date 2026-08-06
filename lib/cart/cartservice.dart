@@ -1,7 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:arunstore/cart/cartscreen.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/screen/checkout.dart';
+import 'package:flutter/material.dart';
 
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
@@ -60,54 +60,59 @@ class _CartPageState extends State<CartPage> {
   }
 
   Widget _bottomBar() {
-  final shipping = 10.0;
-  final total = (subtotal + shipping).clamp(0.0, double.infinity);
-  
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: const BoxDecoration(
-      color: Colors.white,
-      boxShadow: [BoxShadow(blurRadius: 6, color: Colors.black12)],
-    ),
-    child: Column(
-      children: [
-        _row('Subtotal', subtotal),
-        _row('Shipping', shipping),
-        const Divider(),
-        _row('Total', total, bold: true),
-        const SizedBox(height: 12),
-        SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black, 
-              padding: const EdgeInsets.symmetric(vertical: 14)
-            ),
-            onPressed: cart.items.isEmpty ? null : () {
-           
-              Navigator.push(
-                context, 
-                MaterialPageRoute(builder: (_) => const CheckoutScreen())
-              );
-            },
-            child: const Text(
-              'Proceed to Checkout', 
-              style: TextStyle(color: Colors.white)
+    final total = cart.total.toDouble();
+    final shipping = (total - subtotal).clamp(0.0, double.infinity);
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [BoxShadow(blurRadius: 6, color: Colors.black12)],
+      ),
+      child: Column(
+        children: [
+          _row('Subtotal', subtotal),
+          _row('Shipping', shipping),
+          const Divider(),
+          _row('Total', total, bold: true),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.black,
+                padding: const EdgeInsets.symmetric(vertical: 14),
+              ),
+              onPressed: cart.items.isEmpty
+                  ? null
+                  : () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                      );
+                    },
+              child: const Text(
+                'Proceed to Checkout',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
-        ),
-      ],
-    ),
-  );
-}
+        ],
+      ),
+    );
+  }
 
   Widget _row(String label, double value, {bool bold = false}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label),
-        Text('₹${value.toStringAsFixed(2)}', style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null),
+        Text(
+          'INR ${value.toStringAsFixed(2)}',
+          style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null,
+        ),
       ],
     );
   }
 }
+
