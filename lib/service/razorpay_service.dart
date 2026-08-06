@@ -80,7 +80,7 @@ class RazorpayService {
 
   static const String paymentBaseUrl =
       'https://aroun-shopping-website-a2he.onrender.com/api/payment';
-  static const String defaultCreateOrderUrl = '$paymentBaseUrl/create-order';
+  static const String defaultCreateOrderUrl = paymentBaseUrl;
   static const String defaultVerifyUrl = '$paymentBaseUrl/verify';
 
   static Map<String, String> _headers({String? authToken}) {
@@ -100,27 +100,44 @@ class RazorpayService {
     required Map<String, dynamic> shippingDetails,
     String? authToken,
   }) async {
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: _headers(authToken: authToken),
-      body: jsonEncode({
-        'amount': amount,
-        'currency': currency,
-        'cartItems': cartItems,
-        'shippingDetails': shippingDetails,
-      }),
-    );
+    final payload = jsonEncode({
+      'amount': amount,
+      'currency': currency,
+      'cartItems': cartItems,
+      'shippingDetails': shippingDetails,
+    });
 
-    final decoded = _decodeJson(response);
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(_extractErrorMessage(decoded, response.statusCode, 'Failed to create payment order'));
+    final endpoints = _candidateCreateOrderEndpoints(endpoint);
+    Object? lastError;
+
+    for (final candidate in endpoints) {
+      final response = await http.post(
+        Uri.parse(candidate),
+        headers: _headers(authToken: authToken),
+        body: payload,
+      );
+
+      final decoded = _decodeJson(response);
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (decoded is! Map<String, dynamic>) {
+          throw const FormatException('Invalid order response received from backend.');
+        }
+
+        return RazorpayOrderResult.fromResponse(decoded);
+      }
+
+      lastError = _extractErrorMessage(
+        decoded,
+        response.statusCode,
+        'Failed to create payment order',
+      );
+
+      if (response.statusCode != 404) {
+        break;
+      }
     }
 
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('Invalid order response received from backend.');
-    }
-
-    return RazorpayOrderResult.fromResponse(decoded);
+    throw Exception(lastError ?? 'Failed to create payment order');
   }
 
   static Future<RazorpayPaymentVerification> verifyPayment({
@@ -165,6 +182,29 @@ class RazorpayService {
 
     return '$fallback ($statusCode)';
   }
+}
+
+List<String> _candidateCreateOrderEndpoints(String endpoint) {
+  final candidates = <String>[endpoint];
+
+  try {
+    final uri = Uri.parse(endpoint);
+    final path = uri.path;
+
+    if (path.endsWith('/create-order')) {
+      candidates.add(uri.replace(path: path.replaceFirst('/create-order', '')).toString());
+    } else if (path.endsWith('/payment')) {
+      candidates.add(uri.replace(path: '$path/create-order').toString());
+    }
+  } catch (_) {
+    if (endpoint.endsWith('/create-order')) {
+      candidates.add(endpoint.replaceFirst('/create-order', ''));
+    } else if (endpoint.endsWith('/payment')) {
+      candidates.add('$endpoint/create-order');
+    }
+  }
+
+  return candidates.toSet().toList();
 }
 
 Map<String, dynamic> buildShippingPayload({
