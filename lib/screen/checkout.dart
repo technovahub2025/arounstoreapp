@@ -57,6 +57,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   RazorpayPaymentVerification? _verification;
   RazorpayOrderResult? _preparedOrder;
   String? _preparedOrderSignature;
+  String? _resolvedAuthToken;
   Timer? _debounce;
 
   @override
@@ -70,6 +71,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       controller.addListener(_schedulePreparation);
     }
     _cart.addListener(_schedulePreparation);
+    _loadAuthToken();
     _schedulePreparation();
   }
 
@@ -101,7 +103,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double get _shipping => _cart.total.toDouble() - _subtotal;
   double get _total => _cart.total.toDouble();
 
-  String? get _effectiveAuthToken => widget.authToken ?? AuthManager().token;
+  String? get _effectiveAuthToken =>
+      widget.authToken ?? _resolvedAuthToken ?? AuthManager().token;
 
   List<Map<String, dynamic>> get _cartItemsPayload => _cart.items
       .map(
@@ -139,6 +142,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (clean != null && clean.isNotEmpty) return clean;
     }
     return null;
+  }
+
+  Future<void> _loadAuthToken() async {
+    final token = await _resolveAuthToken();
+    if (!mounted) return;
+
+    setState(() {
+      _resolvedAuthToken = token;
+    });
+
+    _schedulePreparation();
   }
 
   bool _readyToPrepare() {
