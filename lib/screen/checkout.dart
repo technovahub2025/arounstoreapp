@@ -1,4 +1,3 @@
-import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/cartmodel.dart';
 import 'package:arunstore/service/order_history_service.dart';
@@ -50,7 +49,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isProcessing = false;
   String? _errorMessage;
   RazorpayPaymentVerification? _verification;
-  Map<String, dynamic>? _lastPayment;
 
   @override
   void initState() {
@@ -113,11 +111,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     setState(() {
       _errorMessage = null;
-      _lastPayment = {
-        'razorpay_order_id': response.orderId,
-        'razorpay_payment_id': response.paymentId,
-        'razorpay_signature': response.signature,
-      };
     });
 
     try {
@@ -156,7 +149,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
         OrderHistoryService.instance.addOrder(
           CompletedOrder(
-            orderId: response.orderId ?? '',
+            orderId: response.orderId ?? response.paymentId,
             paymentId: response.paymentId,
             signature: response.signature,
             customerName: _fullNameController.text.trim(),
@@ -190,7 +183,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     setState(() {
       _isProcessing = false;
-      _errorMessage = response.message.isNotEmpty
+      _errorMessage = (response.message ?? '').isNotEmpty
           ? response.message
           : 'Payment failed. Please try again.';
     });
