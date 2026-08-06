@@ -1,13 +1,15 @@
+import 'dart:async';
+
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/cartmodel.dart';
+import 'package:arunstore/screen/widgets/checkout_widgets.dart';
 import 'package:arunstore/service/order_history_service.dart';
 import 'package:arunstore/service/razorpay_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:async';
 import 'package:razorpay_web/razorpay_web.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({
@@ -17,6 +19,8 @@ class CheckoutScreen extends StatefulWidget {
     this.authToken,
     this.razorpayKeyId = const String.fromEnvironment('RAZORPAY_KEY_ID'),
     this.clearCartOnSuccess = true,
+    this.successRedirectTo = '',
+    this.onSuccess,
   });
 
   final String createOrderUrl;
@@ -24,6 +28,8 @@ class CheckoutScreen extends StatefulWidget {
   final String? authToken;
   final String razorpayKeyId;
   final bool clearCartOnSuccess;
+  final String successRedirectTo;
+  final void Function(RazorpayPaymentVerification verification)? onSuccess;
 
   @override
   State<CheckoutScreen> createState() => _CheckoutScreenState();
@@ -31,23 +37,19 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
-  final CartManager _cart = CartManager.instance;
-  final Razorpay _razorpay = Razorpay();
-  final NumberFormat _money = NumberFormat.currency(
-    locale: 'en_IN',
-    symbol: 'INR ',
-    decimalDigits: 0,
-  );
+  final _cart = CartManager.instance;
+  final _razorpay = Razorpay();
+  final _money = NumberFormat.currency(locale: 'en_IN', symbol: 'INR ', decimalDigits: 0);
 
-  final TextEditingController _fullNameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _address1Controller = TextEditingController();
-  final TextEditingController _address2Controller = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-  final TextEditingController _stateController = TextEditingController();
-  final TextEditingController _pincodeController = TextEditingController();
-  final TextEditingController _countryController = TextEditingController(text: 'India');
+  final _fullNameController = TextEditingController();
+  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
+  final _address1Controller = TextEditingController();
+  final _address2Controller = TextEditingController();
+  final _cityController = TextEditingController();
+  final _stateController = TextEditingController();
+  final _pincodeController = TextEditingController();
+  final _countryController = TextEditingController(text: 'India');
 
   bool _isProcessing = false;
   bool _isPreparingOrder = false;
@@ -55,7 +57,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   RazorpayPaymentVerification? _verification;
   RazorpayOrderResult? _preparedOrder;
   String? _preparedOrderSignature;
-  Timer? _prepareDebounce;
+  Timer? _debounce;
 
   @override
   void initState() {
@@ -63,121 +65,86 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
     _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
-    _fullNameController.addListener(_scheduleOrderPreparation);
-    _emailController.addListener(_scheduleOrderPreparation);
-    _phoneController.addListener(_scheduleOrderPreparation);
-    _address1Controller.addListener(_scheduleOrderPreparation);
-    _address2Controller.addListener(_scheduleOrderPreparation);
-    _cityController.addListener(_scheduleOrderPreparation);
-    _stateController.addListener(_scheduleOrderPreparation);
-    _pincodeController.addListener(_scheduleOrderPreparation);
-    _countryController.addListener(_scheduleOrderPreparation);
-    _cart.addListener(_scheduleOrderPreparation);
-    _scheduleOrderPreparation();
+
+    for (final controller in _controllers) {
+      controller.addListener(_schedulePreparation);
+    }
+    _cart.addListener(_schedulePreparation);
+    _schedulePreparation();
   }
 
   @override
   void dispose() {
-    _prepareDebounce?.cancel();
-    _cart.removeListener(_scheduleOrderPreparation);
-    _fullNameController.removeListener(_scheduleOrderPreparation);
-    _emailController.removeListener(_scheduleOrderPreparation);
-    _phoneController.removeListener(_scheduleOrderPreparation);
-    _address1Controller.removeListener(_scheduleOrderPreparation);
-    _address2Controller.removeListener(_scheduleOrderPreparation);
-    _cityController.removeListener(_scheduleOrderPreparation);
-    _stateController.removeListener(_scheduleOrderPreparation);
-    _pincodeController.removeListener(_scheduleOrderPreparation);
-    _countryController.removeListener(_scheduleOrderPreparation);
+    _debounce?.cancel();
+    _cart.removeListener(_schedulePreparation);
+    for (final controller in _controllers) {
+      controller.removeListener(_schedulePreparation);
+      controller.dispose();
+    }
     _razorpay.clear();
-    _fullNameController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _address1Controller.dispose();
-    _address2Controller.dispose();
-    _cityController.dispose();
-    _stateController.dispose();
-    _pincodeController.dispose();
-    _countryController.dispose();
     super.dispose();
   }
+
+  List<TextEditingController> get _controllers => [
+        _fullNameController,
+        _emailController,
+        _phoneController,
+        _address1Controller,
+        _address2Controller,
+        _cityController,
+        _stateController,
+        _pincodeController,
+        _countryController,
+      ];
 
   double get _subtotal => _cart.subTotal.toDouble();
   double get _shipping => _cart.total.toDouble() - _subtotal;
   double get _total => _cart.total.toDouble();
+
   String? get _effectiveAuthToken => widget.authToken ?? AuthManager().token;
 
+  List<Map<String, dynamic>> get _cartItemsPayload => _cart.items
+      .map(
+        (item) => {
+          'id': item.product.id,
+          'name': item.product.name,
+          'price': item.product.price,
+          'quantity': item.quantity,
+          'image': item.product.imageUrl,
+          'category': item.product.category,
+        },
+      )
+      .toList();
+
+  Map<String, dynamic> get _shippingPayload => buildShippingPayload(
+        fullName: _fullNameController.text.trim(),
+        email: _emailController.text.trim(),
+        phone: _phoneController.text.trim(),
+        addressLine1: _address1Controller.text.trim(),
+        addressLine2: _address2Controller.text.trim(),
+        city: _cityController.text.trim(),
+        state: _stateController.text.trim(),
+        pincode: _pincodeController.text.trim(),
+        country: _countryController.text.trim(),
+      );
+
   Future<String?> _resolveAuthToken() async {
-    final managerToken = widget.authToken ?? AuthManager().token;
-    if (managerToken != null && managerToken.isNotEmpty) {
-      return managerToken;
-    }
+    final token = _effectiveAuthToken;
+    if (token != null && token.isNotEmpty) return token;
 
     final prefs = await SharedPreferences.getInstance();
-    final storedToken = prefs.getString('token')?.trim();
-    if (storedToken != null && storedToken.isNotEmpty) {
-      return storedToken;
+    final values = [prefs.getString('token'), prefs.getString('auth_token')];
+    for (final value in values) {
+      final clean = value?.trim();
+      if (clean != null && clean.isNotEmpty) return clean;
     }
-
-    final altToken = prefs.getString('auth_token')?.trim();
-    if (altToken != null && altToken.isNotEmpty) {
-      return altToken;
-    }
-
     return null;
   }
 
-  List<Map<String, dynamic>> get _cartItemsPayload {
-    return _cart.items
-        .map(
-          (item) => {
-            'id': item.product.id,
-            'name': item.product.name,
-            'price': item.product.price,
-            'quantity': item.quantity,
-            'image': item.product.imageUrl,
-            'category': item.product.category,
-          },
-        )
-        .toList();
-  }
-
-  Map<String, dynamic> get _shippingPayload {
-    return buildShippingPayload(
-      fullName: _fullNameController.text.trim(),
-      email: _emailController.text.trim(),
-      phone: _phoneController.text.trim(),
-      addressLine1: _address1Controller.text.trim(),
-      addressLine2: _address2Controller.text.trim(),
-      city: _cityController.text.trim(),
-      state: _stateController.text.trim(),
-      pincode: _pincodeController.text.trim(),
-      country: _countryController.text.trim(),
-    );
-  }
-
-  String _buildOrderSignature() {
-    final authToken = _effectiveAuthToken ?? '';
-    final payload = [
-      _total.toStringAsFixed(2),
-      _fullNameController.text.trim(),
-      _emailController.text.trim(),
-      _phoneController.text.trim(),
-      _address1Controller.text.trim(),
-      _address2Controller.text.trim(),
-      _cityController.text.trim(),
-      _stateController.text.trim(),
-      _pincodeController.text.trim(),
-      _countryController.text.trim(),
-      authToken,
-    ];
-    return payload.join('|');
-  }
-
-  bool _isReadyToPrepareOrder() {
+  bool _readyToPrepare() {
     return _cart.items.isNotEmpty &&
         widget.razorpayKeyId.trim().isNotEmpty &&
-        (_effectiveAuthToken != null && _effectiveAuthToken!.isNotEmpty) &&
+        (_effectiveAuthToken?.isNotEmpty ?? false) &&
         _fullNameController.text.trim().isNotEmpty &&
         _emailController.text.trim().isNotEmpty &&
         _phoneController.text.trim().isNotEmpty &&
@@ -188,30 +155,40 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _countryController.text.trim().isNotEmpty;
   }
 
-  void _scheduleOrderPreparation() {
-    _prepareDebounce?.cancel();
-    _prepareDebounce = Timer(const Duration(milliseconds: 350), () {
+  String _signature() => [
+        _total.toStringAsFixed(2),
+        _fullNameController.text.trim(),
+        _emailController.text.trim(),
+        _phoneController.text.trim(),
+        _address1Controller.text.trim(),
+        _address2Controller.text.trim(),
+        _cityController.text.trim(),
+        _stateController.text.trim(),
+        _pincodeController.text.trim(),
+        _countryController.text.trim(),
+        _effectiveAuthToken ?? '',
+      ].join('|');
+
+  void _schedulePreparation() {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
       if (!mounted) return;
       _prepareOrderIfNeeded();
     });
   }
 
   Future<void> _prepareOrderIfNeeded() async {
-    if (!_isReadyToPrepareOrder()) {
-      if (mounted) {
-        setState(() {
-          _preparedOrder = null;
-          _preparedOrderSignature = null;
-        });
-      }
+    if (!_readyToPrepare()) {
+      if (!mounted) return;
+      setState(() {
+        _preparedOrder = null;
+        _preparedOrderSignature = null;
+      });
       return;
     }
 
-    final signature = _buildOrderSignature();
-    if (_preparedOrder != null && _preparedOrderSignature == signature) {
-      return;
-    }
-
+    final signature = _signature();
+    if (_preparedOrder != null && _preparedOrderSignature == signature) return;
     if (_isPreparingOrder) return;
 
     setState(() {
@@ -251,134 +228,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
-    if (!mounted) return;
-
-    setState(() {
-      _errorMessage = null;
-    });
-
-    try {
-      final verification = await RazorpayService.verifyPayment(
-        endpoint: widget.verifyUrl,
-        authToken: await _resolveAuthToken(),
-        payload: {
-          'razorpay_order_id': response.orderId,
-          'razorpay_payment_id': response.paymentId,
-          'razorpay_signature': response.signature,
-          'amount': (_total * 100).round(),
-          'currency': 'INR',
-          'customer': _shippingPayload['customer'],
-          'shippingAddress': _shippingPayload['shippingAddress'],
-          'cartItems': _cartItemsPayload,
-        },
-      );
-
-      if (!mounted) return;
-
-      setState(() {
-        _verification = verification;
-        _isProcessing = false;
-        _errorMessage = verification.success ? null : verification.message;
-      });
-
-      if (verification.success) {
-        final orderSnapshot = _cart.items
-            .map(
-              (item) => CartItem(
-                product: item.product,
-                quantity: item.quantity,
-              ),
-            )
-            .toList();
-
-        OrderHistoryService.instance.addOrder(
-          CompletedOrder(
-            orderId: response.orderId ?? response.paymentId ?? '',
-            paymentId: response.paymentId ?? '',
-            signature: response.signature,
-            customerName: _fullNameController.text.trim(),
-            items: orderSnapshot,
-            subtotal: _subtotal,
-            shipping: _shipping,
-            total: _total,
-            createdAt: DateTime.now(),
-          ),
-        );
-
-        if (widget.clearCartOnSuccess) {
-          _cart.clearCart();
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment verified successfully.')),
-        );
-      }
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isProcessing = false;
-        _errorMessage = 'Payment succeeded, but verification failed: $error';
-      });
-    }
-  }
-
-  void _handlePaymentError(PaymentFailureResponse response) {
-    if (!mounted) return;
-
-    setState(() {
-      _isProcessing = false;
-      _errorMessage = (response.message ?? '').isNotEmpty
-          ? response.message
-          : 'Payment failed. Please try again.';
-    });
-  }
-
-  void _handleExternalWallet(ExternalWalletResponse response) {
-    if (!mounted) return;
-
-    setState(() {
-      _errorMessage = 'External wallet selected: ${response.walletName}.';
-      _isProcessing = false;
-    });
-  }
-
-  String? _requiredValidator(String? value, String label) {
-    if (value == null || value.trim().isEmpty) {
-      return '$label is required.';
-    }
-    return null;
-  }
-
-  String? _emailValidator(String? value) {
-    final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Email address is required.';
-    final emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
-    if (!emailRegex.hasMatch(text)) {
-      return 'Enter a valid email address.';
-    }
-    return null;
-  }
-
-  String? _phoneValidator(String? value) {
-    final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Phone number is required.';
-    final phoneRegex = RegExp(r'^[0-9+\-\s]{8,15}$');
-    if (!phoneRegex.hasMatch(text)) {
-      return 'Enter a valid phone number.';
-    }
-    return null;
-  }
-
-  String? _pincodeValidator(String? value) {
-    final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'PIN code is required.';
-    if (!RegExp(r'^[0-9]{4,10}$').hasMatch(text)) {
-      return 'Enter a valid PIN code.';
-    }
-    return null;
-  }
-
   Future<void> _startPayment() async {
     FocusScope.of(context).unfocus();
     setState(() {
@@ -386,46 +235,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _verification = null;
     });
 
-    if (_cart.items.isEmpty) {
-      setState(() {
-        _errorMessage = 'Your cart is empty.';
-      });
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _errorMessage = 'Please fix the highlighted fields.');
       return;
     }
 
-    if (!_formKey.currentState!.validate()) {
-      setState(() {
-        _errorMessage = 'Please fix the highlighted fields.';
-      });
+    final token = await _resolveAuthToken();
+    if (token == null || token.isEmpty) {
+      setState(() => _errorMessage = 'Not authenticated. Please log in again before paying.');
       return;
     }
+
+    if (_preparedOrder == null || _preparedOrderSignature != _signature()) {
+      await _prepareOrderIfNeeded();
+    }
+    if (_preparedOrder == null) {
+      setState(() => _errorMessage = 'Payment order is still being prepared. Please try again.');
+      return;
+    }
+
+    setState(() => _isProcessing = true);
 
     try {
-      if (widget.razorpayKeyId.trim().isEmpty) {
-        throw Exception(
-          'Missing Razorpay key id. Pass RAZORPAY_KEY_ID with --dart-define.',
-        );
-      }
-
-      final effectiveAuthToken = await _resolveAuthToken();
-      if (effectiveAuthToken == null || effectiveAuthToken.isEmpty) {
-        throw Exception('Not authenticated. Please log in again before paying.');
-      }
-
-      final signature = _buildOrderSignature();
-      if (_preparedOrder == null || _preparedOrderSignature != signature) {
-        await _prepareOrderIfNeeded();
-      }
-
-      if (_preparedOrder == null) {
-        throw Exception('Payment order is still being prepared. Please try again.');
-      }
-
-      setState(() {
-        _isProcessing = true;
-      });
-
-      final options = <String, dynamic>{
+      _razorpay.open({
         'key': widget.razorpayKeyId,
         'amount': _preparedOrder!.amount,
         'currency': _preparedOrder!.currency,
@@ -454,9 +286,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             });
           }
         },
-      };
-
-      _razorpay.open(options);
+      });
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -464,6 +294,119 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _errorMessage = error.toString().replaceFirst('Exception: ', '');
       });
     }
+  }
+
+  Future<void> _handlePaymentSuccess(PaymentSuccessResponse response) async {
+    if (!mounted) return;
+
+    try {
+      final verification = await RazorpayService.verifyPayment(
+        endpoint: widget.verifyUrl,
+        authToken: await _resolveAuthToken(),
+        payload: {
+          'razorpay_order_id': response.orderId,
+          'razorpay_payment_id': response.paymentId,
+          'razorpay_signature': response.signature,
+          'amount': (_total * 100).round(),
+          'currency': 'INR',
+          'customer': _shippingPayload['customer'],
+          'shippingAddress': _shippingPayload['shippingAddress'],
+          'cartItems': _cartItemsPayload,
+        },
+      );
+
+      if (!mounted) return;
+      setState(() {
+        _verification = verification;
+        _isProcessing = false;
+        _errorMessage = verification.success ? null : verification.message;
+      });
+
+      if (!verification.success) return;
+
+      OrderHistoryService.instance.addOrder(
+        CompletedOrder(
+          orderId: response.orderId ?? response.paymentId ?? '',
+          paymentId: response.paymentId ?? '',
+          signature: response.signature,
+          customerName: _fullNameController.text.trim(),
+          items: _cart.items
+              .map((item) => CartItem(product: item.product, quantity: item.quantity))
+              .toList(),
+          subtotal: _subtotal,
+          shipping: _shipping,
+          total: _total,
+          createdAt: DateTime.now(),
+        ),
+      );
+
+      if (widget.clearCartOnSuccess) {
+        _cart.clearCart();
+      }
+
+      widget.onSuccess?.call(verification);
+
+      if (widget.successRedirectTo.isNotEmpty && mounted) {
+        Navigator.of(context).pushReplacementNamed(widget.successRedirectTo);
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Payment verified successfully.')),
+        );
+      }
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Payment succeeded, but verification failed: $error';
+      });
+    }
+  }
+
+  void _handlePaymentError(PaymentFailureResponse response) {
+    if (!mounted) return;
+    setState(() {
+      _isProcessing = false;
+      _errorMessage = (response.message ?? '').isNotEmpty
+          ? response.message
+          : 'Payment failed. Please try again.';
+    });
+  }
+
+  void _handleExternalWallet(ExternalWalletResponse response) {
+    if (!mounted) return;
+    setState(() {
+      _isProcessing = false;
+      _errorMessage = 'External wallet selected: ${response.walletName}.';
+    });
+  }
+
+  String? _requiredValidator(String? value, String label) {
+    if (value == null || value.trim().isEmpty) return '$label is required.';
+    return null;
+  }
+
+  String? _emailValidator(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'Email address is required.';
+    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(text)
+        ? null
+        : 'Enter a valid email address.';
+  }
+
+  String? _phoneValidator(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'Phone number is required.';
+    return RegExp(r'^[0-9+\-\s]{8,15}$').hasMatch(text)
+        ? null
+        : 'Enter a valid phone number.';
+  }
+
+  String? _pincodeValidator(String? value) {
+    final text = value?.trim() ?? '';
+    if (text.isEmpty) return 'PIN code is required.';
+    return RegExp(r'^[0-9]{4,10}$').hasMatch(text)
+        ? null
+        : 'Enter a valid PIN code.';
   }
 
   @override
@@ -496,47 +439,44 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildHeader(),
+                        _header(),
                         if (_errorMessage != null) ...[
                           const SizedBox(height: 16),
-                          _buildBanner(
+                          CheckoutNoticeBanner(
+                            message: _errorMessage!,
                             color: const Color(0xFFFFE4E6),
                             textColor: const Color(0xFF9F1239),
                             borderColor: const Color(0xFFFDA4AF),
-                            message: _errorMessage!,
                           ),
                         ],
                         if (_verification != null && _verification!.success) ...[
                           const SizedBox(height: 16),
-                          _buildBanner(
+                          CheckoutNoticeBanner(
+                            message: _verification!.message,
                             color: const Color(0xFFDCFCE7),
                             textColor: const Color(0xFF166534),
                             borderColor: const Color(0xFF86EFAC),
-                            message: _verification!.message,
                           ),
                         ],
                         const SizedBox(height: 16),
                         LayoutBuilder(
                           builder: (context, constraints) {
-                            final isWide = constraints.maxWidth >= 960;
-                            final children = [
-                              Expanded(flex: 3, child: _buildShippingCard()),
-                              const SizedBox(width: 20, height: 20),
-                              Expanded(flex: 2, child: _buildSummaryCard()),
-                            ];
-
-                            if (isWide) {
+                            final wide = constraints.maxWidth >= 960;
+                            if (wide) {
                               return Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
-                                children: children,
+                                children: [
+                                  Expanded(flex: 3, child: _shippingCard()),
+                                  const SizedBox(width: 20),
+                                  Expanded(flex: 2, child: _summaryCard()),
+                                ],
                               );
                             }
-
                             return Column(
                               children: [
-                                _buildShippingCard(),
+                                _shippingCard(),
                                 const SizedBox(height: 20),
-                                _buildSummaryCard(),
+                                _summaryCard(),
                               ],
                             );
                           },
@@ -553,7 +493,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _header() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
@@ -601,59 +541,24 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildBanner({
-    required Color color,
-    required Color textColor,
-    required Color borderColor,
-    required String message,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
-      ),
-      child: Text(
-        message,
-        style: TextStyle(
-          color: textColor,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildShippingCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+  Widget _shippingCard() {
+    return CheckoutSectionCard(
+      title: 'Shipping details',
+      subtitle: 'Enter the address where we should deliver your order.',
       child: Form(
         key: _formKey,
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _sectionTitle('Shipping details', 'Enter the address where we should deliver your order.'),
-            const SizedBox(height: 18),
-            _buildGridFields(),
+            _responsiveFields(),
             const SizedBox(height: 16),
-            _buildPaymentNote(),
+            _paymentNote(),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: (_isProcessing || _isPreparingOrder || _preparedOrder == null) ? null : _startPayment,
+                onPressed: (_isProcessing || _isPreparingOrder || _preparedOrder == null)
+                    ? null
+                    : _startPayment,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF0F172A),
                   foregroundColor: Colors.white,
@@ -682,9 +587,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                               )
                             : Text(
-                                'Pay now • ${_money.format(_total)}',
+                                'Pay now - ${_money.format(_total)}',
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                              ),),
+                              ),
               ),
             ),
           ],
@@ -693,121 +598,115 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildGridFields() {
+  Widget _responsiveFields() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isWide = constraints.maxWidth >= 680;
-        final children = [
-          Expanded(
-            child: _inputField(
-              controller: _fullNameController,
-              label: 'Full name *',
-              hintText: 'Aarav Sharma',
-              validator: (value) => _requiredValidator(value, 'Full name'),
-            ),
-          ),
-          const SizedBox(width: 14, height: 14),
-          Expanded(
-            child: _inputField(
-              controller: _emailController,
-              label: 'Email *',
-              hintText: 'aarav@example.com',
-              keyboardType: TextInputType.emailAddress,
-              validator: _emailValidator,
-            ),
-          ),
-        ];
-
-        final phoneAndAddress = [
-          Expanded(
-            child: _inputField(
-              controller: _phoneController,
-              label: 'Phone *',
-              hintText: '+91 98765 43210',
-              keyboardType: TextInputType.phone,
-              validator: _phoneValidator,
-            ),
-          ),
-          const SizedBox(width: 14, height: 14),
-          Expanded(
-            child: _inputField(
-              controller: _pincodeController,
-              label: 'PIN code *',
-              hintText: '560001',
-              keyboardType: TextInputType.number,
-              validator: _pincodeValidator,
-            ),
-          ),
-        ];
-
-        final cityState = [
-          Expanded(
-            child: _inputField(
-              controller: _cityController,
-              label: 'City *',
-              hintText: 'Bengaluru',
-              validator: (value) => _requiredValidator(value, 'City'),
-            ),
-          ),
-          const SizedBox(width: 14, height: 14),
-          Expanded(
-            child: _inputField(
-              controller: _stateController,
-              label: 'State *',
-              hintText: 'Karnataka',
-              validator: (value) => _requiredValidator(value, 'State'),
-            ),
-          ),
-        ];
-
-        final addressRows = [
-          _inputField(
-            controller: _address1Controller,
-            label: 'Address line 1 *',
-            hintText: 'House number, street name',
-            validator: (value) => _requiredValidator(value, 'Address line 1'),
-          ),
-          const SizedBox(height: 14),
-          _inputField(
-            controller: _address2Controller,
-            label: 'Address line 2',
-            hintText: 'Apartment, landmark, etc.',
-          ),
-        ];
-
-        final countryField = _inputField(
-          controller: _countryController,
-          label: 'Country *',
-          hintText: 'India',
-          validator: (value) => _requiredValidator(value, 'Country'),
-        );
-
-        if (isWide) {
+        final wide = constraints.maxWidth >= 680;
+        if (wide) {
           return Column(
             children: [
-              Row(children: children),
+              Row(
+                children: [
+                  Expanded(
+                    child: CheckoutTextField(
+                      controller: _fullNameController,
+                      label: 'Full name *',
+                      hintText: 'Aarav Sharma',
+                      validator: (value) => _requiredValidator(value, 'Full name'),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: CheckoutTextField(
+                      controller: _emailController,
+                      label: 'Email *',
+                      hintText: 'aarav@example.com',
+                      keyboardType: TextInputType.emailAddress,
+                      validator: _emailValidator,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 14),
-              ...addressRows,
+              Row(
+                children: [
+                  Expanded(
+                    child: CheckoutTextField(
+                      controller: _phoneController,
+                      label: 'Phone *',
+                      hintText: '+91 98765 43210',
+                      keyboardType: TextInputType.phone,
+                      validator: _phoneValidator,
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: CheckoutTextField(
+                      controller: _pincodeController,
+                      label: 'PIN code *',
+                      hintText: '560001',
+                      keyboardType: TextInputType.number,
+                      validator: _pincodeValidator,
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 14),
-              Row(children: cityState),
+              Row(
+                children: [
+                  Expanded(
+                    child: CheckoutTextField(
+                      controller: _cityController,
+                      label: 'City *',
+                      hintText: 'Bengaluru',
+                      validator: (value) => _requiredValidator(value, 'City'),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: CheckoutTextField(
+                      controller: _stateController,
+                      label: 'State *',
+                      hintText: 'Karnataka',
+                      validator: (value) => _requiredValidator(value, 'State'),
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 14),
-              Row(children: [...phoneAndAddress]),
+              CheckoutTextField(
+                controller: _address1Controller,
+                label: 'Address line 1 *',
+                hintText: 'House number, street name',
+                validator: (value) => _requiredValidator(value, 'Address line 1'),
+              ),
               const SizedBox(height: 14),
-              countryField,
+              CheckoutTextField(
+                controller: _address2Controller,
+                label: 'Address line 2',
+                hintText: 'Apartment, landmark, etc.',
+              ),
+              const SizedBox(height: 14),
+              CheckoutTextField(
+                controller: _countryController,
+                label: 'Country *',
+                hintText: 'India',
+                validator: (value) => _requiredValidator(value, 'Country'),
+              ),
             ],
           );
         }
 
         return Column(
           children: [
-            _inputField(
+            CheckoutTextField(
               controller: _fullNameController,
               label: 'Full name *',
               hintText: 'Aarav Sharma',
               validator: (value) => _requiredValidator(value, 'Full name'),
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _emailController,
               label: 'Email *',
               hintText: 'aarav@example.com',
@@ -815,7 +714,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               validator: _emailValidator,
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _phoneController,
               label: 'Phone *',
               hintText: '+91 98765 43210',
@@ -823,34 +722,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               validator: _phoneValidator,
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _address1Controller,
               label: 'Address line 1 *',
               hintText: 'House number, street name',
               validator: (value) => _requiredValidator(value, 'Address line 1'),
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _address2Controller,
               label: 'Address line 2',
               hintText: 'Apartment, landmark, etc.',
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _cityController,
               label: 'City *',
               hintText: 'Bengaluru',
               validator: (value) => _requiredValidator(value, 'City'),
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _stateController,
               label: 'State *',
               hintText: 'Karnataka',
               validator: (value) => _requiredValidator(value, 'State'),
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _pincodeController,
               label: 'PIN code *',
               hintText: '560001',
@@ -858,7 +757,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               validator: _pincodeValidator,
             ),
             const SizedBox(height: 14),
-            _inputField(
+            CheckoutTextField(
               controller: _countryController,
               label: 'Country *',
               hintText: 'India',
@@ -870,25 +769,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _buildSummaryCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+  Widget _summaryCard() {
+    return CheckoutSectionCard(
+      title: 'Order summary',
+      subtitle: 'Review the items and totals before paying.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _sectionTitle('Order summary', 'Review the items and totals before paying.'),
-          const SizedBox(height: 18),
           if (_cart.items.isEmpty)
             Container(
               width: double.infinity,
@@ -922,7 +809,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             width: 72,
                             height: 72,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, _, _) => Container(
+                            errorBuilder: (_, __, ___) => Container(
                               width: 72,
                               height: 72,
                               color: const Color(0xFFE2E8F0),
@@ -946,10 +833,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 ),
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                'Qty ${item.quantity}',
-                                style: TextStyle(color: Colors.grey.shade600),
-                              ),
+                              Text('Qty ${item.quantity}', style: TextStyle(color: Colors.grey.shade600)),
                               const SizedBox(height: 6),
                               Text(
                                 _money.format((item.product.price ?? 0) * item.quantity),
@@ -968,10 +852,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               }).toList(),
             ),
           const SizedBox(height: 12),
-          _totalRow('Subtotal', _subtotal),
-          _totalRow('Shipping', _shipping),
+          PriceRow(label: 'Subtotal', value: _subtotal, formatter: _formatMoney),
+          PriceRow(label: 'Shipping', value: _shipping, formatter: _formatMoney),
           const Divider(height: 28),
-          _totalRow('Total', _total, bold: true),
+          PriceRow(label: 'Total', value: _total, formatter: _formatMoney, bold: true),
           const SizedBox(height: 18),
           _supportCard(),
         ],
@@ -979,82 +863,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _supportCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Secure payment flow',
-            style: TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 16,
-            ),
-          ),
-          SizedBox(height: 10),
-          Text(
-            '1. Create order on backend\n2. Open Razorpay checkout\n3. Verify payment signature\n4. Clear cart and continue',
-            style: TextStyle(
-              color: Color(0xFFCBD5E1),
-              height: 1.5,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _totalRow(String label, double value, {bool bold = false}) {
-    final style = TextStyle(
-      fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
-      fontSize: bold ? 18 : 15,
-      color: const Color(0xFF0F172A),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(label, style: style),
-          Text(_money.format(value), style: style),
-        ],
-      ),
-    );
-  }
-
-  Widget _sectionTitle(String title, String subtitle) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF0F172A),
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          subtitle,
-          style: TextStyle(
-            color: Colors.grey.shade600,
-            height: 1.4,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentNote() {
+  Widget _paymentNote() {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
@@ -1074,42 +883,31 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _inputField({
-    required TextEditingController controller,
-    required String label,
-    required String hintText,
-    TextInputType keyboardType = TextInputType.text,
-    String? Function(String?)? validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      keyboardType: keyboardType,
-      validator: validator,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText,
-        filled: true,
-        fillColor: const Color(0xFFF8FAFC),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.4),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFEF4444)),
-        ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
+  Widget _supportCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(18),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Secure payment flow',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
+          ),
+          SizedBox(height: 10),
+          Text(
+            '1. Create order on backend\n2. Open Razorpay checkout\n3. Verify payment signature\n4. Clear cart and continue',
+            style: TextStyle(color: Color(0xFFCBD5E1), height: 1.5),
+          ),
+        ],
       ),
     );
   }
-}
 
+  String _formatMoney(num value) => _money.format(value);
+}
 
