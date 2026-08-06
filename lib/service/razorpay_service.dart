@@ -78,6 +78,11 @@ Map<String, dynamic> _extractOrderMap(Map<String, dynamic> response) {
 class RazorpayService {
   const RazorpayService._();
 
+  static const String paymentBaseUrl =
+      'https://aroun-shopping-website-a2he.onrender.com/api/payment';
+  static const String defaultCreateOrderUrl = '$paymentBaseUrl/create-order';
+  static const String defaultVerifyUrl = '$paymentBaseUrl/verify';
+
   static Map<String, String> _headers({String? authToken}) {
     return {
       'Content-Type': 'application/json',
@@ -189,4 +194,3 @@ Map<String, dynamic> buildShippingPayload({
     },
   };
 }
-

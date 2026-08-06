@@ -9,8 +9,8 @@ import 'package:razorpay_web/razorpay_web.dart';
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({
     super.key,
-    this.createOrderUrl = '/api/payment/create-order',
-    this.verifyUrl = '/api/payment/verify',
+    this.createOrderUrl = RazorpayService.defaultCreateOrderUrl,
+    this.verifyUrl = RazorpayService.defaultVerifyUrl,
     this.authToken,
     this.razorpayKeyId = const String.fromEnvironment('RAZORPAY_KEY_ID'),
     this.clearCartOnSuccess = true,
