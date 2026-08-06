@@ -185,9 +185,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _cityController.text.trim().isNotEmpty &&
         _stateController.text.trim().isNotEmpty &&
         _pincodeController.text.trim().isNotEmpty &&
-        _countryController.text.trim().isNotEmpty &&
-        _formKey.currentState != null &&
-        _formKey.currentState!.validate();
+        _countryController.text.trim().isNotEmpty;
   }
 
   void _scheduleOrderPreparation() {
@@ -1103,3 +1101,4 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 }
+
