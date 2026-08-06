@@ -1,9 +1,11 @@
+import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/cartmodel.dart';
 import 'package:arunstore/service/order_history_service.dart';
 import 'package:arunstore/service/razorpay_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:razorpay_web/razorpay_web.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -77,6 +79,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double get _shipping => _cart.total.toDouble() - _subtotal;
   double get _total => _cart.total.toDouble();
 
+  Future<String?> _resolveAuthToken() async {
+    final managerToken = widget.authToken ?? AuthManager().token;
+    if (managerToken != null && managerToken.isNotEmpty) {
+      return managerToken;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final storedToken = prefs.getString('token')?.trim();
+    if (storedToken != null && storedToken.isNotEmpty) {
+      return storedToken;
+    }
+
+    final altToken = prefs.getString('auth_token')?.trim();
+    if (altToken != null && altToken.isNotEmpty) {
+      return altToken;
+    }
+
+    return null;
+  }
+
   List<Map<String, dynamic>> get _cartItemsPayload {
     return _cart.items
         .map(
@@ -116,7 +138,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     try {
       final verification = await RazorpayService.verifyPayment(
         endpoint: widget.verifyUrl,
-        authToken: widget.authToken,
+        authToken: await _resolveAuthToken(),
         payload: {
           'razorpay_order_id': response.orderId,
           'razorpay_payment_id': response.paymentId,
@@ -263,6 +285,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
 
+    final effectiveAuthToken = await _resolveAuthToken();
+
+    if (effectiveAuthToken == null || effectiveAuthToken.isEmpty) {
+      setState(() {
+        _isProcessing = false;
+        _errorMessage = 'Not authenticated. Please log in again before paying.';
+      });
+      return;
+    }
+
     setState(() {
       _isProcessing = true;
     });
@@ -274,7 +306,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         currency: 'INR',
         cartItems: _cartItemsPayload,
         shippingDetails: _shippingPayload,
-        authToken: widget.authToken,
+        authToken: effectiveAuthToken,
       );
 
       if (!mounted) return;

@@ -85,11 +85,12 @@ class RazorpayService {
   static const String defaultVerifyUrl = '$paymentBaseUrl/verify';
 
   static Map<String, String> _headers({String? authToken}) {
+    final rawToken = authToken?.replaceFirst(RegExp(r'^Bearer\s+'), '') ?? '';
     return {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      if (authToken != null && authToken.isNotEmpty)
-        'Authorization': authToken.startsWith('Bearer ') ? authToken : 'Bearer $authToken',
+      if (rawToken.isNotEmpty) 'Authorization': 'Bearer $rawToken',
+      if (rawToken.isNotEmpty) 'x-access-token': rawToken,
     };
   }
 
