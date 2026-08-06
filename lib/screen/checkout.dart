@@ -4,7 +4,7 @@ import 'package:arunstore/service/order_history_service.dart';
 import 'package:arunstore/service/razorpay_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:razorpay_web/razorpay_web.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({
