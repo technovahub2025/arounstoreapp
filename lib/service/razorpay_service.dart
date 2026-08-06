@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:arunstore/service/razorpay_http_client.dart';
 import 'package:http/http.dart' as http;
 
 class RazorpayOrderResult {
@@ -99,6 +100,7 @@ class RazorpayService {
     required List<Map<String, dynamic>> cartItems,
     required Map<String, dynamic> shippingDetails,
     String? authToken,
+    bool withCredentials = true,
   }) async {
     final payload = jsonEncode({
       'amount': amount,
@@ -111,30 +113,36 @@ class RazorpayService {
     Object? lastError;
 
     for (final candidate in endpoints) {
-      final response = await http.post(
-        Uri.parse(candidate),
-        headers: _headers(authToken: authToken),
-        body: payload,
-      );
+      final client = createRazorpayHttpClient(withCredentials: withCredentials);
+      try {
+        final response = await client.post(
+          Uri.parse(candidate),
+          headers: _headers(authToken: authToken),
+          body: payload,
+        );
 
-      final decoded = _decodeJson(response);
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (decoded is! Map<String, dynamic>) {
-          throw const FormatException('Invalid order response received from backend.');
+        final decoded = _decodeJson(response);
+        if (response.statusCode >= 200 && response.statusCode < 300) {
+          if (decoded is! Map<String, dynamic>) {
+            throw const FormatException('Invalid order response received from backend.');
+          }
+
+          return RazorpayOrderResult.fromResponse(decoded);
         }
 
-        return RazorpayOrderResult.fromResponse(decoded);
+        lastError = _extractErrorMessage(
+          decoded,
+          response.statusCode,
+          'Failed to create payment order',
+        );
+
+        if (response.statusCode != 404) {
+          break;
+        }
+      } finally {
+        client.close();
       }
 
-      lastError = _extractErrorMessage(
-        decoded,
-        response.statusCode,
-        'Failed to create payment order',
-      );
-
-      if (response.statusCode != 404) {
-        break;
-      }
     }
 
     throw Exception(lastError ?? 'Failed to create payment order');
@@ -144,23 +152,29 @@ class RazorpayService {
     required String endpoint,
     required Map<String, dynamic> payload,
     String? authToken,
+    bool withCredentials = true,
   }) async {
-    final response = await http.post(
-      Uri.parse(endpoint),
-      headers: _headers(authToken: authToken),
-      body: jsonEncode(payload),
-    );
+    final client = createRazorpayHttpClient(withCredentials: withCredentials);
+    try {
+      final response = await client.post(
+        Uri.parse(endpoint),
+        headers: _headers(authToken: authToken),
+        body: jsonEncode(payload),
+      );
 
-    final decoded = _decodeJson(response);
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw Exception(_extractErrorMessage(decoded, response.statusCode, 'Failed to verify payment'));
+      final decoded = _decodeJson(response);
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw Exception(_extractErrorMessage(decoded, response.statusCode, 'Failed to verify payment'));
+      }
+
+      if (decoded is! Map<String, dynamic>) {
+        throw const FormatException('Invalid verification response received from backend.');
+      }
+
+      return RazorpayPaymentVerification.fromResponse(decoded);
+    } finally {
+      client.close();
     }
-
-    if (decoded is! Map<String, dynamic>) {
-      throw const FormatException('Invalid verification response received from backend.');
-    }
-
-    return RazorpayPaymentVerification.fromResponse(decoded);
   }
 
   static dynamic _decodeJson(http.Response response) {
