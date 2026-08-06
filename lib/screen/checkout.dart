@@ -1,5 +1,7 @@
 import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/model/cartmanager.dart';
+import 'package:arunstore/model/cartmodel.dart';
+import 'package:arunstore/service/order_history_service.dart';
 import 'package:arunstore/service/razorpay_service.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -141,6 +143,29 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _isProcessing = false;
         _errorMessage = verification.success ? null : verification.message;
       });
+
+      final orderSnapshot = _cart.items
+          .map(
+            (item) => CartItem(
+              product: item.product,
+              quantity: item.quantity,
+            ),
+          )
+          .toList();
+
+      OrderHistoryService.instance.addOrder(
+        CompletedOrder(
+          orderId: response.orderId ?? '',
+          paymentId: response.paymentId,
+          signature: response.signature,
+          customerName: _fullNameController.text.trim(),
+          items: orderSnapshot,
+          subtotal: _subtotal,
+          shipping: _shipping,
+          total: _total,
+          createdAt: DateTime.now(),
+        ),
+      );
 
       if (widget.clearCartOnSuccess) {
         _cart.clearCart();
@@ -937,4 +962,3 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 }
-
