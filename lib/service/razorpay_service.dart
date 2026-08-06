@@ -18,14 +18,36 @@ class RazorpayOrderResult {
 
   factory RazorpayOrderResult.fromResponse(Map<String, dynamic> response) {
     final order = _extractOrderMap(response);
-    final orderId = (order['id'] ?? order['order_id'] ?? order['razorpay_order_id'] ?? '').toString();
-    final amount = (order['amount'] ?? response['amount'] ?? 0) is int
-        ? (order['amount'] ?? response['amount'] ?? 0) as int
-        : int.tryParse((order['amount'] ?? response['amount'] ?? 0).toString()) ?? 0;
-    final currency = (order['currency'] ?? response['currency'] ?? 'INR').toString();
+    final orderId = _readFirstString(
+      order,
+      response,
+      keys: const [
+        'id',
+        'order_id',
+        'orderId',
+        'razorpay_order_id',
+        'razorpayOrderId',
+      ],
+    ) ??
+        '';
+    final amount = _readFirstInt(
+      order,
+      response,
+      keys: const ['amount', 'order_amount', 'orderAmount', 'total'],
+      defaultValue: 0,
+    );
+    final currency = _readFirstString(
+      order,
+      response,
+      keys: const ['currency', 'order_currency', 'orderCurrency'],
+      defaultValue: 'INR',
+    );
 
     if (orderId.isEmpty) {
-      throw const FormatException('Backend response did not include a Razorpay order id.');
+      throw FormatException(
+        'Backend response did not include a Razorpay order id. '
+        'Response: ${jsonEncode(response)}',
+      );
     }
 
     return RazorpayOrderResult(
@@ -74,6 +96,70 @@ Map<String, dynamic> _extractOrderMap(Map<String, dynamic> response) {
   }
 
   return response;
+}
+
+String? _readFirstString(
+  Map<String, dynamic> primary,
+  Map<String, dynamic> secondary, {
+  required List<String> keys,
+  String? defaultValue,
+}) {
+  final primaryValue = _findNestedValue(primary, keys);
+  if (primaryValue != null && primaryValue.toString().trim().isNotEmpty) {
+    return primaryValue.toString();
+  }
+
+  final secondaryValue = _findNestedValue(secondary, keys);
+  if (secondaryValue != null && secondaryValue.toString().trim().isNotEmpty) {
+    return secondaryValue.toString();
+  }
+
+  return defaultValue;
+}
+
+int _readFirstInt(
+  Map<String, dynamic> primary,
+  Map<String, dynamic> secondary, {
+  required List<String> keys,
+  required int defaultValue,
+}) {
+  final candidates = <dynamic>[
+    _findNestedValue(primary, keys),
+    _findNestedValue(secondary, keys),
+  ];
+
+  for (final candidate in candidates) {
+    if (candidate == null) continue;
+    if (candidate is int) return candidate;
+    if (candidate is num) return candidate.round();
+    final parsed = int.tryParse(candidate.toString());
+    if (parsed != null) return parsed;
+  }
+
+  return defaultValue;
+}
+
+dynamic _findNestedValue(dynamic node, List<String> keys) {
+  if (node is Map) {
+    for (final key in keys) {
+      if (node.containsKey(key)) {
+        final value = node[key];
+        if (value != null) return value;
+      }
+    }
+
+    for (final value in node.values) {
+      final nested = _findNestedValue(value, keys);
+      if (nested != null) return nested;
+    }
+  } else if (node is List) {
+    for (final value in node) {
+      final nested = _findNestedValue(value, keys);
+      if (nested != null) return nested;
+    }
+  }
+
+  return null;
 }
 
 class RazorpayService {
