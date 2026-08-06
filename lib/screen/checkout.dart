@@ -149,8 +149,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
         OrderHistoryService.instance.addOrder(
           CompletedOrder(
-            orderId: response.orderId ?? response.paymentId,
-            paymentId: response.paymentId,
+            orderId: response.orderId ?? response.paymentId ?? '',
+            paymentId: response.paymentId ?? '',
             signature: response.signature,
             customerName: _fullNameController.text.trim(),
             items: orderSnapshot,
@@ -416,7 +416,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -487,7 +487,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -722,7 +722,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 24,
             offset: const Offset(0, 10),
           ),
@@ -766,7 +766,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                             width: 72,
                             height: 72,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
+                            errorBuilder: (_, _, _) => Container(
                               width: 72,
                               height: 72,
                               color: const Color(0xFFE2E8F0),
