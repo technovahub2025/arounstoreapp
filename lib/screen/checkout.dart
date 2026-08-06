@@ -545,227 +545,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return CheckoutSectionCard(
       title: 'Shipping details',
       subtitle: 'Enter the address where we should deliver your order.',
-      child: Form(
-        key: _formKey,
-        child: Column(
-          children: [
-            _responsiveFields(),
-            const SizedBox(height: 16),
-            _paymentNote(),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: (_isProcessing || _isPreparingOrder || _preparedOrder == null)
-                    ? null
-                    : _startPayment,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0F172A),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                ),
-                child: _isProcessing
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : _isPreparingOrder
-                        ? const Text(
-                            'Preparing payment...',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                          )
-                        : _preparedOrder == null
-                            ? const Text(
-                                'Fill details to continue',
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                              )
-                            : Text(
-                                'Pay now - ${_money.format(_total)}',
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                              ),
-              ),
-            ),
-          ],
-        ),
+      child: CheckoutShippingForm(
+        formKey: _formKey,
+        fullNameController: _fullNameController,
+        emailController: _emailController,
+        phoneController: _phoneController,
+        address1Controller: _address1Controller,
+        address2Controller: _address2Controller,
+        cityController: _cityController,
+        stateController: _stateController,
+        pincodeController: _pincodeController,
+        countryController: _countryController,
+        onPayPressed: _startPayment,
+        formatTotal: _formatMoney,
+        total: _total,
+        isProcessing: _isProcessing,
+        isPreparingOrder: _isPreparingOrder,
+        isOrderReady: _preparedOrder != null,
+        requiredValidator: _requiredValidator,
+        emailValidator: _emailValidator,
+        phoneValidator: _phoneValidator,
+        pincodeValidator: _pincodeValidator,
       ),
-    );
-  }
-
-  Widget _responsiveFields() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 680;
-        if (wide) {
-          return Column(
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: CheckoutTextField(
-                      controller: _fullNameController,
-                      label: 'Full name *',
-                      hintText: 'Aarav Sharma',
-                      validator: (value) => _requiredValidator(value, 'Full name'),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: CheckoutTextField(
-                      controller: _emailController,
-                      label: 'Email *',
-                      hintText: 'aarav@example.com',
-                      keyboardType: TextInputType.emailAddress,
-                      validator: _emailValidator,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: CheckoutTextField(
-                      controller: _phoneController,
-                      label: 'Phone *',
-                      hintText: '+91 98765 43210',
-                      keyboardType: TextInputType.phone,
-                      validator: _phoneValidator,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: CheckoutTextField(
-                      controller: _pincodeController,
-                      label: 'PIN code *',
-                      hintText: '560001',
-                      keyboardType: TextInputType.number,
-                      validator: _pincodeValidator,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: CheckoutTextField(
-                      controller: _cityController,
-                      label: 'City *',
-                      hintText: 'Bengaluru',
-                      validator: (value) => _requiredValidator(value, 'City'),
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: CheckoutTextField(
-                      controller: _stateController,
-                      label: 'State *',
-                      hintText: 'Karnataka',
-                      validator: (value) => _requiredValidator(value, 'State'),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              CheckoutTextField(
-                controller: _address1Controller,
-                label: 'Address line 1 *',
-                hintText: 'House number, street name',
-                validator: (value) => _requiredValidator(value, 'Address line 1'),
-              ),
-              const SizedBox(height: 14),
-              CheckoutTextField(
-                controller: _address2Controller,
-                label: 'Address line 2',
-                hintText: 'Apartment, landmark, etc.',
-              ),
-              const SizedBox(height: 14),
-              CheckoutTextField(
-                controller: _countryController,
-                label: 'Country *',
-                hintText: 'India',
-                validator: (value) => _requiredValidator(value, 'Country'),
-              ),
-            ],
-          );
-        }
-
-        return Column(
-          children: [
-            CheckoutTextField(
-              controller: _fullNameController,
-              label: 'Full name *',
-              hintText: 'Aarav Sharma',
-              validator: (value) => _requiredValidator(value, 'Full name'),
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _emailController,
-              label: 'Email *',
-              hintText: 'aarav@example.com',
-              keyboardType: TextInputType.emailAddress,
-              validator: _emailValidator,
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _phoneController,
-              label: 'Phone *',
-              hintText: '+91 98765 43210',
-              keyboardType: TextInputType.phone,
-              validator: _phoneValidator,
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _address1Controller,
-              label: 'Address line 1 *',
-              hintText: 'House number, street name',
-              validator: (value) => _requiredValidator(value, 'Address line 1'),
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _address2Controller,
-              label: 'Address line 2',
-              hintText: 'Apartment, landmark, etc.',
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _cityController,
-              label: 'City *',
-              hintText: 'Bengaluru',
-              validator: (value) => _requiredValidator(value, 'City'),
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _stateController,
-              label: 'State *',
-              hintText: 'Karnataka',
-              validator: (value) => _requiredValidator(value, 'State'),
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _pincodeController,
-              label: 'PIN code *',
-              hintText: '560001',
-              keyboardType: TextInputType.number,
-              validator: _pincodeValidator,
-            ),
-            const SizedBox(height: 14),
-            CheckoutTextField(
-              controller: _countryController,
-              label: 'Country *',
-              hintText: 'India',
-              validator: (value) => _requiredValidator(value, 'Country'),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -776,81 +577,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (_cart.items.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF8FAFC),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE2E8F0)),
-              ),
-              child: const Text('Your cart is empty. Add products to continue.'),
-            )
-          else
-            Column(
-              children: _cart.items.map((item) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8FAFC),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.network(
-                            item.product.imageUrl ?? '',
-                            width: 72,
-                            height: 72,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Container(
-                              width: 72,
-                              height: 72,
-                              color: const Color(0xFFE2E8F0),
-                              alignment: Alignment.center,
-                              child: const Icon(Icons.shopping_bag_outlined),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.product.name ?? 'Unnamed product',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF0F172A),
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text('Qty ${item.quantity}', style: TextStyle(color: Colors.grey.shade600)),
-                              const SizedBox(height: 6),
-                              Text(
-                                _money.format((item.product.price ?? 0) * item.quantity),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  color: Color(0xFF16A34A),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+          CheckoutCartItemList(
+            isEmpty: _cart.items.isEmpty,
+            emptyMessage: 'Your cart is empty. Add products to continue.',
+            children: _cart.items
+                .map(
+                  (item) => Padding(
+                    padding: const EdgeInsets.only(bottom: 14),
+                    child: CheckoutCartItemTile(
+                      imageUrl: item.product.imageUrl,
+                      name: item.product.name ?? 'Unnamed product',
+                      quantity: item.quantity,
+                      priceText: _money.format((item.product.price ?? 0) * item.quantity),
                     ),
                   ),
-                );
-              }).toList(),
-            ),
+                )
+                .toList(),
+          ),
           const SizedBox(height: 12),
           PriceRow(label: 'Subtotal', value: _subtotal, formatter: _formatMoney),
           PriceRow(label: 'Shipping', value: _shipping, formatter: _formatMoney),
@@ -859,26 +602,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SizedBox(height: 18),
           _supportCard(),
         ],
-      ),
-    );
-  }
-
-  Widget _paymentNote() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: const Color(0xFFEFF6FF),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFBFDBFE)),
-      ),
-      child: const Text(
-        'Only the Razorpay Key ID is used on the client. The secret key stays on your backend.',
-        style: TextStyle(
-          color: Color(0xFF1E3A8A),
-          fontWeight: FontWeight.w600,
-          height: 1.4,
-        ),
       ),
     );
   }
@@ -910,4 +633,3 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   String _formatMoney(num value) => _money.format(value);
 }
-
