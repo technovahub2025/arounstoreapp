@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:arunstore/authmanager.dart';
+import 'package:arunstore/config/app_env.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/cartmodel.dart';
 import 'package:arunstore/screen/widgets/checkout_widgets.dart';
@@ -17,7 +18,7 @@ class CheckoutScreen extends StatefulWidget {
     this.createOrderUrl = RazorpayService.defaultCreateOrderUrl,
     this.verifyUrl = RazorpayService.defaultVerifyUrl,
     this.authToken,
-    this.razorpayKeyId = const String.fromEnvironment('RAZORPAY_KEY_ID'),
+    this.razorpayKeyId = AppEnv.razorpayKeyId,
     this.clearCartOnSuccess = true,
     this.successRedirectTo = '',
     this.onSuccess,
@@ -103,6 +104,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   double get _shipping => _cart.total.toDouble() - _subtotal;
   double get _total => _cart.total.toDouble();
 
+  bool get _hasRequiredCheckoutDetails =>
+      _fullNameController.text.trim().isNotEmpty &&
+      _emailController.text.trim().isNotEmpty &&
+      _phoneController.text.trim().isNotEmpty &&
+      _address1Controller.text.trim().isNotEmpty &&
+      _cityController.text.trim().isNotEmpty &&
+      _stateController.text.trim().isNotEmpty &&
+      _pincodeController.text.trim().isNotEmpty &&
+      _countryController.text.trim().isNotEmpty;
+
+  bool get _hasPaymentPrerequisites =>
+      _cart.items.isNotEmpty &&
+      widget.razorpayKeyId.trim().isNotEmpty &&
+      (_effectiveAuthToken?.isNotEmpty ?? false);
+
+  bool get _canAttemptPayment => _hasPaymentPrerequisites && _hasRequiredCheckoutDetails;
+
   String? get _effectiveAuthToken =>
       widget.authToken ?? _resolvedAuthToken ?? AuthManager().token;
 
@@ -156,17 +174,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   bool _readyToPrepare() {
-    return _cart.items.isNotEmpty &&
-        widget.razorpayKeyId.trim().isNotEmpty &&
-        (_effectiveAuthToken?.isNotEmpty ?? false) &&
-        _fullNameController.text.trim().isNotEmpty &&
-        _emailController.text.trim().isNotEmpty &&
-        _phoneController.text.trim().isNotEmpty &&
-        _address1Controller.text.trim().isNotEmpty &&
-        _cityController.text.trim().isNotEmpty &&
-        _stateController.text.trim().isNotEmpty &&
-        _pincodeController.text.trim().isNotEmpty &&
-        _countryController.text.trim().isNotEmpty;
+    return _canAttemptPayment;
   }
 
   String _signature() => [
@@ -576,6 +584,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         isProcessing: _isProcessing,
         isPreparingOrder: _isPreparingOrder,
         isOrderReady: _preparedOrder != null,
+        canAttemptPayment: _canAttemptPayment,
+        hasRequiredDetails: _hasRequiredCheckoutDetails,
+        hasPaymentPrerequisites: _hasPaymentPrerequisites,
         requiredValidator: _requiredValidator,
         emailValidator: _emailValidator,
         phoneValidator: _phoneValidator,

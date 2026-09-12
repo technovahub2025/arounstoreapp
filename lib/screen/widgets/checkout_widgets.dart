@@ -304,6 +304,9 @@ class CheckoutShippingForm extends StatelessWidget {
     required this.isProcessing,
     required this.isPreparingOrder,
     required this.isOrderReady,
+    required this.canAttemptPayment,
+    required this.hasRequiredDetails,
+    required this.hasPaymentPrerequisites,
     required this.requiredValidator,
     required this.emailValidator,
     required this.phoneValidator,
@@ -326,6 +329,9 @@ class CheckoutShippingForm extends StatelessWidget {
   final bool isProcessing;
   final bool isPreparingOrder;
   final bool isOrderReady;
+  final bool canAttemptPayment;
+  final bool hasRequiredDetails;
+  final bool hasPaymentPrerequisites;
   final String? Function(String?, String) requiredValidator;
   final String? Function(String?) emailValidator;
   final String? Function(String?) phoneValidator;
@@ -527,7 +533,7 @@ class CheckoutShippingForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: (isProcessing || isPreparingOrder || !isOrderReady) ? null : onPayPressed,
+              onPressed: (isProcessing || isPreparingOrder || !canAttemptPayment) ? null : onPayPressed,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF0F172A),
                 foregroundColor: Colors.white,
@@ -550,15 +556,25 @@ class CheckoutShippingForm extends StatelessWidget {
                           'Preparing payment...',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                         )
-                      : !isOrderReady
+                      : !hasRequiredDetails
                           ? const Text(
                               'Fill details to continue',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                             )
-                          : Text(
-                              'Pay now - ${formatTotal(total)}',
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                            ),
+                          : !hasPaymentPrerequisites
+                              ? const Text(
+                                  'Log in to continue',
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                )
+                              : !isOrderReady
+                                  ? const Text(
+                                      'Prepare payment',
+                                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                    )
+                              : Text(
+                                  'Pay now - ${formatTotal(total)}',
+                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                                ),
             ),
           ),
         ],

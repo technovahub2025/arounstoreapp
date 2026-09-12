@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:arunstore/config/app_env.dart';
 import 'package:arunstore/service/razorpay_http_client.dart';
 import 'package:http/http.dart' as http;
 
@@ -166,8 +167,7 @@ dynamic _findNestedValue(dynamic node, List<String> keys) {
 class RazorpayService {
   const RazorpayService._();
 
-  static const String paymentBaseUrl =
-      'https://aroun-shopping-website-a2he.onrender.com/api/payment';
+  static const String paymentBaseUrl = AppEnv.paymentBaseUrl;
   static const String defaultCreateOrderUrl = paymentBaseUrl;
   static const String defaultVerifyUrl = '$paymentBaseUrl/verify';
 
