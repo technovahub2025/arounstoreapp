@@ -7,6 +7,7 @@ import 'package:arunstore/model/cartmodel.dart';
 import 'package:arunstore/screen/widgets/checkout_widgets.dart';
 import 'package:arunstore/service/order_history_service.dart';
 import 'package:arunstore/service/razorpay_service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:razorpay_web/razorpay_web.dart';
@@ -119,6 +120,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       widget.razorpayKeyId.trim().isNotEmpty &&
       (_effectiveAuthToken?.isNotEmpty ?? false);
 
+  bool get _hasRazorpayKey => widget.razorpayKeyId.trim().isNotEmpty;
+  bool get _hasAuthToken => _effectiveAuthToken?.isNotEmpty ?? false;
+
   bool get _canAttemptPayment => _hasPaymentPrerequisites && _hasRequiredCheckoutDetails;
 
   String? get _effectiveAuthToken =>
@@ -201,6 +205,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _prepareOrderIfNeeded() async {
     if (!_readyToPrepare()) {
+      if (kDebugMode) {
+        print('Checkout: _readyToPrepare() returned false');
+        print('  - hasPaymentPrerequisites: $_hasPaymentPrerequisites');
+        print('  - hasAuthToken: ${_hasAuthToken}');
+        print('  - hasRazorpayKey: $_hasRazorpayKey');
+        print('  - hasRequiredDetails: $_hasRequiredCheckoutDetails');
+      }
       if (!mounted) return;
       setState(() {
         _preparedOrder = null;
@@ -240,6 +251,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _isPreparingOrder = false;
       });
     } catch (error) {
+      if (kDebugMode) {
+        print('Checkout: Order preparation failed: $error');
+      }
       if (!mounted) return;
       setState(() {
         _preparedOrder = null;
@@ -272,8 +286,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       await _prepareOrderIfNeeded();
     }
     if (_preparedOrder == null) {
+      if (kDebugMode) {
+        print('Checkout: Prepared order is null after preparation attempt');
+      }
       setState(() => _errorMessage = 'Payment order is still being prepared. Please try again.');
       return;
+    }
+
+    if (kDebugMode) {
+      print('Checkout: Opening Razorpay with key: ${widget.razorpayKeyId.substring(0, 6)}...');
+      print('Checkout: Order ID: ${_preparedOrder!.orderId}');
+      print('Checkout: Amount: ${_preparedOrder!.amount}');
     }
 
     setState(() => _isProcessing = true);
@@ -308,6 +331,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             });
           }
         },
+      });
+
+      Future.delayed(const Duration(seconds: 30), () {
+        if (mounted && _isProcessing) {
+          setState(() {
+            _isProcessing = false;
+            _errorMessage = 'Payment did not complete. Please check your connection and try again.';
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Payment timed out. Please try again.')),
+          );
+        }
       });
     } catch (error) {
       if (!mounted) return;
@@ -385,12 +420,15 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   void _handlePaymentError(PaymentFailureResponse response) {
+    if (kDebugMode) {
+      print('Checkout: Payment error - code: ${response.code}, message: ${response.message}');
+    }
     if (!mounted) return;
     setState(() {
       _isProcessing = false;
       _errorMessage = (response.message ?? '').isNotEmpty
           ? response.message
-          : 'Payment failed. Please try again.';
+          : 'Payment failed. Code: ${response.code}. Please try again.';
     });
   }
 
@@ -587,6 +625,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         canAttemptPayment: _canAttemptPayment,
         hasRequiredDetails: _hasRequiredCheckoutDetails,
         hasPaymentPrerequisites: _hasPaymentPrerequisites,
+        hasRazorpayKey: _hasRazorpayKey,
+        hasAuthToken: _hasAuthToken,
         requiredValidator: _requiredValidator,
         emailValidator: _emailValidator,
         phoneValidator: _phoneValidator,

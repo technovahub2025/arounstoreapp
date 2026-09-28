@@ -307,6 +307,8 @@ class CheckoutShippingForm extends StatelessWidget {
     required this.canAttemptPayment,
     required this.hasRequiredDetails,
     required this.hasPaymentPrerequisites,
+     required this.hasRazorpayKey,
+     required this.hasAuthToken,
     required this.requiredValidator,
     required this.emailValidator,
     required this.phoneValidator,
@@ -332,6 +334,8 @@ class CheckoutShippingForm extends StatelessWidget {
   final bool canAttemptPayment;
   final bool hasRequiredDetails;
   final bool hasPaymentPrerequisites;
+  final bool hasRazorpayKey;
+  final bool hasAuthToken;
   final String? Function(String?, String) requiredValidator;
   final String? Function(String?) emailValidator;
   final String? Function(String?) phoneValidator;
@@ -556,14 +560,19 @@ class CheckoutShippingForm extends StatelessWidget {
                           'Preparing payment...',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                         )
-                      : !hasRequiredDetails
+                  : !hasRequiredDetails
+                      ? const Text(
+                          'Fill details to continue',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                        )
+                      : !hasAuthToken
                           ? const Text(
-                              'Fill details to continue',
+                              'Log in to continue',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                             )
-                          : !hasPaymentPrerequisites
+                          : !hasRazorpayKey
                               ? const Text(
-                                  'Log in to continue',
+                                  'Payment key missing',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                 )
                               : !isOrderReady

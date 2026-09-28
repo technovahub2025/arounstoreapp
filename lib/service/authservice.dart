@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 
 class ApiService {
-  static const String baseUrl = "https://aroun-shopping-website-a2he.onrender.com/api/auth";
+  static const String baseUrl = "https://aroun-shopping-website-ysi0.onrender.com/api/auth";
 
   static Future<http.Response> register(User user) async {
     final url = Uri.parse('$baseUrl/register');

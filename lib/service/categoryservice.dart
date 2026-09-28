@@ -6,7 +6,7 @@ import 'package:flutter/foundation.dart';
 
 
 class ProductController {
-  static const String apiUrl = 'https://aroun-shopping-website-a2he.onrender.com/api/products';
+  static const String apiUrl = 'https://aroun-shopping-website-ysi0.onrender.com/api/products';
   
   // Add AuthManager reference
   AuthManager? _authManager;

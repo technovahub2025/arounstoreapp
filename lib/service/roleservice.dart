@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 
 
 class roleService {
-  static const String baseUrl = "https://aroun-shopping-website-a2he.onrender.com/api/auth";
+  static const String baseUrl = "https://aroun-shopping-website-ysi0.onrender.com/api/auth";
 
   static Future<http.Response> roleselection(Role role) async {
     final url = Uri.parse('$baseUrl/register');

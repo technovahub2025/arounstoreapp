@@ -28,7 +28,7 @@ class AuthManager with ChangeNotifier {
   }
   
   // Base URL for your API
-  static const String baseUrl = "https://aroun-shopping-website-a2he.onrender.com/api/auth";
+  static const String baseUrl = "https://aroun-shopping-website-ysi0.onrender.com/api/auth";
   
   // Login with API - UPDATED to handle your JSON response format
   Future<Map<String, dynamic>> login(String phone, String password) async {
