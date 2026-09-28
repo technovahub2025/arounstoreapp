@@ -320,17 +320,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           'shipping_state': _stateController.text.trim(),
           'shipping_pincode': _pincodeController.text.trim(),
         },
-        'theme': {'color': '#0f172a'},
+         'theme': {'color': '#0f172a'},
         'retry': {'enabled': true, 'max_count': 2},
-        'modal': {
-          'ondismiss': () {
-            if (!mounted) return;
-            setState(() {
-              _isProcessing = false;
-              _errorMessage = 'Payment cancelled before completion.';
-            });
-          }
-        },
       });
 
       Future.delayed(const Duration(seconds: 30), () {
