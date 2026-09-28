@@ -44,7 +44,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _money = NumberFormat.currency(locale: 'en_IN', symbol: 'INR ', decimalDigits: 0);
 
   final _fullNameController = TextEditingController();
-  final _emailController = TextEditingController();
   final _phoneController = TextEditingController(text: '9003530230');
   final _address1Controller = TextEditingController();
   final _address2Controller = TextEditingController();
@@ -91,7 +90,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   List<TextEditingController> get _controllers => [
         _fullNameController,
-        _emailController,
         _phoneController,
         _address1Controller,
         _address2Controller,
@@ -107,7 +105,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   bool get _hasRequiredCheckoutDetails =>
       _fullNameController.text.trim().isNotEmpty &&
-      _emailController.text.trim().isNotEmpty &&
       _phoneController.text.trim().isNotEmpty &&
       _address1Controller.text.trim().isNotEmpty &&
       _cityController.text.trim().isNotEmpty &&
@@ -143,7 +140,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Map<String, dynamic> get _shippingPayload => buildShippingPayload(
         fullName: _fullNameController.text.trim(),
-        email: _emailController.text.trim(),
         phone: _phoneController.text.trim(),
         addressLine1: _address1Controller.text.trim(),
         addressLine2: _address2Controller.text.trim(),
@@ -184,7 +180,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   String _signature() => [
         _total.toStringAsFixed(2),
         _fullNameController.text.trim(),
-        _emailController.text.trim(),
         _phoneController.text.trim(),
         _address1Controller.text.trim(),
         _address2Controller.text.trim(),
@@ -311,7 +306,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         'order_id': _preparedOrder!.orderId,
         'prefill': {
           'name': _fullNameController.text.trim(),
-          'email': _emailController.text.trim(),
           'contact': _phoneController.text.trim(),
         },
         'notes': {
@@ -436,14 +430,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     return null;
   }
 
-  String? _emailValidator(String? value) {
-    final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Email address is required.';
-    return RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(text)
-        ? null
-        : 'Enter a valid email address.';
-  }
-
   String? _phoneValidator(String? value) {
     final text = value?.trim() ?? '';
     if (text.isEmpty) return 'Phone number is required.';
@@ -543,7 +529,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: CheckoutShippingForm(
         formKey: _formKey,
         fullNameController: _fullNameController,
-        emailController: _emailController,
         phoneController: _phoneController,
         address1Controller: _address1Controller,
         address2Controller: _address2Controller,
@@ -563,7 +548,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         hasRazorpayKey: _hasRazorpayKey,
         hasAuthToken: _hasAuthToken,
         requiredValidator: _requiredValidator,
-        emailValidator: _emailValidator,
         phoneValidator: _phoneValidator,
         pincodeValidator: _pincodeValidator,
       ),

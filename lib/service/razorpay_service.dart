@@ -319,7 +319,6 @@ List<String> _candidateCreateOrderEndpoints(String endpoint) {
 
 Map<String, dynamic> buildShippingPayload({
   required String fullName,
-  required String email,
   required String phone,
   required String addressLine1,
   required String addressLine2,
@@ -331,7 +330,6 @@ Map<String, dynamic> buildShippingPayload({
   return {
     'customer': {
       'name': fullName,
-      'email': email,
       'contact': phone,
     },
     'shippingAddress': {

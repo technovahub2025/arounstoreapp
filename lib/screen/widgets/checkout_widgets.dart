@@ -290,7 +290,6 @@ class CheckoutShippingForm extends StatelessWidget {
     super.key,
     required this.formKey,
     required this.fullNameController,
-    required this.emailController,
     required this.phoneController,
     required this.address1Controller,
     required this.address2Controller,
@@ -310,14 +309,12 @@ class CheckoutShippingForm extends StatelessWidget {
      required this.hasRazorpayKey,
      required this.hasAuthToken,
     required this.requiredValidator,
-    required this.emailValidator,
     required this.phoneValidator,
     required this.pincodeValidator,
   });
 
   final GlobalKey<FormState> formKey;
   final TextEditingController fullNameController;
-  final TextEditingController emailController;
   final TextEditingController phoneController;
   final TextEditingController address1Controller;
   final TextEditingController address2Controller;
@@ -337,7 +334,6 @@ class CheckoutShippingForm extends StatelessWidget {
   final bool hasRazorpayKey;
   final bool hasAuthToken;
   final String? Function(String?, String) requiredValidator;
-  final String? Function(String?) emailValidator;
   final String? Function(String?) phoneValidator;
   final String? Function(String?) pincodeValidator;
 
@@ -353,27 +349,11 @@ class CheckoutShippingForm extends StatelessWidget {
               if (wide) {
                 return Column(
                   children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CheckoutTextField(
-                            controller: fullNameController,
-                            label: 'Full name *',
-                            hintText: 'Aarav Sharma',
-                            validator: (value) => requiredValidator(value, 'Full name'),
-                          ),
-                        ),
-                        const SizedBox(width: 14),
-                        Expanded(
-                          child: CheckoutTextField(
-                            controller: emailController,
-                            label: 'Email *',
-                            hintText: 'aarav@example.com',
-                            keyboardType: TextInputType.emailAddress,
-                            validator: emailValidator,
-                          ),
-                        ),
-                      ],
+                    CheckoutTextField(
+                      controller: fullNameController,
+                      label: 'Full name *',
+                      hintText: 'Aarav Sharma',
+                      validator: (value) => requiredValidator(value, 'Full name'),
                     ),
                     const SizedBox(height: 14),
                     Row(
@@ -452,14 +432,6 @@ class CheckoutShippingForm extends StatelessWidget {
                     label: 'Full name *',
                     hintText: 'Aarav Sharma',
                     validator: (value) => requiredValidator(value, 'Full name'),
-                  ),
-                  const SizedBox(height: 14),
-                  CheckoutTextField(
-                    controller: emailController,
-                    label: 'Email *',
-                    hintText: 'aarav@example.com',
-                    keyboardType: TextInputType.emailAddress,
-                    validator: emailValidator,
                   ),
                   const SizedBox(height: 14),
                   CheckoutTextField(
