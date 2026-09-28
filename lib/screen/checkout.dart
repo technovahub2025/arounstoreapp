@@ -45,7 +45,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   final _fullNameController = TextEditingController();
   final _emailController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _phoneController = TextEditingController(text: '9003530230');
   final _address1Controller = TextEditingController();
   final _address2Controller = TextEditingController();
   final _cityController = TextEditingController();
