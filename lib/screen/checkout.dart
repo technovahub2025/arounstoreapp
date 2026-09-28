@@ -411,10 +411,22 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       print('Checkout: Payment error - code: ${response.code}, message: ${response.message}');
     }
     if (!mounted) return;
+    final wasCanceled = response.code == 2;
+    OrderHistoryService.instance.addCanceledPayment(
+      items: _cart.items.map((item) => CartItem(product: item.product, quantity: item.quantity)).toList(),
+      subtotal: _subtotal,
+      shipping: _shipping,
+      total: _total,
+      customerName: _fullNameController.text.trim(),
+      status: wasCanceled ? 'Canceled' : 'Failed',
+    );
     setState(() {
       _isProcessing = false;
-      _errorMessage = 'Payment wasn’t completed. Please try again or use another payment method.';
+      _errorMessage = wasCanceled ? 'Payment canceled.' : 'Payment failed. Please try again.';
     });
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(wasCanceled ? 'Payment canceled.' : 'Payment failed.'),
+    ));
   }
 
   void _handleExternalWallet(ExternalWalletResponse response) {

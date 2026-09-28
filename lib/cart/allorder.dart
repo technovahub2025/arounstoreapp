@@ -52,16 +52,17 @@ class _AllorderState extends State<Allorder> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Order confirmed',
+              Text(
+                order.paymentSuccessful ? 'Payment successful' : 'Payment ${order.paymentStatus.toLowerCase()}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
+                  color: order.paymentSuccessful ? Colors.green.shade700 : Colors.red.shade700,
                 ),
               ),
               const SizedBox(height: 8),
               Text('Order ID: ${order.orderId}'),
-              Text('Payment ID: ${order.paymentId}'),
+              if (order.paymentSuccessful) Text('Payment ID: ${order.paymentId}'),
               Text('Placed on: ${order.createdAt}'),
               const SizedBox(height: 12),
               _summaryRow('Subtotal', order.subtotal),

@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
 import 'package:arunstore/screen/app_home.dart';
 import 'package:arunstore/screen/registerscreen.dart';
+import 'package:arunstore/service/authservice.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -27,6 +30,38 @@ class _LoginScreenState extends State<LoginScreen> {
   String? _errorMessage;
 
   bool _isPasswordVisible = false;
+
+  Future<void> _forgotPassword() async {
+    final phoneController = TextEditingController(text: _phoneController.text.trim());
+    final phone = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Reset password'),
+        content: TextField(
+          controller: phoneController,
+          keyboardType: TextInputType.phone,
+          decoration: const InputDecoration(labelText: 'Phone number'),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, phoneController.text.trim()), child: const Text('Send reset link')),
+        ],
+      ),
+    );
+    phoneController.dispose();
+    if (phone == null || phone.isEmpty || !mounted) return;
+    try {
+      final response = await ApiService.forgotPassword(phone);
+      final data = response.body.isEmpty ? <String, dynamic>{} : jsonDecode(response.body) as Map<String, dynamic>;
+      if (!mounted) return;
+      final message = data['message']?.toString() ?? (response.statusCode >= 200 && response.statusCode < 300
+          ? 'Password reset instructions sent.'
+          : 'Could not send reset instructions. Please try again.');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not connect to reset your password.')));
+    }
+  }
 
   // ============================================================
   // LOGIN
@@ -638,10 +673,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               Alignment.centerRight,
 
                           child: TextButton(
-                            onPressed: () {
-                              // Forgot password functionality
-                              // can be connected here later.
-                            },
+                            onPressed: _forgotPassword,
 
                             style: TextButton.styleFrom(
                               padding:

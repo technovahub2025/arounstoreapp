@@ -11,6 +11,8 @@ class CompletedOrder {
   final double shipping;
   final double total;
   final DateTime createdAt;
+  final bool paymentSuccessful;
+  final String paymentStatus;
 
   const CompletedOrder({
     required this.orderId,
@@ -22,6 +24,8 @@ class CompletedOrder {
     required this.shipping,
     required this.total,
     required this.createdAt,
+    this.paymentSuccessful = true,
+    this.paymentStatus = 'Successful',
   });
 }
 
@@ -38,6 +42,30 @@ class OrderHistoryService extends ChangeNotifier {
 
   void addOrder(CompletedOrder order) {
     _orders.insert(0, order);
+    notifyListeners();
+  }
+
+  void addCanceledPayment({
+    required List<CartItem> items,
+    required double subtotal,
+    required double shipping,
+    required double total,
+    required String customerName,
+    String status = 'Canceled',
+  }) {
+    _orders.insert(0, CompletedOrder(
+      orderId: 'Pending',
+      paymentId: '—',
+      signature: null,
+      customerName: customerName,
+      items: items,
+      subtotal: subtotal,
+      shipping: shipping,
+      total: total,
+      createdAt: DateTime.now(),
+      paymentSuccessful: false,
+      paymentStatus: status,
+    ));
     notifyListeners();
   }
 

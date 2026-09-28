@@ -27,4 +27,12 @@ class ApiService {
     );
     return response;
   }
+
+  static Future<http.Response> forgotPassword(String phone) async {
+    return http.post(
+      Uri.parse('$baseUrl/forgot-password'),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({'phone': phone}),
+    );
+  }
 }
