@@ -516,24 +516,6 @@ class CheckoutShippingForm extends StatelessWidget {
             },
           ),
           const SizedBox(height: 16),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF6FF),
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: const Color(0xFFBFDBFE)),
-            ),
-            child: const Text(
-              'Only the Razorpay Key ID is used on the client. The secret key stays on your backend.',
-              style: TextStyle(
-                color: Color(0xFF1E3A8A),
-                fontWeight: FontWeight.w600,
-                height: 1.4,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
@@ -572,7 +554,7 @@ class CheckoutShippingForm extends StatelessWidget {
                             )
                           : !hasRazorpayKey
                               ? const Text(
-                                  'Payment key missing',
+                                  'Payments unavailable',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                 )
                               : !isOrderReady

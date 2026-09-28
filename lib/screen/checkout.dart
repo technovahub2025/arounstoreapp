@@ -259,7 +259,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         _preparedOrder = null;
         _preparedOrderSignature = null;
         _isPreparingOrder = false;
-        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+        _errorMessage = 'We couldn’t prepare your payment. Please try again.';
       });
     }
   }
@@ -289,7 +289,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (kDebugMode) {
         print('Checkout: Prepared order is null after preparation attempt');
       }
-      setState(() => _errorMessage = 'Payment order is still being prepared. Please try again.');
+      setState(() => _errorMessage = 'Your payment is taking longer than expected. Please try again.');
       return;
     }
 
@@ -328,18 +328,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         if (mounted && _isProcessing) {
           setState(() {
             _isProcessing = false;
-            _errorMessage = 'Payment did not complete. Please check your connection and try again.';
+            _errorMessage = 'Payment wasn’t completed. Please try again.';
           });
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Payment timed out. Please try again.')),
           );
         }
       });
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _isProcessing = false;
-        _errorMessage = error.toString().replaceFirst('Exception: ', '');
+        _errorMessage = 'We couldn’t open the payment window. Please try again.';
       });
     }
   }
@@ -367,7 +367,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       setState(() {
         _verification = verification;
         _isProcessing = false;
-        _errorMessage = verification.success ? null : verification.message;
+        _errorMessage = verification.success
+            ? null
+            : 'We couldn’t confirm your payment. If money was deducted, please contact us before trying again.';
       });
 
       if (!verification.success) return;
@@ -401,11 +403,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           const SnackBar(content: Text('Payment verified successfully.')),
         );
       }
-    } catch (error) {
+    } catch (_) {
       if (!mounted) return;
       setState(() {
         _isProcessing = false;
-        _errorMessage = 'Payment succeeded, but verification failed: $error';
+        _errorMessage = 'We couldn’t confirm your payment. If money was deducted, please contact us before trying again.';
       });
     }
   }
@@ -417,9 +419,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     if (!mounted) return;
     setState(() {
       _isProcessing = false;
-      _errorMessage = (response.message ?? '').isNotEmpty
-          ? response.message
-          : 'Payment failed. Code: ${response.code}. Please try again.';
+      _errorMessage = 'Payment wasn’t completed. Please try again or use another payment method.';
     });
   }
 
@@ -490,20 +490,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _header(),
-                        if (_errorMessage != null) ...[
-                          const SizedBox(height: 16),
-                          CheckoutNoticeBanner(
-                            message: _errorMessage!,
-                            color: const Color(0xFFFFE4E6),
-                            textColor: const Color(0xFF9F1239),
-                            borderColor: const Color(0xFFFDA4AF),
-                          ),
-                        ],
+                       
                         if (_verification != null && _verification!.success) ...[
                           const SizedBox(height: 16),
                           CheckoutNoticeBanner(
-                            message: _verification!.message,
+            message: 'Payment confirmed. Thank you for your order.',
                             color: const Color(0xFFDCFCE7),
                             textColor: const Color(0xFF166534),
                             borderColor: const Color(0xFF86EFAC),
@@ -544,54 +535,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
-  Widget _header() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Secure checkout',
-            style: TextStyle(
-              color: Color(0xFF2563EB),
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
-            ),
-          ),
-          const SizedBox(height: 8),
-          const Text(
-            'Complete your order with Razorpay',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Order creation happens on your backend, and payment verification happens after the checkout modal returns.',
-            style: TextStyle(
-              color: Colors.grey.shade700,
-              height: 1.45,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
+ 
   Widget _shippingCard() {
     return CheckoutSectionCard(
       title: 'Shipping details',
@@ -655,33 +599,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           PriceRow(label: 'Shipping', value: _shipping, formatter: _formatMoney),
           const Divider(height: 28),
           PriceRow(label: 'Total', value: _total, formatter: _formatMoney, bold: true),
-          const SizedBox(height: 18),
-          _supportCard(),
-        ],
-      ),
-    );
-  }
-
-  Widget _supportCard() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Secure payment flow',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700, fontSize: 16),
-          ),
-          SizedBox(height: 10),
-          Text(
-            '1. Create order on backend\n2. Open Razorpay checkout\n3. Verify payment signature\n4. Clear cart and continue',
-            style: TextStyle(color: Color(0xFFCBD5E1), height: 1.5),
-          ),
         ],
       ),
     );

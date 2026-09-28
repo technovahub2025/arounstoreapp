@@ -2,11 +2,11 @@ class AppEnv {
   const AppEnv._();
 
   /// Public Razorpay key ID used by the client checkout flow.
-  /// For production, pass `-dRAZORPAY_KEY_ID=rzp_live_...` at build time.
-  /// The test key works on localhost for development.
+  /// It must belong to the same Razorpay account as the backend key secret.
+  /// Pass `-dRAZORPAY_KEY_ID=rzp_test_...` or `rzp_live_...` at build time.
   static const String razorpayKeyId = String.fromEnvironment(
     'RAZORPAY_KEY_ID',
-    defaultValue: 'rzp_test_5H8kXnV2mY9pQ3',
+    defaultValue: 'rzp_live_TGQ0tqCuQsVTlk',
   );
 
   /// Public backend base URL for Razorpay order creation and verification.

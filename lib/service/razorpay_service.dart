@@ -52,6 +52,14 @@ class RazorpayOrderResult {
       );
     }
 
+    if (!orderId.startsWith('order_')) {
+      throw FormatException(
+        'Backend returned "$orderId" instead of a Razorpay order ID. '
+        'Create the order with Razorpay Orders API and return its id '
+        '(it should start with "order_").',
+      );
+    }
+
     return RazorpayOrderResult(
       orderId: orderId,
       amount: amount,
@@ -168,7 +176,7 @@ class RazorpayService {
   const RazorpayService._();
 
   static const String paymentBaseUrl = AppEnv.paymentBaseUrl;
-  static const String defaultCreateOrderUrl = paymentBaseUrl;
+  static const String defaultCreateOrderUrl = '$paymentBaseUrl/create-order';
   static const String defaultVerifyUrl = '$paymentBaseUrl/verify';
 
   static Map<String, String> _headers({String? authToken}) {
