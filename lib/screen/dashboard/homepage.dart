@@ -1,16 +1,28 @@
-
+import 'package:arunstore/authmanager.dart';
+import 'package:arunstore/categories/filter.dart';
+import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/cart/cartservice.dart';
+import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/model/cartmanager.dart';
-import 'package:arunstore/screen/dashboard/categories.dart';
-import 'package:arunstore/screen/dashboard/categoriesimage.dart';
-import 'package:arunstore/screen/dashboard/hero.dart';
+import 'package:arunstore/screen/dashboard/wishlist.dart';
 import 'package:arunstore/service/homescreenfunction.dart';
+import 'package:arunstore/theme/app_theme.dart';
+import 'package:arunstore/widgets/app_footer.dart';
+import 'package:arunstore/widgets/app_header.dart';
+
+import 'package:arunstore/widgets/category_carousel.dart';
+import 'package:arunstore/widgets/hero_banner.dart';
+import 'package:arunstore/widgets/newsletter_section.dart';
+import 'package:arunstore/widgets/product_carousel.dart';
+import 'package:arunstore/widgets/promo_banner_card.dart';
+import 'package:arunstore/widgets/promo_top_bar.dart';
+import 'package:arunstore/widgets/service_feature_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -19,6 +31,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   HomeScreenLogic? _logic;
   bool _isInitializing = true;
+  final TextEditingController _searchController = TextEditingController();
+  final List<String> _navItems = [
+    'Home',
+    'Shop by Category',
+    'Shop',
+    'Offers',
+    'Best Sellers',
+    'New Arrivals',
+    'Combo Deals',
+    'Blog',
+    'Contact Us',
+  ];
+  final String _activeNavItem = 'Home';
 
   @override
   void initState() {
@@ -49,208 +74,396 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void dispose() {
-    _logic?.dispose(); 
+    _logic?.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _handleNavTap(String item) {
+    if (_logic == null) return;
+
+    switch (item) {
+      case 'Shop by Category':
+      case 'Shop':
+        _logic!.openAllCategoriesFilter(context, _logic!.categoryMap);
+        break;
+      case 'Offers':
+      case 'Combo Deals':
+        _navigateToDeals();
+        break;
+      case 'Best Sellers':
+        _navigateToTopRated();
+        break;
+      case 'New Arrivals':
+        _navigateToAllProducts();
+        break;
+      case 'Blog':
+        _showComingSoon(item);
+        break;
+      case 'Contact Us':
+        _showContactInfo();
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _navigateToDeals() {
+    if (_logic == null) return;
+    final dealProducts = _logic!.dealProducts;
+    _navigateToProductList(dealProducts, 'Best Deals');
+  }
+
+  void _navigateToTopRated() {
+    if (_logic == null) return;
+    final topRated = List.of(_logic!.allProducts);
+    topRated.sort((a, b) => (b.rating ?? 0).compareTo(a.rating ?? 0));
+    _navigateToProductList(topRated, 'Best Sellers');
+  }
+
+  void _navigateToAllProducts() {
+    if (_logic == null) return;
+    _navigateToProductList(List.of(_logic!.allProducts), 'New Arrivals');
+  }
+
+  void _navigateToProductList(List<dynamic> products, String title) {
+    final map = <String, List<Product>>{title: products.cast<Product>()};
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategoryFilterPage(categories: map),
+      ),
+    );
+  }
+
+  void _showComingSoon(String feature) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$feature - Coming Soon!')),
+    );
+  }
+
+  void _showContactInfo() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Contact Us',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.darkText,
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildContactRow(Icons.phone, 'Phone', '1800-123-4560'),
+            _buildContactRow(Icons.email_outlined, 'Email', 'support@arounstores.com'),
+            _buildContactRow(Icons.location_on, 'Address', 'Puducherry, India'),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContactRow(IconData icon, String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: AppColors.primary, size: 20),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: AppColors.grey500,
+                ),
+              ),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.darkText,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onSearchChanged(String query) {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    
     if (_isInitializing || _logic == null) {
       return _buildLoadingScaffold();
     }
 
-    
     if (_logic!.authLoading) {
       return _buildLoadingScaffold();
     }
 
+    final isDesktop = AppTheme.isDesktop(context);
+
     return Scaffold(
-      appBar: _buildAppBar(context),
-      drawer: _buildDrawer(context),
+      backgroundColor: AppColors.background,
+      appBar: isDesktop ? null : _buildMobileAppBar(),
+      drawer: isDesktop ? null : _buildMobileDrawer(),
       body: _buildBody(context),
-      bottomNavigationBar: _buildBottomNavigationBar(context),
+      bottomNavigationBar: isDesktop ? null : _buildMobileBottomNav(),
     );
   }
 
-  Widget _buildLoadingScaffold() {
-    return Scaffold(
-      body: Center(
-        child: CircularProgressIndicator(
-          color: Color(0xFF15803D),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar(BuildContext context) {
+  PreferredSizeWidget _buildMobileAppBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(110),
-      child: Container(
-        decoration: BoxDecoration(
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.1),
-              blurRadius: 3,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            _buildTopBar(),
-            _buildMainAppBar(context),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTopBar() {
-    return Container(
-      height: 30,
-      width: double.infinity,
-      color: const Color(0xFF15803D),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      preferredSize: const Size.fromHeight(120),
+      child: Column(
         children: [
-          _buildLocationInfo(),
-         
-          if (_logic != null && _logic!.isLoggedIn && _logic!.isAdmin) 
-            _buildAdminBadge(), 
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationInfo() {
-    return const Padding(
-      padding: EdgeInsets.only(left: 16),
-      child: Row(
-        children: [
-          Icon(Icons.location_on, color: Colors.white, size: 14),
-          SizedBox(width: 4),
-          Text(
-            'PUDUCHERRY',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
+          const PromoTopBar(),
+          Container(
+            color: AppColors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Row(
+              children: [
+                _buildLogo(),
+                const Spacer(),
+                _buildCartIcon(),
+                const SizedBox(width: 8),
+                _buildUserAccountButton(),
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ),
+              ],
             ),
           ),
+        
         ],
       ),
     );
   }
 
-  Widget _buildAdminBadge() {
-    return Padding(
-      padding: const EdgeInsets.only(right: 16),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.verified_user, size: 12, color: Colors.green),
-            const SizedBox(width: 4),
-            Text(
-              'ADMIN',
+  Widget _buildBody(BuildContext context) {
+    if (_logic == null) return const SizedBox.shrink();
+
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildAppBarSection(),
+          _buildNavigationSection(),
+          HeroBanner(
+            categoryMap: _logic!.categoryMap,
+          ),
+          _buildCategorySection(),
+          _buildBestDealsSection(),
+          _buildPromoBannerStrip(),
+          const ServiceFeatureBar(),
+          const SizedBox(height: 24),
+       
+          const SizedBox(height: 24),
+          const NewsletterSection(),
+          const SizedBox(height: 24),
+         
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBarSection() {
+    return AppHeader(
+      logic: _logic!,
+      searchController: _searchController,
+      onSearchChanged: _onSearchChanged,
+      navItems: _navItems,
+      activeNavItem: _activeNavItem,
+      onNavTap: _handleNavTap,
+    );
+  }
+
+  Widget _buildNavigationSection() {
+    final isDesktop = AppTheme.isDesktop(context);
+    if (!isDesktop) return const SizedBox.shrink();
+
+    return Container(
+      color: AppColors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      child: Row(
+        children: _navItems.map((item) {
+          final isActive = _activeNavItem == item;
+          return TextButton(
+            onPressed: () => _handleNavTap(item),
+            style: TextButton.styleFrom(
+              foregroundColor: isActive ? AppColors.primary : AppColors.mutedText,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            ),
+            child: Text(
+              item,
               style: TextStyle(
-                color: Colors.green,
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+                fontSize: 13,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                color: isActive ? AppColors.primary : AppColors.mutedText,
               ),
             ),
-          ],
-        ),
+          );
+        }).toList(),
       ),
     );
   }
 
-  Widget _buildMainAppBar(BuildContext context) {
-    return Container(
-      height: 80,
-      color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          _buildLogo(),
-          const Spacer(),
-          if (MediaQuery.of(context).size.width > 768) _buildDesktopMenu(),
-          _buildIconsSection(context),
-          if (MediaQuery.of(context).size.width <= 768) _buildMobileMenuButton(context),
-        ],
+  Widget _buildCategorySection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'Shop by Category',
+            style: AppTextStyles.headingLarge.copyWith(
+              color: AppColors.darkText,
+              fontSize: 20,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        if (_logic!.loading)
+          _buildLoadingState('Loading categories...')
+        else if (_logic!.error != null)
+          _buildErrorState()
+        else if (_logic!.categoryMap.isEmpty)
+          _buildEmptyState()
+        else
+          CategoryCarousel(
+            categories: _logic!.categoryMap,
+            onCategoryTap: (categoryName) {
+              _logic!.onCategoryImageTap(context, categoryName, _logic!.categoryMap);
+            },
+          ),
+      ],
+    );
+  }
+
+  Widget _buildBestDealsSection() {
+    final products = _logic!.dealProducts;
+    final title = products.isNotEmpty ? 'Best Deals for You' : 'Top Products';
+
+    if (_logic!.loading || _logic!.allProducts.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return ProductCarousel(
+      title: title,
+      subtitle: products.isNotEmpty
+          ? 'Special discounts just for you'
+          : 'Handpicked for you',
+      products: products.isNotEmpty ? products : _logic!.allProducts,
+    );
+  }
+
+  Widget _buildPromoBannerStrip() {
+    final banners = [
+      PromoBannerConfig(
+        title: 'Save More with Combo Deals',
+        subtitle: 'Buy more, save more on groceries',
+        offer: 'UP TO 30% OFF',
+        backgroundColor: AppColors.cream,
+        accentColor: AppColors.primary,
+        icon: Icons.local_offer,
+        onTap: (context) => _handleNavTap('Combo Deals'),
       ),
+      PromoBannerConfig(
+        title: 'Big Savings',
+        subtitle: 'On Daily Essentials',
+        offer: 'UP TO 40% OFF',
+        backgroundColor: AppColors.green100,
+        accentColor: AppColors.amber,
+        icon: Icons.savings,
+        onTap: (context) => _handleNavTap('Offers'),
+      ),
+      PromoBannerConfig(
+        title: 'Monthly Sale',
+        subtitle: "Don't Miss Out!",
+        offer: 'LIMITED TIME',
+        backgroundColor: AppColors.lightGreen,
+        accentColor: AppColors.primary,
+        icon: Icons.calendar_month,
+        onTap: (context) => _handleNavTap('New Arrivals'),
+      ),
+      PromoBannerConfig(
+        title: 'Free Delivery',
+        subtitle: 'On Orders Above ₹499',
+        offer: 'FREE',
+        backgroundColor: AppColors.green100,
+        accentColor: AppColors.primaryLight,
+        icon: Icons.local_shipping,
+        onTap: (context) {},
+      ),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'Special Offers',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
+              color: AppColors.darkText,
+            ),
+          ),
+        ),
+        const SizedBox(height: 8),
+        PromoBannerStrip(banners: banners),
+      ],
     );
   }
 
   Widget _buildLogo() {
-    return const Text(
+    return Text(
       'AROUN STORES',
-      style: TextStyle(
+      style: AppTextStyles.displaySmall.copyWith(
+        color: AppColors.primary,
+        letterSpacing: 1,
         fontSize: 22,
-        fontWeight: FontWeight.bold,
-        color: Color(0xFF15803D),
       ),
     );
   }
 
-  Widget _buildDesktopMenu() {
-    // Add null check at the beginning of method
-    if (_logic == null) return Container();
-    
-    return Row(
-      children: [
-        _buildNavItem('Home', isActive: true),
-        _buildNavItem('Filter Products', onTap: () {
-          _logic!.openAllCategoriesFilter(context, _logic!.categoryMap);
-        }),
-        if (_logic!.isAdmin) 
-          _buildNavItem('Dashboard', onTap: () => _logic!.goToDashboard(context)),
-        _buildNavItem('Contact'),
-      ],
-    );
-  }
 
-  Widget _buildNavItem(String title, {bool isActive = false, VoidCallback? onTap}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      child: TextButton(
-        onPressed: onTap,
-        style: TextButton.styleFrom(
-          foregroundColor: isActive ? const Color(0xFF15803D) : Colors.grey[700],
-        ),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.normal,
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildIconsSection(BuildContext context) {
-    return Row(
-      children: [
-        _buildCartIcon(context),
-        _buildUserIcon(context),
-      ],
-    );
-  }
-
-  Widget _buildCartIcon(BuildContext context) {
+  Widget _buildCartIcon() {
     return Consumer<CartManager>(
       builder: (context, cartManager, child) {
+        final hasItems = cartManager.totalItems > 0;
         return Stack(
           clipBehavior: Clip.none,
           children: [
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined),
+              color: AppColors.darkText,
+              iconSize: 24,
               onPressed: () {
                 Navigator.push(
                   context,
@@ -258,16 +471,23 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
             ),
-            if (cartManager.totalItems > 0)
+            if (hasItems)
               Positioned(
-                right: 6,
-                top: 6,
-                child: CircleAvatar(
-                  radius: 8,
-                  backgroundColor: Colors.red,
+                right: 4,
+                top: 4,
+                child: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: AppColors.red,
+                    shape: BoxShape.circle,
+                  ),
                   child: Text(
                     cartManager.totalItems.toString(),
-                    style: const TextStyle(fontSize: 10, color: Colors.white),
+                    style: const TextStyle(
+                      fontSize: 10,
+                      color: AppColors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -277,293 +497,75 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildUserIcon(BuildContext context) {
-    
-    if (_logic == null) return IconButton(
-      onPressed: () {},
-      icon: const Icon(Icons.person_outline, color: Colors.grey),
-    );
-    
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        IconButton(
-          onPressed: () {
+  Widget _buildUserAccountButton() {
+    return Consumer<AuthManager>(
+      builder: (context, authManager, child) {
+        final isLogged = authManager.isLoggedIn;
+
+        return GestureDetector(
+          onTap: () {
             _logic!.showUserMenu(
               context,
-              isLoggedIn: _logic!.isLoggedIn,
+              isLoggedIn: isLogged,
               isAdmin: _logic!.isAdmin,
-              userName: _logic!.authManager.currentUser?.name,
+              userName: authManager.currentUser?.name,
               onDashboardTap: () => _logic!.goToDashboard(context),
               onLoginTap: () => _logic!.goToLogin(context),
               onRegisterTap: () => _logic!.goToRegister(context),
               onLogoutTap: () => _logic!.showLogoutConfirmation(context),
             );
           },
-          icon: Icon(
-            Icons.person_outline,
-            color: _logic!.isLoggedIn ? const Color(0xFF15803D) : Colors.grey[700],
-          ),
-        ),
-        if (_logic!.isLoggedIn)
-          Positioned(
-            right: 6,
-            top: 6,
-            child: Container(
-              width: 8,
-              height: 8,
-              decoration: const BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.circle,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: isLogged ? AppColors.green50 : AppColors.grey100,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(
+                color: isLogged ? AppColors.green200 : AppColors.border,
+                width: 1,
               ),
             ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  radius: 12,
+                  backgroundColor: isLogged ? AppColors.primary : AppColors.grey300,
+                  child: Icon(
+                    isLogged ? Icons.person : Icons.person_outline,
+                    color: isLogged ? AppColors.white : AppColors.grey500,
+                    size: 14,
+                  ),
+                ),
+              ],
+            ),
           ),
-      ],
-    );
-  }
-
-  Widget _buildMobileMenuButton(BuildContext context) {
-    return Builder(
-      builder: (context) {
-        return IconButton(
-          onPressed: () {
-            Scaffold.of(context).openDrawer();
-          },
-          icon: const Icon(Icons.menu),
         );
       },
     );
   }
 
-  Widget? _buildDrawer(BuildContext context) {
-    if (MediaQuery.of(context).size.width > 768) return null;
-    if (_logic == null) return null; 
-
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: [
-          _buildDrawerHeader(),
-          if (_logic!.isLoggedIn) _buildUserInfoSection(),
-          ..._buildDrawerItems(context),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDrawerHeader() {
-    if (_logic == null) return const DrawerHeader(
-      decoration: BoxDecoration(color: Color(0xFF15803D)),
-      child: Center(
-        child: Text(
-          'Loading...',
-          style: TextStyle(color: Colors.white),
+  Widget _buildLoadingScaffold() {
+    return const Scaffold(
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: CircularProgressIndicator(
+          color: AppColors.primary,
         ),
       ),
     );
-
-    return DrawerHeader(
-      decoration: const BoxDecoration(color: Color(0xFF15803D)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          const Text(
-            'aroun stores',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(height: 8),
-          if (_logic!.authManager.currentUser != null)
-            Text(
-              _logic!.authManager.currentUser!.phone ?? '',
-              style: const TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFFFFFFF),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 
-  Widget _buildUserInfoSection() {
-    if (_logic == null) return Container();
-
-    return Padding(
-      padding: const EdgeInsets.only(left: 16, top: 8, bottom: 4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Welcome,',
-            style: TextStyle(
-              fontSize: 25,
-              color: Colors.grey[600],
-            ),
-          ),
-          Text(
-            _logic!.authManager.currentUser?.name ?? 'User',
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 25,
-              color: Color(0xFF15803D),
-            ),
-          ),
-          if (_logic!.isAdmin)
-            Container(
-              margin: const EdgeInsets.only(top: 4),
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-              decoration: BoxDecoration(
-                color: Colors.green[50],
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: Text(
-                'Admin',
-                style: TextStyle(
-                  color: Colors.green[700],
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  List<Widget> _buildDrawerItems(BuildContext context) {
-    if (_logic == null) return []; 
-
-    return [
-      if (_logic!.isLoggedIn)
-        _buildDrawerItem('My Profile', Icons.person),
-      
-      _buildDrawerItem('Contact', Icons.contact_phone),
-      
-      _buildDrawerItem('Filter', Icons.filter, onTap: () {
-        Navigator.pop(context);
-        _logic!.openAllCategoriesFilter(context, _logic!.categoryMap);
-      }),
-
-      if (_logic!.isAdmin)
-        _buildDrawerItem('Dashboard', Icons.dashboard, onTap: () {
-          Navigator.pop(context);
-          _logic!.goToDashboard(context);
-        }),
-      
-      if (_logic!.isLoggedIn)
-        _buildDrawerItem('My Orders', Icons.shopping_cart),
-      
-      if (_logic!.isLoggedIn)
-        _buildDrawerItem('Wishlist', Icons.favorite_border),
-      
-      if (_logic!.isLoggedIn)
-        _buildDrawerItem('Logout', Icons.logout, onTap: () {
-          Navigator.pop(context);
-          _logic!.showLogoutConfirmation(context);
-        }),
-      
-      if (!_logic!.isLoggedIn) ...[
-        _buildDrawerItem('Login', Icons.login, onTap: () {
-          Navigator.pop(context);
-          _logic!.goToLogin(context);
-        }),
-        _buildDrawerItem('Register', Icons.person_add, onTap: () {
-          Navigator.pop(context);
-          _logic!.goToRegister(context);
-        }),
-      ],
-    ];
-  }
-
-  Widget _buildDrawerItem(String title, IconData icon, {VoidCallback? onTap}) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF15803D)),
-      title: Text(title),
-      onTap: onTap,
-    );
-  }
-
-  Widget _buildBody(BuildContext context) {
-    if (_logic == null) return const Center(child: CircularProgressIndicator());
-
-    return SingleChildScrollView(
-      controller: _logic!.scrollController,
-      child: Column(
-        children: [
-          const HeroSection(),
-          const SizedBox(height: 20),
-          _buildCategoriesHeader(),
-          const SizedBox(height: 10),
-          _buildCategoriesCarousel(),
-          const SizedBox(height: 10),
-          _buildCategoryImagesHorizontal(),
-          const SizedBox(height: 40),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoriesHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            "Shop by Categories",
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCategoriesCarousel() {
-    if (_logic == null) return _buildLoadingState();
-    if (_logic!.loading) return _buildLoadingState();
-    if (_logic!.error != null) return _buildErrorState();
-    if (_logic!.categoryMap.isEmpty) return _buildEmptyState();
-
-    return CategoriesCarousel(
-      categories: _logic!.categoryMap,
-      onCategoryTap: (categoryName) {
-        _logic!.onCategoryImageTap(context, categoryName, _logic!.categoryMap);
-      },
-    );
-  }
-
-  Widget _buildCategoryImagesHorizontal() {
-    if (_logic == null) return _buildLoadingState();
-    if (_logic!.loading) return _buildLoadingState();
-    if (_logic!.error != null) return _buildErrorState();
-    if (_logic!.categoryMap.isEmpty) return _buildEmptyState();
-
-    return CategoryImagesHorizontal(
-      categories: _logic!.categoryMap,
-      onCategoryTap: (categoryName) {
-        _logic!.onCategoryImageTap(context, categoryName, _logic!.categoryMap);
-      },
-    );
-  }
-
-  Widget _buildLoadingState() {
+  Widget _buildLoadingState(String message) {
     return Container(
       height: 200,
       alignment: Alignment.center,
-      child: const Column(
+      child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          CircularProgressIndicator(color: Color(0xFF15803D)),
-          SizedBox(height: 10),
-          Text('Loading categories...'),
+          const CircularProgressIndicator(color: AppColors.primary),
+          const SizedBox(height: 10),
+          Text(message, style: TextStyle(color: AppColors.grey600)),
         ],
       ),
     );
@@ -577,9 +579,13 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: Colors.red, size: 40),
+          const Icon(Icons.error_outline, color: AppColors.red, size: 40),
           const SizedBox(height: 10),
-          Text(_logic?.error ?? 'An error occurred', textAlign: TextAlign.center), 
+          Text(
+            _logic?.error ?? 'An error occurred',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: AppColors.grey700),
+          ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
@@ -588,14 +594,14 @@ class _HomeScreenState extends State<HomeScreen> {
                   _logic!.loading = true;
                 });
               }
-              _logic?.loadCategories().then((_) { 
+              _logic?.loadCategories().then((_) {
                 if (mounted) {
                   setState(() {});
                 }
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF15803D),
+              backgroundColor: AppColors.primary,
             ),
             child: const Text('Retry'),
           ),
@@ -612,7 +618,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: const Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.category_outlined, size: 40, color: Colors.grey),
+          Icon(Icons.category_outlined, size: 40, color: AppColors.grey400),
           SizedBox(height: 10),
           Text('No categories found'),
         ],
@@ -620,16 +626,115 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget? _buildBottomNavigationBar(BuildContext context) {
-    if (MediaQuery.of(context).size.width > 768) return null;
-    if (_logic == null) return null;
+  Widget _buildMobileDrawer() {
+    if (_logic == null) return const Drawer();
+
+    return Drawer(
+      backgroundColor: AppColors.white,
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(color: AppColors.primary),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                const Text(
+                  'AROUN STORES',
+                  style: TextStyle(
+                    color: AppColors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                if (_logic!.authManager.currentUser != null)
+                  Text(
+                    _logic!.authManager.currentUser!.phone ?? '',
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.white,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (_logic!.isLoggedIn)
+            _buildDrawerItem('My Profile', Icons.person),
+          _buildDrawerItem('Contact', Icons.contact_phone, onTap: () {
+            Navigator.pop(context);
+            _showContactInfo();
+          }),
+          _buildDrawerItem('Filter Products', Icons.filter_alt, onTap: () {
+            Navigator.pop(context);
+            _logic!.openAllCategoriesFilter(context, _logic!.categoryMap);
+          }),
+          if (_logic!.isAdmin)
+            _buildDrawerItem('Dashboard', Icons.dashboard, onTap: () {
+              Navigator.pop(context);
+              _logic!.goToDashboard(context);
+            }),
+          if (_logic!.isLoggedIn)
+            _buildDrawerItem('My Orders', Icons.shopping_bag, onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const Allorder()));
+            }),
+          if (_logic!.isLoggedIn)
+            _buildDrawerItem('Wishlist', Icons.favorite_border, onTap: () {
+              Navigator.pop(context);
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const WishlistPage()));
+            }),
+          const Divider(),
+          if (_logic!.isLoggedIn)
+            _buildDrawerItem('Logout', Icons.logout, onTap: () {
+              Navigator.pop(context);
+              _logic!.showLogoutConfirmation(context);
+            }),
+          if (!_logic!.isLoggedIn) ...[
+            _buildDrawerItem('Login', Icons.login, onTap: () {
+              Navigator.pop(context);
+              _logic!.goToLogin(context);
+            }),
+            _buildDrawerItem('Register', Icons.person_add, onTap: () {
+              Navigator.pop(context);
+              _logic!.goToRegister(context);
+            }),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(String title, IconData icon, {VoidCallback? onTap}) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(
+        title,
+        style: TextStyle(
+          color: AppColors.darkText,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      onTap: onTap,
+    );
+  }
+
+  Widget _buildMobileBottomNav() {
+    if (_logic == null) return const SizedBox.shrink();
 
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
+      backgroundColor: AppColors.white,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.grey500,
       onTap: (index) {
-        if (index == 1) {
+        if (index == 0) {
+          // Home - already here
+        } else if (index == 1) {
           _logic!.openAllCategoriesFilter(context, _logic!.categoryMap);
-        } else if (index == 3) {
+        } else if (index == 2) {
           _logic!.showUserMenu(
             context,
             isLoggedIn: _logic!.isLoggedIn,
@@ -648,10 +753,6 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Home',
         ),
         const BottomNavigationBarItem(
-          icon: Icon(Icons.filter_list),
-          label: 'Filter',
-        ),
-        const BottomNavigationBarItem(
           icon: Icon(Icons.category),
           label: 'Categories',
         ),
@@ -667,7 +768,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 8,
                     height: 8,
                     decoration: const BoxDecoration(
-                      color: Colors.green,
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
                   ),

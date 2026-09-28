@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:arunstore/adminservice/productapiservice.dart';
 import 'package:arunstore/model/model/productmodel.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +80,6 @@ class _ProductFormState extends State<ProductForm> {
         setState(() {});
       }
     } catch (e) {
-     
       _showError('Failed to pick image: ${e.toString()}');
     }
   }
@@ -151,14 +149,12 @@ class _ProductFormState extends State<ProductForm> {
       await ApiService.addProduct(product, imageFile);
       return true;
     } catch (e) {
-     
       if (imageFile != null) {
         try {
           _showError('Image upload failed, trying without image...');
           await ApiService.addProduct(product, null);
           return true;
         } catch (e2) {
-       
           rethrow;
         }
       }
@@ -171,7 +167,6 @@ class _ProductFormState extends State<ProductForm> {
       await ApiService.updateProduct(product, imageFile);
       return true;
     } catch (e) {
-
       if (imageFile != null) {
         try {
           _showError('Image upload failed, trying without image...');

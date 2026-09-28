@@ -1,8 +1,10 @@
 // home_logic.dart
 import 'package:arunstore/adminscreen/dashboard.dart';
 import 'package:arunstore/authmanager.dart';
+import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/screen/dashboard/wishlist.dart';
 import 'package:arunstore/screen/loginscreen.dart';
 import 'package:arunstore/screen/registerscreen.dart';
 import 'package:arunstore/service/categoryservice.dart';
@@ -15,6 +17,7 @@ class HomeScreenLogic {
   final AuthManager authManager = AuthManager();
   
   Map<String, List<Product>> categoryMap = {};
+  List<Product> allProducts = [];
   bool loading = true;
   String? error;
   bool authLoading = true;
@@ -146,8 +149,7 @@ class HomeScreenLogic {
                   leading: const Icon(Icons.dashboard, color: Colors.green),
                   title: const Text('Admin Dashboard'),
                   onTap: () {
-                    Navigator.pop(context);
-                    onDashboardTap();
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDashboard()));
                   },
                 ),
               
@@ -156,7 +158,7 @@ class HomeScreenLogic {
                   leading: const Icon(Icons.shopping_bag),
                   title: const Text('My Orders'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (_) => const Allorder()));
                   },
                 ),
               
@@ -165,7 +167,7 @@ class HomeScreenLogic {
                   leading: const Icon(Icons.favorite_border),
                   title: const Text('Wishlist'),
                   onTap: () {
-                    Navigator.pop(context);
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const WishlistPage()));
                   },
                 ),
               
@@ -250,9 +252,10 @@ class HomeScreenLogic {
       loading = true;
       error = null;
       
-      final data = await controller.fetchProductsByCategory();
-      categoryMap = data;
-      loading = false;
+       final data = await controller.fetchProductsByCategory();
+       categoryMap = data;
+       allProducts = data.values.expand((products) => products).toList();
+       loading = false;
       
     } catch (e, stackTrace) {
       if (kDebugMode) {
@@ -261,6 +264,7 @@ class HomeScreenLogic {
       }
       
       categoryMap = {};
+      allProducts = [];
       loading = false;
       error = 'Failed to load categories. Please check your internet connection.';
     }
@@ -273,11 +277,47 @@ class HomeScreenLogic {
       onStateChanged();
       
       if (kDebugMode) {
-        print('🔄 Auth state changed:');
+        print('Auth state changed:');
         print('   isAdmin: $isAdmin');
         print('   isLoggedIn: $isLoggedIn');
       }
     });
+  }
+
+  List<Product> get dealProducts => allProducts.where((p) {
+    final discount = p.discountPercent;
+    return discount != null && discount > 0;
+  }).toList();
+
+  
+
+  List<Product> searchProducts(String query) {
+    if (query.isEmpty) return allProducts;
+    final lowerQuery = query.toLowerCase();
+    return allProducts.where((product) {
+      final name = product.name?.toLowerCase() ?? '';
+      final category = product.category?.toLowerCase() ?? '';
+      final description = product.description?.toLowerCase() ?? '';
+      return name.contains(lowerQuery) ||
+          category.contains(lowerQuery) ||
+          description.contains(lowerQuery);
+    }).toList();
+  }
+
+  void navigateToSearchResults(BuildContext context, String query) {
+    final results = searchProducts(query);
+    final categoryMap = <String, List<Product>>{};
+    if (results.isNotEmpty) {
+      categoryMap['Search Results'] = results;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CategoryFilterPage(
+          categories: categoryMap,
+        ),
+      ),
+    );
   }
 
   // Cleanup

@@ -137,6 +137,7 @@ class CategoriesCarousel extends StatelessWidget {
         builder: (context) => CategoryDetailsPage(
           categoryName: categoryName,
           products: products,
+          allCategories: categories,
         ),
       ),
     );

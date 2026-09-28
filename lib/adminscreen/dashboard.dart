@@ -6,7 +6,7 @@ import '../adminservice/productapiservice.dart';
 import 'form.dart';
 
 class ProductDashboard extends StatefulWidget {
-  const ProductDashboard({Key? key}) : super(key: key);
+  const ProductDashboard({super.key});
 
   @override
   State<ProductDashboard> createState() => _ProductDashboardState();
@@ -27,7 +27,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
     setState(() => loading = true);
     try {
       products = await ApiService.getProducts();
-     
+
     
     } catch (e) {
       _showError('Failed to load products: ${e.toString()}');
@@ -43,7 +43,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
 
     try {
       await ApiService.deleteProduct(id);
-      fetchProducts();
+      await fetchProducts();
       _showSuccess('Product deleted successfully');
     } catch (e) {
       _showError('Failed to delete: ${e.toString()}');
@@ -139,7 +139,6 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                         );
                                       },
                                       errorBuilder: (context, error, stackTrace) {
-                                   
                                         return const Center(
                                           child: Icon(Icons.broken_image,
                                               color: Colors.grey),
@@ -167,6 +166,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
                           // ---------- SUBTITLE ----------
                           subtitle: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               const SizedBox(height: 4),
                               Row(
@@ -179,18 +179,6 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                       fontSize: 14,
                                     ),
                                   ),
-                                  if (product.mrp > 0 && product.mrp > product.price)
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 8),
-                                      child: Text(
-                                        '₹${product.mrp.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          decoration: TextDecoration.lineThrough,
-                                          color: Colors.grey,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                    ),
                                 ],
                               ),
                               const SizedBox(height: 2),
@@ -202,54 +190,45 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                       : Colors.orange,
                                   fontSize: 13,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              if (product.images.isNotEmpty) // Changed to images
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 2),
-                                  child: Text(
-                                    '${product.images.length} image(s)', // Changed to images
-                                    style: const TextStyle(
-                                      color: Colors.blue,
-                                      fontSize: 11,
-                                    ),
-                                  ),
-                                ),
                               Text(
                                 'Category: ${product.category}',
                                 style: TextStyle(
                                   color: Colors.grey[600],
                                   fontSize: 11,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ],
                           ),
 
                           // ---------- ACTIONS ----------
-                          trailing: SizedBox(
-                            width: 100,
-                            child: Row(
-                              children: [
-                                IconButton(
-                                  icon: const Icon(Icons.edit_outlined,
-                                      size: 20, color: Colors.blue),
-                                  onPressed: () async {
-                                    await showDialog(
-                                      context: context,
-                                      builder: (_) =>
-                                          ProductForm(product: product),
-                                    );
-                                    fetchProducts();
-                                  },
-                                  tooltip: 'Edit',
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline,
-                                      size: 20, color: Colors.red),
-                                  onPressed: () => deleteProduct(product.id!),
-                                  tooltip: 'Delete',
-                                ),
-                              ],
-                            ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined,
+                                    size: 20, color: Colors.blue),
+                                onPressed: () async {
+                                  await showDialog(
+                                    context: context,
+                                    builder: (_) =>
+                                        ProductForm(product: product),
+                                  );
+                                  fetchProducts();
+                                },
+                                tooltip: 'Edit',
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline,
+                                    size: 20, color: Colors.red),
+                                onPressed: () => deleteProduct(product.id!),
+                                tooltip: 'Delete',
+                              ),
+                            ],
                           ),
                           contentPadding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
