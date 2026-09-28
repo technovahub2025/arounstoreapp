@@ -208,7 +208,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       if (kDebugMode) {
         print('Checkout: _readyToPrepare() returned false');
         print('  - hasPaymentPrerequisites: $_hasPaymentPrerequisites');
-        print('  - hasAuthToken: ${_hasAuthToken}');
+        print('  - hasAuthToken: $_hasAuthToken');
         print('  - hasRazorpayKey: $_hasRazorpayKey');
         print('  - hasRequiredDetails: $_hasRequiredCheckoutDetails');
       }
