@@ -1,14 +1,12 @@
 import 'package:arunstore/authmanager.dart';
-import 'package:arunstore/cart/cartservice.dart';
+import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/cart/allorder.dart';
+import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
-import 'package:arunstore/model/cartmanager.dart';
-import 'package:arunstore/adminscreen/dashboard.dart';
 import 'package:arunstore/screen/loginscreen.dart';
 import 'package:arunstore/screen/mobile_home.dart';
 import 'package:arunstore/screen/mobile_account.dart';
-import 'package:arunstore/screen/registerscreen.dart';
 import 'package:arunstore/service/categoryservice.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +20,7 @@ class MobileMainScreen extends StatefulWidget {
 }
 
 class _MobileMainScreenState extends State<MobileMainScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
   final ProductController _productController = ProductController();
   Map<String, List<Product>> _categoryMap = {};
@@ -63,17 +62,22 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
     });
   }
 
-  void _goToLogin() {
+  void _openCart() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => LoginScreen()),
+      MaterialPageRoute(builder: (_) => const CartPage()),
     );
   }
 
-  void _goToDashboard() {
+  void _openOrders() {
+    final authManager = Provider.of<AuthManager>(context, listen: false);
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => const ProductDashboard()),
+      MaterialPageRoute(
+        builder: (_) => authManager.isLoggedIn
+            ? const Allorder()
+            : const LoginScreen(),
+      ),
     );
   }
 
@@ -84,6 +88,10 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
         builder: (_) => CategoryFilterPage(
           categories: categories,
           initialSelectedCategory: initialCategory,
+          onProfileTap: () {
+            Navigator.pop(context);
+            _onNavTap(2);
+          },
         ),
       ),
     );
@@ -97,7 +105,13 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => CategoryFilterPage(categories: map),
+        builder: (_) => CategoryFilterPage(
+          categories: map,
+          onProfileTap: () {
+            Navigator.pop(context);
+            _onNavTap(2);
+          },
+        ),
       ),
     );
   }
@@ -105,7 +119,6 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
   @override
   Widget build(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context);
-    final isLoggedIn = authManager.isLoggedIn;
 
     final screens = [
       MobileHomeScreen(
@@ -113,6 +126,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
         allProducts: _allProducts,
         loading: _loading,
         error: _error,
+        onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
         onCategoryTap: (categoryName) {
           _navigateToCategoryFilter(_categoryMap, initialCategory: categoryName);
         },
@@ -130,60 +144,102 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _error != null
               ? Center(child: Text(_error ?? 'Error loading categories'))
-              : CategoryFilterPage(categories: _categoryMap),
-      const CartPage(),
-      isLoggedIn ? const Allorder() : _buildLoginPrompt(),
-      isLoggedIn
-          ? MobileAccountScreen(
-              onLogoutTap: () async {
-                await authManager.logout();
-                setState(() {});
-              },
-              onDashboardTap: _goToDashboard,
-            )
-          : MobileAccountScreen(
-              onLogoutTap: () {},
-              onDashboardTap: _goToDashboard,
-              showLoginPrompt: true,
-              onLoginTap: _goToLogin,
-              onRegisterTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => RegisterScreen(),
-                  ),
-                );
-              },
-            ),
+              : CategoryFilterPage(
+                  categories: _categoryMap,
+                  onProfileTap: () => _onNavTap(2),
+                ),
+      MobileAccountScreen(
+        onLogoutTap: () async {
+          await authManager.logout();
+          if (mounted) setState(() {});
+        },
+      ),
     ];
 
     return Scaffold(
+      key: _scaffoldKey,
+      drawer: _buildNavigationDrawer(),
       body: screens[_currentIndex],
       bottomNavigationBar: _buildBottomNavBar(),
     );
   }
 
-  Widget _buildLoginPrompt() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.shopping_bag_outlined, size: 64, color: AppColors.grey400),
-              const SizedBox(height: 16),
-              const Text(
-                'Sign in to view your orders',
-                style: TextStyle(fontSize: 18, color: AppColors.grey600),
+  Widget _buildNavigationDrawer() {
+    final user = Provider.of<AuthManager>(context).currentUser;
+
+    return Drawer(
+      child: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              color: AppColors.primary,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Icon(Icons.storefront, color: AppColors.white, size: 32),
+                  const SizedBox(height: 12),
+                  const Text(
+                    'Aroun Stores',
+                    style: TextStyle(
+                      color: AppColors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (user?.name.isNotEmpty == true) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      user!.name,
+                      style: const TextStyle(color: Colors.white70),
+                    ),
+                  ],
+                ],
               ),
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _goToLogin,
-                child: const Text('Login'),
-              ),
-            ],
-          ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home_outlined),
+              title: const Text('Home'),
+              onTap: () {
+                Navigator.pop(context);
+                _onNavTap(0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.category_outlined),
+              title: const Text('Categories'),
+              onTap: () {
+                Navigator.pop(context);
+                _onNavTap(1);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.shopping_cart_outlined),
+              title: const Text('Cart'),
+              onTap: () {
+                Navigator.pop(context);
+                _openCart();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.shopping_bag_outlined),
+              title: const Text('Orders'),
+              onTap: () {
+                Navigator.pop(context);
+                _openOrders();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_outline),
+              title: const Text('My Profile'),
+              onTap: () {
+                Navigator.pop(context);
+                _onNavTap(2);
+              },
+            ),
+          ],
         ),
       ),
     );
@@ -209,39 +265,6 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
         const BottomNavigationBarItem(
           icon: Icon(Icons.category),
           label: 'Categories',
-        ),
-        BottomNavigationBarItem(
-          icon: Builder(
-            builder: (context) {
-              final cart = Provider.of<CartManager>(context, listen: true);
-              return Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  const Icon(Icons.shopping_cart),
-                  if (cart.totalItems > 0)
-                    Positioned(
-                      right: -6,
-                      top: -4,
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.red,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
-          label: 'Cart',
-        ),
-        BottomNavigationBarItem(
-          icon: Icon(
-            isLoggedIn ? Icons.shopping_bag : Icons.shopping_bag_outlined,
-          ),
-          label: 'Orders',
         ),
         BottomNavigationBarItem(
           icon: Stack(

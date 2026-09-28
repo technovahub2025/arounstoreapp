@@ -1,6 +1,6 @@
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
-import 'package:arunstore/screen/dashboard/homepage.dart';
+import 'package:arunstore/screen/app_home.dart';
 import 'package:arunstore/screen/registerscreen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -101,13 +101,7 @@ class _LoginScreenState extends State<LoginScreen> {
             }
 
             // Navigate based on role
-            Widget destination;
-
-            if (user.isAdmin) {
-              destination = HomeScreen();
-            } else {
-              destination = HomeScreen();
-            }
+            const destination = AppHomeScreen();
 
             // Clear navigation stack
             Navigator.pushAndRemoveUntil(

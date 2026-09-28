@@ -5,6 +5,7 @@ import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/screen/dashboard/wishlist.dart';
+import 'package:arunstore/screen/mobile_account.dart';
 import 'package:arunstore/service/homescreenfunction.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:arunstore/widgets/app_footer.dart';
@@ -15,7 +16,6 @@ import 'package:arunstore/widgets/hero_banner.dart';
 import 'package:arunstore/widgets/newsletter_section.dart';
 import 'package:arunstore/widgets/product_carousel.dart';
 import 'package:arunstore/widgets/promo_banner_card.dart';
-import 'package:arunstore/widgets/promo_top_bar.dart';
 import 'package:arunstore/widgets/service_feature_bar.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -234,10 +234,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   PreferredSizeWidget _buildMobileAppBar() {
     return PreferredSize(
-      preferredSize: const Size.fromHeight(120),
+      preferredSize: const Size.fromHeight(64),
       child: Column(
         children: [
-          const PromoTopBar(),
           Container(
             color: AppColors.white,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -662,7 +661,19 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           if (_logic!.isLoggedIn)
-            _buildDrawerItem('My Profile', Icons.person),
+            _buildDrawerItem('My Profile', Icons.person, onTap: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => MobileAccountScreen(
+                    onLogoutTap: () async {
+                      await _logic!.authManager.logout();
+                    },
+                  ),
+                ),
+              );
+            }),
           _buildDrawerItem('Contact', Icons.contact_phone, onTap: () {
             Navigator.pop(context);
             _showContactInfo();

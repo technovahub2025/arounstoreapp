@@ -12,11 +12,13 @@ enum PriceSortType {
 class CategoryFilterPage extends StatefulWidget {
   final Map<String, List<Product>> categories;
   final String? initialSelectedCategory;
+  final VoidCallback? onProfileTap;
 
   const CategoryFilterPage({
     Key? key,
     required this.categories,
     this.initialSelectedCategory,
+    this.onProfileTap,
   }) : super(key: key);
 
   @override
@@ -302,6 +304,12 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
         ),
 
         actions: [
+          if (widget.onProfileTap != null)
+            IconButton(
+              tooltip: 'My Profile',
+              icon: const Icon(Icons.person_outline_rounded),
+              onPressed: widget.onProfileTap,
+            ),
           IconButton(
             tooltip: 'Sort',
             icon: const Icon(
@@ -805,7 +813,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 12,
-                      childAspectRatio: 0.68,
+                      childAspectRatio: 0.58,
                     ),
                     itemCount: _filteredProducts.length,
                     itemBuilder: (context, index) {

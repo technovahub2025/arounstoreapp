@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:arunstore/authmanager.dart';
-import 'package:arunstore/screen/mobile_main.dart';
+import 'package:arunstore/screen/app_home.dart';
 import 'package:arunstore/screen/loginscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -62,10 +62,10 @@ class _SplashScreenState extends State<SplashScreen> {
     }
     
     if (await authManager.isLoggedIn) {
-      if (kDebugMode) print('SplashScreen: User is logged in, going to MobileMainScreen');
+      if (kDebugMode) print('SplashScreen: User is logged in, opening the responsive app home');
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const MobileMainScreen()),
+        MaterialPageRoute(builder: (context) => const AppHomeScreen()),
       );
     } else {
       if (kDebugMode) print('SplashScreen: User not logged in, going to LoginScreen');

@@ -8,8 +8,6 @@ import 'package:arunstore/widgets/product_carousel.dart';
 import 'package:arunstore/widgets/promo_banner_card.dart';
 import 'package:arunstore/widgets/service_feature_bar.dart';
 
-import 'package:arunstore/widgets/newsletter_section.dart';
-import 'package:arunstore/widgets/app_footer.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -21,6 +19,7 @@ class MobileHomeScreen extends StatefulWidget {
   final void Function(String categoryName)? onCategoryTap;
   final void Function(Product product)? onDealProductTap;
   final void Function(String query)? onSearchSubmitted;
+  final VoidCallback? onMenuTap;
 
   const MobileHomeScreen({
     super.key,
@@ -31,6 +30,7 @@ class MobileHomeScreen extends StatefulWidget {
     this.onCategoryTap,
     this.onDealProductTap,
     this.onSearchSubmitted,
+    this.onMenuTap,
   });
 
   @override
@@ -95,11 +95,6 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               _buildPromoStrip(),
               const ServiceFeatureBar(),
               const SizedBox(height: 24),
-              
-              const SizedBox(height: 24),
-              const NewsletterSection(),
-              const SizedBox(height: 24),
-              const AppFooter(),
             ],
           ),
         ),
@@ -115,6 +110,12 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         bottom: false,
         child: Row(
           children: [
+            if (widget.onMenuTap != null)
+              IconButton(
+                tooltip: 'Open navigation menu',
+                icon: const Icon(Icons.menu_rounded),
+                onPressed: widget.onMenuTap,
+              ),
             Text(
               'AROUN STORES',
               style: TextStyle(
