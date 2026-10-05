@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -7,36 +8,36 @@ class WelcomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0B3D2E), // Dark Green
+      backgroundColor: context.appBackground(const Color(0xFF0B3D2E)), // Dark Green
       body: Center(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(
+               Icon(
                 Icons.eco,
-                color: Colors.white,
+                color: context.appForeground(Colors.white),
                 size: 90,
               ),
               const SizedBox(height: 30),
 
-              const AppText(
+               AppText(
                 'Welcome',
                 style: TextStyle(
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: context.appForeground(Colors.white),
                 ),
               ),
 
               const SizedBox(height: 10),
 
-              const AppText(
+               AppText(
                 'Let’s get started',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.white70,
+                  color: context.appForeground(Colors.white70),
                 ),
               ),
 
@@ -48,7 +49,7 @@ class WelcomePage extends StatelessWidget {
                   // Navigate to Login Page
                 },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.white, width: 2),
+                  side:  BorderSide(color: context.appBorder(Colors.white), width: 2),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 60,
                     vertical: 15,
@@ -57,11 +58,11 @@ class WelcomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const AppText(
+                child:  AppText(
                   'Login',
                   style: TextStyle(
                     fontSize: 18,
-                    color: Colors.white,
+                    color: context.appForeground(Colors.white),
                   ),
                 ),
               ),

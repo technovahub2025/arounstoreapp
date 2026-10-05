@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/categories/productdetail.dart';
@@ -50,7 +51,7 @@ class GroceryProductCard extends StatelessWidget {
           maxHeight: compact ? 240 : 280,
         ),
         decoration: BoxDecoration(
-          color: AppColors.white,
+          color: context.appSurface(AppColors.white),
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
           boxShadow: AppShadows.cardShadow,
         ),
@@ -81,8 +82,8 @@ class GroceryProductCard extends StatelessWidget {
           child: Container(
             height: compact ? 100 : AppDimensions.productImageHeight,
             width: double.infinity,
-            color: AppColors.grey100,
-            child: _buildProductImage(),
+            color: context.appSurface(AppColors.grey100),
+            child: _buildProductImage(context, ),
           ),
         ),
         if (discount != null && discount > 0)
@@ -92,7 +93,7 @@ class GroceryProductCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: AppColors.red,
+                color: context.appSurface(AppColors.red),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -104,8 +105,8 @@ class GroceryProductCard extends StatelessWidget {
               ),
               child: AppText(
                 '$discount% OFF',
-                style: const TextStyle(
-                  color: AppColors.white,
+                style:  TextStyle(
+                  color: context.appForeground(AppColors.white),
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                 ),
@@ -119,7 +120,7 @@ class GroceryProductCard extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: AppColors.primary,
+                color: context.appSurface(AppColors.primary),
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
@@ -131,8 +132,8 @@ class GroceryProductCard extends StatelessWidget {
               ),
               child: AppText(
                 quantityInCart.toString(),
-                style: const TextStyle(
-                  color: AppColors.white,
+                style:  TextStyle(
+                  color: context.appForeground(AppColors.white),
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
                 ),
@@ -143,16 +144,16 @@ class GroceryProductCard extends StatelessWidget {
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.black45,
+                color: context.appSurface(Colors.black45),
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(AppDimensions.radiusLarge),
                 ),
               ),
-              child: const Center(
+              child:  Center(
                 child: AppText(
                   'OUT OF STOCK',
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: context.appForeground(AppColors.white),
                     fontWeight: FontWeight.bold,
                     fontSize: 12,
                   ),
@@ -192,7 +193,7 @@ class GroceryProductCard extends StatelessWidget {
                 product.category!,
                 style: TextStyle(
                   fontSize: 11,
-                  color: AppColors.grey500,
+                  color: context.appForeground(AppColors.grey500),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -205,7 +206,7 @@ class GroceryProductCard extends StatelessWidget {
                   rupeeFormat.format(product.price ?? 0),
                   style: AppTextStyles.headingSmall.copyWith(
                     fontSize: 15,
-                    color: AppColors.primary,
+                    color: context.appForeground(AppColors.primary),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -216,7 +217,7 @@ class GroceryProductCard extends StatelessWidget {
                       rupeeFormat.format(originalPrice),
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.grey500,
+                        color: context.appForeground(AppColors.grey500),
                         decoration: TextDecoration.lineThrough,
                         decorationColor: AppColors.grey400,
                       ),
@@ -230,14 +231,14 @@ class GroceryProductCard extends StatelessWidget {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: AppColors.green100,
+                        color: context.appSurface(AppColors.green100),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: AppText(
                         'Save $discount%',
                         style: TextStyle(
                           fontSize: 10,
-                          color: AppColors.green700,
+                          color: context.appForeground(AppColors.green700),
                           fontWeight: FontWeight.w600,
                         ),
                         maxLines: 1,
@@ -252,17 +253,17 @@ class GroceryProductCard extends StatelessWidget {
             if (product.rating != null && product.rating! > 0)
               Row(
                 children: [
-                  const Icon(
+                   Icon(
                     Icons.star,
                     size: 14,
-                    color: Color(0xFFD97706),
+                    color: context.appForeground(Color(0xFFD97706)),
                   ),
                   const SizedBox(width: 2),
                   AppText(
                     product.rating!.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.grey700,
+                      color: context.appForeground(AppColors.grey700),
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -307,8 +308,8 @@ class GroceryProductCard extends StatelessWidget {
             ),
           ),
           style: ElevatedButton.styleFrom(
-            backgroundColor: isInCart ? AppColors.green50 : AppColors.primary,
-            foregroundColor: isInCart ? AppColors.primary : AppColors.white,
+            backgroundColor: context.appSurface(isInCart ? AppColors.green50 : AppColors.primary),
+            foregroundColor: context.appForeground(isInCart ? AppColors.primary : AppColors.white),
             padding: EdgeInsets.symmetric(
               horizontal: compact ? 8 : 12,
               vertical: compact ? 6 : 8,
@@ -316,7 +317,7 @@ class GroceryProductCard extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
               side: BorderSide(
-                color: isInCart ? AppColors.primary : Colors.transparent,
+                color: context.appBorder(isInCart ? AppColors.primary : Colors.transparent),
                 width: isInCart ? 1 : 0,
               ),
             ),
@@ -326,13 +327,13 @@ class GroceryProductCard extends StatelessWidget {
       ),
     );
   }
-  Widget _buildProductImage() {
+  Widget _buildProductImage(BuildContext context, ) {
     if (product.images.isEmpty) {
-      return const Center(
+      return  Center(
         child: Icon(
           Icons.image_not_supported,
           size: 40,
-          color: AppColors.grey400,
+          color: context.appForeground(AppColors.grey400),
         ),
       );
     }
@@ -348,11 +349,11 @@ class GroceryProductCard extends StatelessWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       ),
-      errorWidget: (context, url, error) => const Center(
+      errorWidget: (context, url, error) =>  Center(
         child: Icon(
           Icons.broken_image,
           size: 30,
-          color: AppColors.grey400,
+          color: context.appForeground(AppColors.grey400),
         ),
       ),
       maxWidthDiskCache: 400,

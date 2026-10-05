@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -119,7 +120,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
   void _showSortBottomSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.appSurface(Colors.white),
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(24),
@@ -211,9 +212,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
           vertical: 14,
         ),
         decoration: BoxDecoration(
-          color: selected
+          color: context.appSurface(selected
               ? Colors.green.withOpacity(0.08)
-              : Colors.transparent,
+              : Colors.transparent),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
@@ -222,16 +223,16 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: selected
+                color: context.appSurface(selected
                     ? Colors.green.withOpacity(0.12)
-                    : Colors.grey.withOpacity(0.10),
+                    : Colors.grey.withOpacity(0.10)),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(
                 icon,
-                color: selected
+                color: context.appForeground(selected
                     ? Colors.green.shade700
-                    : Colors.grey.shade700,
+                    : Colors.grey.shade700),
               ),
             ),
 
@@ -244,9 +245,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                   fontSize: 15,
                   fontWeight:
                       selected ? FontWeight.w700 : FontWeight.w500,
-                  color: selected
+                  color: context.appForeground(selected
                       ? Colors.green.shade700
-                      : Colors.black87,
+                      : Colors.black87),
                 ),
               ),
             ),
@@ -255,9 +256,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
               selected
                   ? Icons.radio_button_checked_rounded
                   : Icons.radio_button_unchecked_rounded,
-              color: selected
+              color: context.appForeground(selected
                   ? Colors.green
-                  : Colors.grey.shade400,
+                  : Colors.grey.shade400),
             ),
           ],
         ),
@@ -270,15 +271,15 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
     final categoryNames = widget.categories.keys.toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF7F7F7),
+      backgroundColor: context.appBackground(const Color(0xFFF7F7F7)),
 
       // ============================================================
       // APP BAR
       // ============================================================
       appBar: AppBar(
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: context.appSurface(Colors.white),
+        foregroundColor: context.appForeground(Colors.black),
         centerTitle: false,
 
         leading: Builder(
@@ -295,12 +296,12 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
           },
         ),
 
-        title: const AppText(
+        title:  AppText(
           'Categories',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
-            color: Colors.black,
+            color: context.appForeground(Colors.black),
           ),
         ),
 
@@ -327,7 +328,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
       // ============================================================
       drawer: Drawer(
         width: 300,
-        backgroundColor: Colors.white,
+        backgroundColor: context.appSurface(Colors.white),
 
         child: SafeArea(
           child: Column(
@@ -343,11 +344,11 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                   10,
                   18,
                 ),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
+                decoration:  BoxDecoration(
+                  color: context.appSurface(Colors.white),
                   border: Border(
                     bottom: BorderSide(
-                      color: Color(0xFFEAEAEA),
+                      color: context.appBorder(Color(0xFFEAEAEA)),
                       width: 1,
                     ),
                   ),
@@ -358,25 +359,25 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       width: 44,
                       height: 44,
                       decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.10),
+                        color: context.appSurface(Colors.green.withOpacity(0.10)),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Icon(
                         Icons.category_rounded,
-                        color: Colors.green.shade700,
+                        color: context.appForeground(Colors.green.shade700),
                         size: 23,
                       ),
                     ),
 
                     const SizedBox(width: 12),
 
-                    const Expanded(
+                     Expanded(
                       child: AppText(
                         'Categories',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                          color: context.appForeground(Colors.black),
                         ),
                       ),
                     ),
@@ -385,9 +386,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      icon: const Icon(
+                      icon:  Icon(
                         Icons.close_rounded,
-                        color: Colors.black87,
+                        color: context.appForeground(Colors.black87),
                       ),
                     ),
                   ],
@@ -412,9 +413,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                           _selectAllCategories();
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.green.shade700,
+                          foregroundColor: context.appForeground(Colors.green.shade700),
                           side: BorderSide(
-                            color: Colors.green.shade600,
+                            color: context.appBorder(Colors.green.shade600),
                           ),
                           padding: const EdgeInsets.symmetric(
                             vertical: 11,
@@ -440,9 +441,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                           _clearAllCategories();
                         },
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.black87,
+                          foregroundColor: context.appForeground(Colors.black87),
                           side: BorderSide(
-                            color: Colors.grey.shade300,
+                            color: context.appBorder(Colors.grey.shade300),
                           ),
                           padding: const EdgeInsets.symmetric(
                             vertical: 11,
@@ -480,7 +481,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade600,
+                        color: context.appForeground(Colors.grey.shade600),
                       ),
                     ),
 
@@ -491,7 +492,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Colors.grey.shade500,
+                        color: context.appForeground(Colors.grey.shade500),
                       ),
                     ),
                   ],
@@ -512,7 +513,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                               Icon(
                                 Icons.category_outlined,
                                 size: 50,
-                                color: Colors.grey.shade400,
+                                color: context.appForeground(Colors.grey.shade400),
                               ),
                               const SizedBox(height: 12),
                               AppText(
@@ -520,7 +521,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   fontSize: 15,
-                                  color: Colors.grey.shade600,
+                                  color: context.appForeground(Colors.grey.shade600),
                                   fontWeight: FontWeight.w500,
                                 ),
                               ),
@@ -573,9 +574,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                     vertical: 8,
                                   ),
                                   decoration: BoxDecoration(
-                                    color: isSelected
+                                    color: context.appSurface(isSelected
                                         ? Colors.green.withOpacity(0.09)
-                                        : Colors.transparent,
+                                        : Colors.transparent),
                                     borderRadius:
                                         BorderRadius.circular(12),
                                   ),
@@ -591,9 +592,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                         width: 4,
                                         height: 42,
                                         decoration: BoxDecoration(
-                                          color: isSelected
+                                          color: context.appSurface(isSelected
                                               ? Colors.green.shade600
-                                              : Colors.transparent,
+                                              : Colors.transparent),
                                           borderRadius:
                                               BorderRadius.circular(5),
                                         ),
@@ -608,11 +609,11 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                         width: 42,
                                         height: 42,
                                         decoration: BoxDecoration(
-                                          color: isSelected
+                                          color: context.appSurface(isSelected
                                               ? Colors.green
                                                   .withOpacity(0.10)
                                               : Colors.grey
-                                                  .withOpacity(0.08),
+                                                  .withOpacity(0.08)),
                                           borderRadius:
                                               BorderRadius.circular(10),
                                         ),
@@ -620,9 +621,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                           Icons
                                               .shopping_basket_outlined,
                                           size: 20,
-                                          color: isSelected
+                                          color: context.appForeground(isSelected
                                               ? Colors.green.shade700
-                                              : Colors.grey.shade600,
+                                              : Colors.grey.shade600),
                                         ),
                                       ),
 
@@ -642,9 +643,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                             fontWeight: isSelected
                                                 ? FontWeight.w700
                                                 : FontWeight.w500,
-                                            color: isSelected
+                                            color: context.appForeground(isSelected
                                                 ? Colors.green.shade700
-                                                : Colors.black87,
+                                                : Colors.black87),
                                           ),
                                         ),
                                       ),
@@ -665,11 +666,11 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                           vertical: 4,
                                         ),
                                         decoration: BoxDecoration(
-                                          color: isSelected
+                                          color: context.appSurface(isSelected
                                               ? Colors.green
                                                   .withOpacity(0.10)
                                               : Colors.grey
-                                                  .withOpacity(0.08),
+                                                  .withOpacity(0.08)),
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
@@ -680,9 +681,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                             fontSize: 11,
                                             fontWeight:
                                                 FontWeight.w600,
-                                            color: isSelected
+                                            color: context.appForeground(isSelected
                                                 ? Colors.green.shade700
-                                                : Colors.grey.shade600,
+                                                : Colors.grey.shade600),
                                           ),
                                         ),
                                       ),
@@ -699,9 +700,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                             : Icons
                                                 .radio_button_unchecked,
                                         size: 20,
-                                        color: isSelected
+                                        color: context.appForeground(isSelected
                                             ? Colors.green.shade600
-                                            : Colors.grey.shade400,
+                                            : Colors.grey.shade400),
                                       ),
                                     ],
                                   ),
@@ -727,7 +728,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
           // ==========================================================
           Container(
             width: double.infinity,
-            color: Colors.white,
+            color: context.appSurface(Colors.white),
             padding: const EdgeInsets.fromLTRB(
               16,
               14,
@@ -755,7 +756,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                         '${_filteredProducts.length} products found',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Colors.grey.shade600,
+                          color: context.appForeground(Colors.grey.shade600),
                         ),
                       ),
                     ],
@@ -773,7 +774,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       vertical: 8,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.grey.shade100,
+                      color: context.appSurface(Colors.grey.shade100),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
@@ -781,7 +782,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                         Icon(
                           Icons.sort_rounded,
                           size: 17,
-                          color: Colors.grey.shade700,
+                          color: context.appForeground(Colors.grey.shade700),
                         ),
                         const SizedBox(width: 5),
                         AppText(
@@ -789,7 +790,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: Colors.grey.shade700,
+                            color: context.appForeground(Colors.grey.shade700),
                           ),
                         ),
                       ],
@@ -853,24 +854,24 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
               width: 90,
               height: 90,
               decoration: BoxDecoration(
-                color: Colors.grey.withOpacity(0.08),
+                color: context.appSurface(Colors.grey.withOpacity(0.08)),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.search_off_rounded,
                 size: 48,
-                color: Colors.grey.shade400,
+                color: context.appForeground(Colors.grey.shade400),
               ),
             ),
 
             const SizedBox(height: 20),
 
-            const AppText(
+             AppText(
               'No products found',
               style: TextStyle(
                 fontSize: 19,
                 fontWeight: FontWeight.w700,
-                color: Colors.black87,
+                color: context.appForeground(Colors.black87),
               ),
             ),
 
@@ -881,7 +882,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade600,
+                color: context.appForeground(Colors.grey.shade600),
               ),
             ),
 
@@ -897,9 +898,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                 'Show All Products',
               ),
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.green.shade700,
+                foregroundColor: context.appForeground(Colors.green.shade700),
                 side: BorderSide(
-                  color: Colors.green.shade600,
+                  color: context.appBorder(Colors.green.shade600),
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 18,
@@ -920,11 +921,11 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
     return Card(
       elevation: 0,
       margin: EdgeInsets.zero,
-      color: Colors.white,
+      color: context.appSurface(Colors.white),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: Colors.grey.shade200,
+          color: context.appBorder(Colors.grey.shade200),
           width: 1,
         ),
       ),
@@ -941,7 +942,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
               flex: 6,
               child: Container(
                 width: double.infinity,
-                color: const Color(0xFFF7F7F7),
+                color: context.appSurface(const Color(0xFFF7F7F7)),
                 child: product.images.isNotEmpty
                     ? Padding(
                         padding: const EdgeInsets.all(8),
@@ -961,7 +962,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                               child: Icon(
                                 Icons.image_not_supported_outlined,
                                 size: 40,
-                                color: Colors.grey.shade400,
+                                color: context.appForeground(Colors.grey.shade400),
                               ),
                             );
                           },
@@ -993,7 +994,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                         child: Icon(
                           Icons.image_outlined,
                           size: 42,
-                          color: Colors.grey.shade400,
+                          color: context.appForeground(Colors.grey.shade400),
                         ),
                       ),
               ),
@@ -1020,10 +1021,10 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       product.name, fallback: 'Unnamed Product',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Colors.black87,
+                        color: context.appForeground(Colors.black87),
                       ),
                     ),
 
@@ -1041,7 +1042,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11,
-                            color: Colors.grey.shade600,
+                            color: context.appForeground(Colors.grey.shade600),
                           ),
                         ),
                       ),
@@ -1052,7 +1053,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
-                        color: Colors.green.shade700,
+                        color: context.appForeground(Colors.green.shade700),
                       ),
                     ),
                   ],

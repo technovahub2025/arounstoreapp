@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -55,8 +56,8 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.loading) {
-      return const Center(
-        child: CircularProgressIndicator(color: AppColors.primary),
+      return  Center(
+        child: CircularProgressIndicator(color: context.appForeground(AppColors.primary)),
       );
     }
 
@@ -67,7 +68,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline, size: 48, color: AppColors.red),
+               Icon(Icons.error_outline, size: 48, color: context.appForeground(AppColors.red)),
               const SizedBox(height: 12),
               AppText(widget.error ?? 'An error occurred'),
               const SizedBox(height: 12),
@@ -79,7 +80,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground(AppColors.background),
       body: RefreshIndicator(
         onRefresh: () async {
           // refresh handled by parent
@@ -105,7 +106,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
   Widget _buildAppBar() {
     return Container(
-      color: AppColors.white,
+      color: context.appSurface(AppColors.white),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: SafeArea(
         bottom: false,
@@ -122,7 +123,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+                color: context.appForeground(AppColors.primary),
                 letterSpacing: 1,
               ),
             ),
@@ -144,7 +145,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       children: [
         IconButton(
           icon: const Icon(Icons.shopping_cart_outlined, size: 24),
-          color: AppColors.darkText,
+          color: context.appForeground(AppColors.darkText),
           onPressed: () {
             Navigator.push(
               context,
@@ -158,15 +159,15 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
             top: 4,
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
-                color: AppColors.red,
+              decoration:  BoxDecoration(
+                color: context.appSurface(AppColors.red),
                 shape: BoxShape.circle,
               ),
               child: AppText(
                 count.toString(),
-                style: const TextStyle(
+                style:  TextStyle(
                   fontSize: 10,
-                  color: AppColors.white,
+                  color: context.appForeground(AppColors.white),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -178,11 +179,11 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
 
   Widget _buildSearchBar() {
     return Container(
-      color: AppColors.white,
+      color: context.appSurface(AppColors.white),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: Container(
         decoration: BoxDecoration(
-          color: AppColors.grey50,
+          color: context.appSurface(AppColors.grey50),
           borderRadius: BorderRadius.circular(30),
         ),
         child: TextField(
@@ -190,14 +191,14 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           style: const TextStyle(fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Search for groceries...',
-            hintStyle: TextStyle(color: AppColors.grey500, fontSize: 13),
-            prefixIcon: Icon(Icons.search, color: AppColors.grey500, size: 20),
+            hintStyle: TextStyle(color: context.appForeground(AppColors.grey500), fontSize: 13),
+            prefixIcon: Icon(Icons.search, color: context.appForeground(AppColors.grey500), size: 20),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     icon: const Icon(Icons.clear, size: 16),
-                    color: AppColors.grey400,
+                    color: context.appForeground(AppColors.grey400),
                     onPressed: () {
                       setState(() {
                         _searchController.clear();
@@ -224,7 +225,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         children: [
           AppText(
             'Shop by Category',
-            style: AppTextStyles.headingMedium.copyWith(color: AppColors.darkText),
+            style: AppTextStyles.headingMedium.copyWith(color: context.appForeground(AppColors.darkText)),
           ),
           const SizedBox(height: 12),
           if (widget.categoryMap.isEmpty)
@@ -251,7 +252,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           width: 80,
           margin: const EdgeInsets.only(right: 8),
           decoration: BoxDecoration(
-            color: AppColors.grey200,
+            color: context.appSurface(AppColors.grey200),
             borderRadius: BorderRadius.circular(12),
           ),
         ),
@@ -315,14 +316,14 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: AppText(
             'Special Offers',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.darkText,
+              color: context.appForeground(AppColors.darkText),
             ),
           ),
         ),

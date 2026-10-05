@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartscreen.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -66,8 +67,8 @@ class _CartPageState extends State<CartPage> {
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration:  BoxDecoration(
+        color: context.appSurface(Colors.white),
         boxShadow: [BoxShadow(blurRadius: 6, color: Colors.black12)],
       ),
       child: Column(
@@ -81,7 +82,7 @@ class _CartPageState extends State<CartPage> {
             width: double.infinity,
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.black,
+                backgroundColor: context.appSurface(Colors.black),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
               onPressed: cart.items.isEmpty
@@ -92,9 +93,9 @@ class _CartPageState extends State<CartPage> {
                         MaterialPageRoute(builder: (_) => const CheckoutScreen()),
                       );
                     },
-              child: const AppText(
+              child:  AppText(
                 'Proceed to Checkout',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: context.appForeground(Colors.white)),
               ),
             ),
           ),

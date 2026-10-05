@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -23,9 +24,9 @@ class _NewsletterSectionState extends State<NewsletterSection> {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: AppText('Please enter a valid email address'),
-          backgroundColor: AppColors.red,
+          backgroundColor: context.appSurface(AppColors.red),
         ),
       );
       return;
@@ -38,7 +39,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: AppText('Thank you! "$email" has been subscribed to our newsletter.'),
-        backgroundColor: AppColors.green600,
+        backgroundColor: context.appSurface(AppColors.green600),
       ),
     );
 
@@ -65,10 +66,10 @@ class _NewsletterSectionState extends State<NewsletterSection> {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
+          colors: context.appGradient([
             AppColors.green700,
             AppColors.green600,
-          ],
+          ]),
         ),
       ),
       child: Center(
@@ -79,7 +80,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
               AppText(
                 'Stay Updated with Fresh Deals & Offers!',
                 style: AppTextStyles.headingLarge.copyWith(
-                  color: AppColors.white,
+                  color: context.appForeground(AppColors.white),
                   fontSize: isDesktop ? 28 : 22,
                 ),
                 textAlign: TextAlign.center,
@@ -88,7 +89,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
               AppText(
                 'Subscribe to our newsletter and never miss the best offers.',
                 style: AppTextStyles.bodyMedium.copyWith(
-                  color: AppColors.white.withValues(alpha: 0.9),
+                  color: context.appForeground(AppColors.white.withValues(alpha: 0.9)),
                   fontSize: isDesktop ? 15 : 14,
                 ),
                 textAlign: TextAlign.center,
@@ -99,7 +100,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: AppColors.white,
+                        color: context.appSurface(AppColors.white),
                         borderRadius: BorderRadius.circular(30),
                         boxShadow: [
                           BoxShadow(
@@ -115,7 +116,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                         decoration: InputDecoration(
                           hintText: 'Enter your email address',
                           hintStyle: TextStyle(
-                            color: AppColors.grey500,
+                            color: context.appForeground(AppColors.grey500),
                             fontSize: 14,
                           ),
                           border: InputBorder.none,
@@ -133,8 +134,8 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                   ElevatedButton(
                     onPressed: _isSubscribed ? null : _subscribe,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.white,
-                      foregroundColor: AppColors.green700,
+                      backgroundColor: context.appSurface(AppColors.white),
+                      foregroundColor: context.appForeground(AppColors.green700),
                       padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 14),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(30),
@@ -142,12 +143,12 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                       elevation: 4,
                     ),
                     child: _isSubscribed
-                        ? const SizedBox(
+                        ?  SizedBox(
                             width: 20,
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: AppColors.green700,
+                              color: context.appForeground(AppColors.green700),
                             ),
                           )
                         : const AppText(

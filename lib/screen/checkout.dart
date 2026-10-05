@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:async';
 
@@ -465,18 +466,18 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       animation: _cart,
       builder: (context, _) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF4F7FB),
+          backgroundColor: context.appBackground(const Color(0xFFF4F7FB)),
           appBar: AppBar(
             title: const AppText('Checkout'),
-            backgroundColor: Colors.white,
-            foregroundColor: const Color(0xFF0F172A),
+            backgroundColor: context.appSurface(Colors.white),
+            foregroundColor: context.appForeground(const Color(0xFF0F172A)),
             elevation: 0,
           ),
           body: SingleChildScrollView(
             child: Container(
-              decoration: const BoxDecoration(
+              decoration:  BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFF4F7FB), Color(0xFFE8EEF7)],
+                  colors: context.appGradient([Color(0xFFF4F7FB), Color(0xFFE8EEF7)]),
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                 ),

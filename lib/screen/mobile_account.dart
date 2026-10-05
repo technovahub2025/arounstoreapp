@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
@@ -20,11 +21,11 @@ class MobileAccountScreen extends StatelessWidget {
     final user = authManager.currentUser;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground(AppColors.background),
       appBar: AppBar(
         title: const AppText('My Profile'),
-        backgroundColor: AppColors.white,
-        foregroundColor: AppColors.darkText,
+        backgroundColor: context.appSurface(AppColors.white),
+        foregroundColor: context.appForeground(AppColors.darkText),
         elevation: 0,
         actions: [
           IconButton(
@@ -39,10 +40,10 @@ class MobileAccountScreen extends StatelessWidget {
       body: SafeArea(
         child: authManager.isLoggedIn && user != null
             ? _buildProfile(context, user)
-            : const Center(
+            :  Center(
                 child: AppText(
                   'No profile data available',
-                  style: TextStyle(color: AppColors.grey600),
+                  style: TextStyle(color: context.appForeground(AppColors.grey600)),
                 ),
               ),
       ),
@@ -62,18 +63,18 @@ class MobileAccountScreen extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.white,
+            color: context.appSurface(AppColors.white),
             borderRadius: BorderRadius.circular(16),
           ),
           child: Column(
             children: [
-              const CircleAvatar(
+               CircleAvatar(
                 radius: 38,
-                backgroundColor: AppColors.green100,
+                backgroundColor: context.appSurface(AppColors.green100),
                 child: Icon(
                   Icons.person_outline,
                   size: 40,
-                  color: AppColors.primary,
+                  color: context.appForeground(AppColors.primary),
                 ),
               ),
               const SizedBox(height: 16),
@@ -86,8 +87,8 @@ class MobileAccountScreen extends StatelessWidget {
                         width: 72,
                         child: AppText(
                           detail.$1,
-                          style: const TextStyle(
-                            color: AppColors.grey600,
+                          style:  TextStyle(
+                            color: context.appForeground(AppColors.grey600),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -95,8 +96,8 @@ class MobileAccountScreen extends StatelessWidget {
                       Expanded(
                         child: Text(
                           detail.$2,
-                          style: const TextStyle(
-                            color: AppColors.darkText,
+                          style:  TextStyle(
+                            color: context.appForeground(AppColors.darkText),
                             fontWeight: FontWeight.w600,
                           ),
                         ),
@@ -116,8 +117,8 @@ class MobileAccountScreen extends StatelessWidget {
             icon: const Icon(Icons.logout),
             label: const AppText('Logout'),
             style: OutlinedButton.styleFrom(
-              foregroundColor: AppColors.red,
-              side: const BorderSide(color: AppColors.red),
+              foregroundColor: context.appForeground(AppColors.red),
+              side:  BorderSide(color: context.appBorder(AppColors.red)),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(12),
               ),

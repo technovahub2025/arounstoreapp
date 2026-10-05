@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -30,7 +31,7 @@ class CategoryCarousel extends StatelessWidget {
     final items = _getCategoryList(context);
 
     if (items.isEmpty) {
-      return _buildEmptyState();
+      return _buildEmptyState(context, );
     }
 
     return SizedBox(
@@ -79,14 +80,14 @@ class CategoryCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context, ) {
     return SizedBox(
       height: 160,
       child: Center(
         child: AppText(
           'No categories available',
           style: TextStyle(
-            color: AppColors.grey500,
+            color: context.appForeground(AppColors.grey500),
             fontSize: 14,
           ),
         ),
@@ -124,8 +125,8 @@ class CategoryCard extends StatelessWidget {
               height: AppDimensions.categoryCardSize,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.green50,
-                border: Border.all(color: AppColors.green200, width: 2),
+                color: context.appSurface(AppColors.green50),
+                border: Border.all(color: context.appBorder(AppColors.green200), width: 2),
                 boxShadow: AppShadows.cardShadow,
               ),
               child: ClipOval(
@@ -134,19 +135,19 @@ class CategoryCard extends StatelessWidget {
                         imageUrl: imageUrl!,
                         fit: BoxFit.contain,
                         placeholder: (context, url) => Container(
-                          color: AppColors.grey100,
+                          color: context.appSurface(AppColors.grey100),
                           child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                         ),
                         errorWidget: (context, url, error) => Icon(
                           Icons.category,
                           size: 40,
-                          color: AppColors.grey400,
+                          color: context.appForeground(AppColors.grey400),
                         ),
                       )
                     : Icon(
                         Icons.category,
                         size: 40,
-                        color: AppColors.grey400,
+                        color: context.appForeground(AppColors.grey400),
                       ),
               ),
             ),
@@ -154,7 +155,7 @@ class CategoryCard extends StatelessWidget {
             AppText(
               name,
               style: AppTextStyles.caption.copyWith(
-                color: AppColors.darkText,
+                color: context.appForeground(AppColors.darkText),
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
@@ -166,7 +167,7 @@ class CategoryCard extends StatelessWidget {
               '$productCount items',
               style: TextStyle(
                 fontSize: 10,
-                color: AppColors.grey500,
+                color: context.appForeground(AppColors.grey500),
               ),
             ),
           ],

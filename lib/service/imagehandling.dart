@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -37,7 +38,7 @@ class CustomImage extends StatelessWidget {
       fit: fit,
       loadingBuilder: (context, child, loadingProgress) {
         if (loadingProgress == null) return child;
-        return placeholder ?? _buildDefaultPlaceholder();
+        return placeholder ?? _buildDefaultPlaceholder(context, );
       },
       errorBuilder: (context, error, stackTrace) {
         // Try to load with a different format
@@ -49,11 +50,11 @@ class CustomImage extends StatelessWidget {
             width: width,
             fit: fit,
             errorBuilder: (_, __, ___) {
-              return errorWidget ?? _buildDefaultErrorWidget();
+              return errorWidget ?? _buildDefaultErrorWidget(context, );
             },
           );
         }
-        return errorWidget ?? _buildDefaultErrorWidget();
+        return errorWidget ?? _buildDefaultErrorWidget(context, );
       },
     );
   }
@@ -69,20 +70,20 @@ class CustomImage extends StatelessWidget {
     );
   }
 
-  Widget _buildDefaultPlaceholder() {
+  Widget _buildDefaultPlaceholder(BuildContext context, ) {
     return Container(
-      color: Colors.grey[200],
+      color: context.appSurface(Colors.grey[200]),
       child: const Center(
         child: CircularProgressIndicator(),
       ),
     );
   }
 
-  Widget _buildDefaultErrorWidget() {
+  Widget _buildDefaultErrorWidget(BuildContext context, ) {
     return Container(
-      color: Colors.grey[200],
-      child: const Center(
-        child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+      color: context.appSurface(Colors.grey[200]),
+      child:  Center(
+        child: Icon(Icons.broken_image, size: 40, color: context.appForeground(Colors.grey)),
       ),
     );
   }

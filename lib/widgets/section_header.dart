@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -28,10 +29,10 @@ class SectionHeader extends StatelessWidget {
               children: [
                 AppText(
                   title,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF1F2937),
+                    color: context.appForeground(Color(0xFF1F2937)),
                     height: 1.2,
                   ),
                 ),
@@ -41,7 +42,7 @@ class SectionHeader extends StatelessWidget {
                     subtitle!,
                     style: TextStyle(
                       fontSize: 13,
-                      color: Colors.grey[600],
+                      color: context.appForeground(Colors.grey[600]),
                       height: 1.3,
                     ),
                   ),
@@ -53,7 +54,7 @@ class SectionHeader extends StatelessWidget {
             TextButton(
               onPressed: onViewAllTap,
               style: TextButton.styleFrom(
-                foregroundColor: const Color(0xFF15803D),
+                foregroundColor: context.appForeground(const Color(0xFF15803D)),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               ),
               child: Row(
@@ -66,10 +67,10 @@ class SectionHeader extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(
+                   Icon(
                     Icons.arrow_forward_ios,
                     size: 14,
-                    color: Color(0xFF15803D),
+                    color: context.appForeground(Color(0xFF15803D)),
                   ),
                 ],
               ),

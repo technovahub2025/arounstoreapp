@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:io';
 import 'package:arunstore/adminservice/productapiservice.dart';
@@ -185,7 +186,7 @@ class _ProductFormState extends State<ProductForm> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: AppText(message),
-        backgroundColor: Colors.green,
+        backgroundColor: context.appSurface(Colors.green),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -195,7 +196,7 @@ class _ProductFormState extends State<ProductForm> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: AppText(message),
-        backgroundColor: Colors.red,
+        backgroundColor: context.appSurface(Colors.red),
         duration: const Duration(seconds: 3),
       ),
     );
@@ -267,12 +268,12 @@ class _ProductFormState extends State<ProductForm> {
                     Expanded(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.grey[300],
+                          backgroundColor: context.appSurface(Colors.grey[300]),
                         ),
                         onPressed: _isSaving ? null : () => Navigator.pop(context),
-                        child: const AppText(
+                        child:  AppText(
                           'Cancel',
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(color: context.appForeground(Colors.black)),
                         ),
                       ),
                     ),
@@ -281,14 +282,14 @@ class _ProductFormState extends State<ProductForm> {
                       child: ElevatedButton(
                         onPressed: _isSaving ? null : _save,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor: context.appSurface(Colors.green),
                         ),
                         child: _isSaving
-                            ? const SizedBox(
+                            ?  SizedBox(
                                 height: 20,
                                 width: 20,
                                 child: CircularProgressIndicator(
-                                  color: Colors.white,
+                                  color: context.appForeground(Colors.white),
                                   strokeWidth: 2,
                                 ),
                               )
@@ -312,15 +313,15 @@ class _ProductFormState extends State<ProductForm> {
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: context.appBorder(Colors.grey)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Image.memory(
           _webImage!,
           fit: BoxFit.cover,
           errorBuilder: (context, error, stackTrace) {
-            return const Center(
-              child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+            return  Center(
+              child: Icon(Icons.broken_image, size: 40, color: context.appForeground(Colors.grey)),
             );
           },
         ),
@@ -332,7 +333,7 @@ class _ProductFormState extends State<ProductForm> {
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: context.appBorder(Colors.grey)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Image.file(
@@ -354,7 +355,7 @@ class _ProductFormState extends State<ProductForm> {
           height: 120,
           width: double.infinity,
           decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
+            border: Border.all(color: context.appBorder(Colors.grey)),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Image.network(
@@ -373,12 +374,12 @@ class _ProductFormState extends State<ProductForm> {
             },
             errorBuilder: (context, error, stackTrace) {
               return Container(
-                color: Colors.grey[200],
-                child: const Center(
+                color: context.appSurface(Colors.grey[200]),
+                child:  Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.image, size: 40, color: Colors.grey),
+                      Icon(Icons.image, size: 40, color: context.appForeground(Colors.grey)),
                       SizedBox(height: 5),
                       AppText('AVIF Image', style: TextStyle(fontSize: 12)),
                     ],
@@ -395,7 +396,7 @@ class _ProductFormState extends State<ProductForm> {
         height: 120,
         width: double.infinity,
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey),
+          border: Border.all(color: context.appBorder(Colors.grey)),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Image.network(
@@ -414,9 +415,9 @@ class _ProductFormState extends State<ProductForm> {
           },
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              color: Colors.grey[200],
-              child: const Center(
-                child: Icon(Icons.broken_image, size: 40, color: Colors.grey),
+              color: context.appSurface(Colors.grey[200]),
+              child:  Center(
+                child: Icon(Icons.broken_image, size: 40, color: context.appForeground(Colors.grey)),
               ),
             );
           },
@@ -429,17 +430,17 @@ class _ProductFormState extends State<ProductForm> {
       width: double.infinity,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey),
+        border: Border.all(color: context.appBorder(Colors.grey)),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: const Column(
+      child:  Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.image, size: 40, color: Colors.grey),
+          Icon(Icons.image, size: 40, color: context.appForeground(Colors.grey)),
           SizedBox(height: 5),
           AppText(
             'No image selected',
-            style: TextStyle(color: Colors.grey),
+            style: TextStyle(color: context.appForeground(Colors.grey)),
           ),
         ],
       ),

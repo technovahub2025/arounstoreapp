@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -12,7 +13,7 @@ class AppFooter extends StatelessWidget {
 
     return Container(
       width: double.infinity,
-      color: AppColors.darkText,
+      color: context.appSurface(AppColors.darkText),
       padding: EdgeInsets.only(
         top: isDesktop ? 40 : 28,
         bottom: 20,
@@ -23,9 +24,9 @@ class AppFooter extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildMainContent(isDesktop, screenWidth),
-              _buildDivider(),
-              _buildBottomBar(isDesktop),
+              _buildMainContent(context, isDesktop, screenWidth),
+              _buildDivider(context, ),
+              _buildBottomBar(context, isDesktop),
             ],
           ),
         ),
@@ -33,14 +34,14 @@ class AppFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildMainContent(bool isDesktop, double screenWidth) {
+  Widget _buildMainContent(BuildContext context, bool isDesktop, double screenWidth) {
     if (isDesktop) {
-      return _buildDesktopColumns(screenWidth);
+      return _buildDesktopColumns(context, screenWidth);
     }
     return _buildMobileColumns();
   }
 
-  Widget _buildDesktopColumns(double screenWidth) {
+  Widget _buildDesktopColumns(BuildContext context, double screenWidth) {
     final crossAxisCount = screenWidth > 1200 ? 4 : 3;
 
     return Padding(
@@ -52,11 +53,11 @@ class AppFooter extends StatelessWidget {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildColumn('Quick Links', _quickLinks, columnWidth),
-              _buildColumn('Customer Service', _customerService, columnWidth),
-              _buildColumn('Information', _information, columnWidth),
+              _buildColumn(context, 'Quick Links', _quickLinks, columnWidth),
+              _buildColumn(context, 'Customer Service', _customerService, columnWidth),
+              _buildColumn(context, 'Information', _information, columnWidth),
               if (crossAxisCount == 4)
-                _buildColumn('Contact Us', [], columnWidth, isContactColumn: true),
+                _buildColumn(context, 'Contact Us', [], columnWidth, isContactColumn: true),
             ],
           );
         },
@@ -94,7 +95,7 @@ class AppFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildColumn(
+  Widget _buildColumn(BuildContext context, 
     String title,
     List<_FooterLink> links,
     double width, {
@@ -114,18 +115,18 @@ class AppFooter extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
-                color: AppColors.white,
+                color: context.appForeground(AppColors.white),
               ),
             ),
             const SizedBox(height: 14),
-            ...effectiveLinks.map((link) => _buildLinkItem(link)),
+            ...effectiveLinks.map((link) => _buildLinkItem(context, link)),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLinkItem(_FooterLink link) {
+  Widget _buildLinkItem(BuildContext context, _FooterLink link) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
@@ -134,7 +135,7 @@ class AppFooter extends StatelessWidget {
           link.title,
           style: TextStyle(
             fontSize: 13,
-            color: AppColors.grey400,
+            color: context.appForeground(AppColors.grey400),
             height: 1.4,
           ),
         ),
@@ -142,15 +143,15 @@ class AppFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildDivider() {
+  Widget _buildDivider(BuildContext context, ) {
     return Container(
       height: 1,
       margin: const EdgeInsets.symmetric(vertical: 24),
-      color: AppColors.grey700,
+      color: context.appSurface(AppColors.grey700),
     );
   }
 
-  Widget _buildBottomBar(bool isDesktop) {
+  Widget _buildBottomBar(BuildContext context, bool isDesktop) {
     return Padding(
       padding: EdgeInsets.symmetric(
         horizontal: isDesktop ? 24 : 16,
@@ -164,8 +165,8 @@ class AppFooter extends StatelessWidget {
                 : MainAxisAlignment.center,
             children: [
               if (isDesktop)
-                _buildSocialIcons(),
-              _buildPaymentIcons(isDesktop),
+                _buildSocialIcons(context, ),
+              _buildPaymentIcons(context, isDesktop),
             ],
           ),
           const SizedBox(height: 16),
@@ -173,7 +174,7 @@ class AppFooter extends StatelessWidget {
             '© 2024 Aroun Stores. All rights reserved.',
             style: TextStyle(
               fontSize: 12,
-              color: AppColors.grey500,
+              color: context.appForeground(AppColors.grey500),
             ),
             textAlign: isDesktop ? TextAlign.left : TextAlign.center,
           ),
@@ -182,7 +183,7 @@ class AppFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildSocialIcons() {
+  Widget _buildSocialIcons(BuildContext context, ) {
     final socialIcons = [
       Icons.facebook,
       Icons.chat,
@@ -198,12 +199,12 @@ class AppFooter extends StatelessWidget {
           width: 36,
           height: 36,
           decoration: BoxDecoration(
-            color: AppColors.grey700,
+            color: context.appSurface(AppColors.grey700),
             shape: BoxShape.circle,
           ),
           child: Icon(
             icon,
-            color: AppColors.white,
+            color: context.appForeground(AppColors.white),
             size: 18,
           ),
         );
@@ -211,7 +212,7 @@ class AppFooter extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentIcons(bool isDesktop) {
+  Widget _buildPaymentIcons(BuildContext context, bool isDesktop) {
     final paymentIcons = [
       Icons.payment,
       Icons.account_balance,
@@ -225,7 +226,7 @@ class AppFooter extends StatelessWidget {
       children: paymentIcons.map((icon) {
         return Icon(
           icon,
-          color: AppColors.grey600,
+          color: context.appForeground(AppColors.grey600),
           size: 24,
         );
       }).toList(),
@@ -294,7 +295,7 @@ class _FooterColumn extends StatelessWidget {
           style: TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.w700,
-            color: AppColors.white,
+            color: context.appForeground(AppColors.white),
           ),
         ),
         const SizedBox(height: 14),
@@ -304,7 +305,7 @@ class _FooterColumn extends StatelessWidget {
                 link.title,
                 style: TextStyle(
                   fontSize: 13,
-                  color: AppColors.grey400,
+                  color: context.appForeground(AppColors.grey400),
                   height: 1.4,
                 ),
               ),

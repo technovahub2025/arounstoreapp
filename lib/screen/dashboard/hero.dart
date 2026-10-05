@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -15,11 +16,11 @@ class HeroSection extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
+          colors: context.appGradient([
             const Color(0xFF15803D).withOpacity(0.1), // Green tint
             Colors.white,
             const Color(0xFFDC2626).withOpacity(0.1), // Red tint
-          ],
+          ]),
         ),
       ),
       child: Stack(
@@ -32,7 +33,7 @@ class HeroSection extends StatelessWidget {
               width: 200,
               height: 200,
               decoration: BoxDecoration(
-                color: const Color(0xFF15803D).withOpacity(0.1),
+                color: context.appSurface(const Color(0xFF15803D).withOpacity(0.1)),
                 shape: BoxShape.circle,
               ),
             ),
@@ -44,7 +45,7 @@ class HeroSection extends StatelessWidget {
               width: 250,
               height: 250,
               decoration: BoxDecoration(
-                color: const Color(0xFFDC2626).withOpacity(0.1),
+                color: context.appSurface(const Color(0xFFDC2626).withOpacity(0.1)),
                 shape: BoxShape.circle,
               ),
             ),
@@ -69,7 +70,7 @@ class HeroSection extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 42,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.grey[900],
+                                  color: context.appForeground(Colors.grey[900]),
                                 ),
                               ),
                               AppText(
@@ -77,7 +78,7 @@ class HeroSection extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 42,
                                   fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF15803D), // Green
+                                  color: context.appForeground(const Color(0xFF15803D)), // Green
                                 ),
                               ),
                               const SizedBox(height: 16),
@@ -85,7 +86,7 @@ class HeroSection extends StatelessWidget {
                                 'Explore a wide range of Snacks, Juice, Soap, and home products at the best prices. New arrivals every week!',
                                 style: TextStyle(
                                   fontSize: 16,
-                                  color: Colors.grey[700],
+                                  color: context.appForeground(Colors.grey[700]),
                                   height: 1.5,
                                 ),
                               ),
@@ -95,7 +96,7 @@ class HeroSection extends StatelessWidget {
                                   ElevatedButton(
                                     onPressed: () {},
                                     style: ElevatedButton.styleFrom(
-                                      backgroundColor: const Color(0xFF15803D),
+                                      backgroundColor: context.appSurface(const Color(0xFF15803D)),
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 32,
                                         vertical: 16,
@@ -104,11 +105,11 @@ class HeroSection extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(30),
                                       ),
                                     ),
-                                    child: const AppText(
+                                    child:  AppText(
                                       'Shop Now',
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: Colors.white,
+                                        color: context.appForeground(Colors.white),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -117,8 +118,8 @@ class HeroSection extends StatelessWidget {
                                   OutlinedButton(
                                     onPressed: () {},
                                     style: OutlinedButton.styleFrom(
-                                      side: const BorderSide(
-                                        color: Color(0xFF15803D),
+                                      side:  BorderSide(
+                                        color: context.appBorder(Color(0xFF15803D)),
                                         width: 2,
                                       ),
                                       padding: const EdgeInsets.symmetric(
@@ -129,11 +130,11 @@ class HeroSection extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(30),
                                       ),
                                     ),
-                                    child: const AppText(
+                                    child:  AppText(
                                       'Learn More',
                                       style: TextStyle(
                                         fontSize: 16,
-                                        color: Color(0xFF15803D),
+                                        color: context.appForeground(Color(0xFF15803D)),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -149,13 +150,13 @@ class HeroSection extends StatelessWidget {
                                       vertical: 8,
                                     ),
                                     decoration: BoxDecoration(
-                                      color: const Color(0xFF15803D).withOpacity(0.1),
+                                      color: context.appSurface(const Color(0xFF15803D).withOpacity(0.1)),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: AppText(
                                       'New Arrival',
                                       style: TextStyle(
-                                        color: const Color(0xFF15803D),
+                                        color: context.appForeground(const Color(0xFF15803D)),
                                         fontWeight: FontWeight.w600,
                                       ),
                                     ),
@@ -164,7 +165,7 @@ class HeroSection extends StatelessWidget {
                                   AppText(
                                     'Check out the latest collection!',
                                     style: TextStyle(
-                                      color: Colors.grey[600],
+                                      color: context.appForeground(Colors.grey[600]),
                                     ),
                                   ),
                                 ],
@@ -210,7 +211,7 @@ class HeroSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.grey[900],
+                                color: context.appForeground(Colors.grey[900]),
                               ),
                             ),
                             AppText(
@@ -218,7 +219,7 @@ class HeroSection extends StatelessWidget {
                               style: TextStyle(
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(0xFF15803D),
+                                color: context.appForeground(const Color(0xFF15803D)),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -226,7 +227,7 @@ class HeroSection extends StatelessWidget {
                               'Explore a wide range of products at the best prices.',
                               style: TextStyle(
                                 fontSize: 14,
-                                color: Colors.grey[700],
+                                color: context.appForeground(Colors.grey[700]),
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -240,7 +241,7 @@ class HeroSection extends StatelessWidget {
                             ElevatedButton(
                               onPressed: () {},
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF15803D),
+                                backgroundColor: context.appSurface(const Color(0xFF15803D)),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
                                   vertical: 12,
@@ -249,10 +250,10 @@ class HeroSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: const AppText(
+                              child:  AppText(
                                 'Shop Now',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: context.appForeground(Colors.white),
                                 ),
                               ),
                             ),
@@ -260,8 +261,8 @@ class HeroSection extends StatelessWidget {
                             OutlinedButton(
                               onPressed: () {},
                               style: OutlinedButton.styleFrom(
-                                side: const BorderSide(
-                                  color: Color(0xFF15803D),
+                                side:  BorderSide(
+                                  color: context.appBorder(Color(0xFF15803D)),
                                 ),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 24,
@@ -271,10 +272,10 @@ class HeroSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: const AppText(
+                              child:  AppText(
                                 'Learn More',
                                 style: TextStyle(
-                                  color: Color(0xFF15803D),
+                                  color: context.appForeground(Color(0xFF15803D)),
                                 ),
                               ),
                             ),

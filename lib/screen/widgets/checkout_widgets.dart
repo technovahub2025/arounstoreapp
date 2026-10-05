@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +19,7 @@ class CheckoutSectionCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.appSurface(Colors.white),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -33,17 +34,17 @@ class CheckoutSectionCard extends StatelessWidget {
         children: [
           AppText(
             title,
-            style: const TextStyle(
+            style:  TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
+              color: context.appForeground(Color(0xFF0F172A)),
             ),
           ),
           const SizedBox(height: 6),
           AppText(
             subtitle,
             style: TextStyle(
-              color: Colors.grey.shade600,
+              color: context.appForeground(Colors.grey.shade600),
               height: 1.4,
             ),
           ),
@@ -85,22 +86,22 @@ class CheckoutTextField extends StatelessWidget {
         labelText: label,
         hintText: hintText,
         filled: true,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: context.appSurface(const Color(0xFFF8FAFC)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide:  BorderSide(color: context.appBorder(Color(0xFFE2E8F0))),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+          borderSide:  BorderSide(color: context.appBorder(Color(0xFFE2E8F0))),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF2563EB), width: 1.4),
+          borderSide:  BorderSide(color: context.appBorder(Color(0xFF2563EB)), width: 1.4),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFEF4444)),
+          borderSide:  BorderSide(color: context.appBorder(Color(0xFFEF4444))),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
       ).localized(context),
@@ -128,14 +129,14 @@ class CheckoutNoticeBanner extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: color,
+        color: context.appSurface(color),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: borderColor),
+        border: Border.all(color: context.appBorder(borderColor)),
       ),
       child: AppText(
         message,
         style: TextStyle(
-          color: textColor,
+          color: context.appForeground(textColor),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -162,7 +163,7 @@ class PriceRow extends StatelessWidget {
     final style = TextStyle(
       fontWeight: bold ? FontWeight.w800 : FontWeight.w600,
       fontSize: bold ? 18 : 15,
-      color: const Color(0xFF0F172A),
+      color: context.appForeground(const Color(0xFF0F172A)),
     );
 
     return Padding(
@@ -197,9 +198,9 @@ class CheckoutCartItemTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: context.appSurface(const Color(0xFFF8FAFC)),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(color: context.appBorder(const Color(0xFFE2E8F0))),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -214,7 +215,7 @@ class CheckoutCartItemTile extends StatelessWidget {
               errorBuilder: (context, error, stackTrace) => Container(
                 width: 72,
                 height: 72,
-                color: const Color(0xFFE2E8F0),
+                color: context.appSurface(const Color(0xFFE2E8F0)),
                 alignment: Alignment.center,
                 child: const Icon(Icons.shopping_bag_outlined),
               ),
@@ -229,22 +230,22 @@ class CheckoutCartItemTile extends StatelessWidget {
                   name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: context.appForeground(Color(0xFF0F172A)),
                   ),
                 ),
                 const SizedBox(height: 4),
                 AppText(
                   'Qty $quantity',
-                  style: TextStyle(color: Colors.grey.shade600),
+                  style: TextStyle(color: context.appForeground(Colors.grey.shade600)),
                 ),
                 const SizedBox(height: 6),
                 AppText(
                   priceText,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF16A34A),
+                    color: context.appForeground(Color(0xFF16A34A)),
                   ),
                 ),
               ],
@@ -275,9 +276,9 @@ class CheckoutCartItemList extends StatelessWidget {
         width: double.infinity,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
+          color: context.appSurface(const Color(0xFFF8FAFC)),
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          border: Border.all(color: context.appBorder(const Color(0xFFE2E8F0))),
         ),
         child: AppText(emptyMessage),
       );
@@ -495,20 +496,20 @@ class CheckoutShippingForm extends StatelessWidget {
             child: ElevatedButton(
               onPressed: (isProcessing || isPreparingOrder || !canAttemptPayment) ? null : onPayPressed,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF0F172A),
-                foregroundColor: Colors.white,
+                backgroundColor: context.appSurface(const Color(0xFF0F172A)),
+                foregroundColor: context.appForeground(Colors.white),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14),
                 ),
               ),
               child: isProcessing
-                  ? const SizedBox(
+                  ?  SizedBox(
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2.2,
-                        color: Colors.white,
+                        color: context.appForeground(Colors.white),
                       ),
                     )
                   : isPreparingOrder

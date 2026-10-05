@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/categories/filter.dart';
@@ -162,12 +163,12 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AppText(
+             AppText(
               'Contact Us',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.darkText,
+                color: context.appForeground(AppColors.darkText),
               ),
             ),
             const SizedBox(height: 16),
@@ -186,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Icon(icon, color: AppColors.primary, size: 20),
+          Icon(icon, color: context.appForeground(AppColors.primary), size: 20),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,7 +196,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: AppColors.grey500,
+                  color: context.appForeground(AppColors.grey500),
                 ),
               ),
               AppText(
@@ -203,7 +204,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
-                  color: AppColors.darkText,
+                  color: context.appForeground(AppColors.darkText),
                 ),
               ),
             ],
@@ -232,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDesktop = AppTheme.isDesktop(context);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground(AppColors.background),
       appBar: isDesktop ? null : _buildMobileAppBar(),
       drawer: isDesktop ? null : _buildMobileDrawer(),
       body: _buildBody(context),
@@ -246,7 +247,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           Container(
-            color: AppColors.white,
+            color: context.appSurface(AppColors.white),
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
@@ -313,7 +314,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!isDesktop) return const SizedBox.shrink();
 
     return Container(
-      color: AppColors.white,
+      color: context.appSurface(AppColors.white),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: Wrap(
         spacing: 4, runSpacing: 4,
@@ -322,7 +323,7 @@ class _HomeScreenState extends State<HomeScreen> {
           return TextButton(
             onPressed: () => _handleNavTap(item),
             style: TextButton.styleFrom(
-              foregroundColor: isActive ? AppColors.primary : AppColors.mutedText,
+              foregroundColor: context.appForeground(isActive ? AppColors.primary : AppColors.mutedText),
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
             child: AppText(
@@ -330,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                color: isActive ? AppColors.primary : AppColors.mutedText,
+                color: context.appForeground(isActive ? AppColors.primary : AppColors.mutedText),
               ),
             ),
           );
@@ -348,7 +349,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: AppText(
             'Shop by Category',
             style: AppTextStyles.headingLarge.copyWith(
-              color: AppColors.darkText,
+              color: context.appForeground(AppColors.darkText),
               fontSize: 20,
             ),
           ),
@@ -431,14 +432,14 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
+         Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: AppText(
             'Special Offers',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: AppColors.darkText,
+              color: context.appForeground(AppColors.darkText),
             ),
           ),
         ),
@@ -452,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return AppText(
       'AROUN STORES',
       style: AppTextStyles.displaySmall.copyWith(
-        color: AppColors.primary,
+        color: context.appForeground(AppColors.primary),
         letterSpacing: 1,
         fontSize: 22,
       ),
@@ -470,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             IconButton(
               icon: const Icon(Icons.shopping_cart_outlined),
-              color: AppColors.darkText,
+              color: context.appForeground(AppColors.darkText),
               iconSize: 24,
               onPressed: () {
                 Navigator.push(
@@ -486,14 +487,14 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
-                    color: AppColors.red,
+                    color: context.appSurface(AppColors.red),
                     shape: BoxShape.circle,
                   ),
                   child: AppText(
                     cartManager.totalItems.toString(),
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 10,
-                      color: AppColors.white,
+                      color: context.appForeground(AppColors.white),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -526,10 +527,10 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: isLogged ? AppColors.green50 : AppColors.grey100,
+              color: context.appSurface(isLogged ? AppColors.green50 : AppColors.grey100),
               borderRadius: BorderRadius.circular(20),
               border: Border.all(
-                color: isLogged ? AppColors.green200 : AppColors.border,
+                color: context.appBorder(isLogged ? AppColors.green200 : AppColors.border),
                 width: 1,
               ),
             ),
@@ -538,10 +539,10 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 CircleAvatar(
                   radius: 12,
-                  backgroundColor: isLogged ? AppColors.primary : AppColors.grey300,
+                  backgroundColor: context.appSurface(isLogged ? AppColors.primary : AppColors.grey300),
                   child: Icon(
                     isLogged ? Icons.person : Icons.person_outline,
-                    color: isLogged ? AppColors.white : AppColors.grey500,
+                    color: context.appForeground(isLogged ? AppColors.white : AppColors.grey500),
                     size: 14,
                   ),
                 ),
@@ -554,11 +555,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLoadingScaffold() {
-    return const Scaffold(
-      backgroundColor: AppColors.background,
+    return  Scaffold(
+      backgroundColor: context.appBackground(AppColors.background),
       body: Center(
         child: CircularProgressIndicator(
-          color: AppColors.primary,
+          color: context.appForeground(AppColors.primary),
         ),
       ),
     );
@@ -571,9 +572,9 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: AppColors.primary),
+           CircularProgressIndicator(color: context.appForeground(AppColors.primary)),
           const SizedBox(height: 10),
-          AppText(message, style: TextStyle(color: AppColors.grey600)),
+          AppText(message, style: TextStyle(color: context.appForeground(AppColors.grey600))),
         ],
       ),
     );
@@ -587,12 +588,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: AppColors.red, size: 40),
+           Icon(Icons.error_outline, color: context.appForeground(AppColors.red), size: 40),
           const SizedBox(height: 10),
           AppText(
             _logic?.error ?? 'An error occurred',
             textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.grey700),
+            style: TextStyle(color: context.appForeground(AppColors.grey700)),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
@@ -609,7 +610,7 @@ class _HomeScreenState extends State<HomeScreen> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
+              backgroundColor: context.appSurface(AppColors.primary),
             ),
             child: const AppText('Retry'),
           ),
@@ -623,10 +624,10 @@ class _HomeScreenState extends State<HomeScreen> {
       height: 200,
       padding: const EdgeInsets.all(20),
       alignment: Alignment.center,
-      child: const Column(
+      child:  Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.category_outlined, size: 40, color: AppColors.grey400),
+          Icon(Icons.category_outlined, size: 40, color: context.appForeground(AppColors.grey400)),
           SizedBox(height: 10),
           AppText('No categories found'),
         ],
@@ -638,20 +639,20 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_logic == null) return const Drawer();
 
     return Drawer(
-      backgroundColor: AppColors.white,
+      backgroundColor: context.appSurface(AppColors.white),
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: AppColors.primary),
+            decoration: BoxDecoration(color: context.appSurface(AppColors.primary)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const AppText(
+                 AppText(
                   'AROUN STORES',
                   style: TextStyle(
-                    color: AppColors.white,
+                    color: context.appForeground(AppColors.white),
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
                   ),
@@ -660,10 +661,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 if (_logic!.authManager.currentUser != null)
                   AppText(
                     _logic!.authManager.currentUser!.phone ?? '',
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.white,
+                      color: context.appForeground(AppColors.white),
                     ),
                   ),
               ],
@@ -733,11 +734,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDrawerItem(String title, IconData icon, {VoidCallback? onTap}) {
     return ListTile(
-      leading: Icon(icon, color: AppColors.primary),
+      leading: Icon(icon, color: context.appForeground(AppColors.primary)),
       title: AppText(
         title,
         style: TextStyle(
-          color: AppColors.darkText,
+          color: context.appForeground(AppColors.darkText),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -750,9 +751,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      backgroundColor: AppColors.white,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.grey500,
+      backgroundColor: context.appSurface(AppColors.white),
+      selectedItemColor: context.appForeground(AppColors.primary),
+      unselectedItemColor: context.appForeground(AppColors.grey500),
       onTap: (index) {
         if (index == 0) {
           // Home - already here
@@ -791,8 +792,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Container(
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(
-                      color: AppColors.primary,
+                    decoration:  BoxDecoration(
+                      color: context.appSurface(AppColors.primary),
                       shape: BoxShape.circle,
                     ),
                   ),

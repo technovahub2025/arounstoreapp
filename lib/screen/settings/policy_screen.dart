@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/screen/settings/app_preferences.dart';
 import 'package:arunstore/screen/settings/policy_content.dart';
 import 'package:flutter/material.dart';
@@ -49,7 +50,7 @@ class PolicyScreen extends StatelessWidget {
                       children: [
                         Icon(
                           policy.icon,
-                          color: theme.colorScheme.primary,
+                          color: context.appForeground(theme.colorScheme.primary),
                           size: 40,
                         ),
                         const SizedBox(height: 20),

@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:async';
 import 'package:arunstore/authmanager.dart';
@@ -80,7 +81,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.appBackground(Colors.white),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -95,14 +96,14 @@ class _SplashScreenState extends State<SplashScreen> {
                 ? Column(
                     children: [
                       CircularProgressIndicator(
-                        color: const Color(0xFF15803D).withOpacity(0.7),
+                        color: context.appForeground(const Color(0xFF15803D).withOpacity(0.7)),
                       ),
                       const SizedBox(height: 20),
                       AppText(
                         'Loading...',
                         style: TextStyle(
                           fontSize: 16,
-                          color: Colors.grey[600],
+                          color: context.appForeground(Colors.grey[600]),
                         ),
                       ),
                     ],

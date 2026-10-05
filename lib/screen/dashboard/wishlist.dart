@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -23,17 +24,17 @@ class _WishlistPageState extends State<WishlistPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground(AppColors.background),
       appBar: AppBar(
-        backgroundColor: AppColors.white,
+        backgroundColor: context.appSurface(AppColors.white),
         elevation: 1,
-        foregroundColor: AppColors.darkText,
-        title: const AppText(
+        foregroundColor: context.appForeground(AppColors.darkText),
+        title:  AppText(
           'My Wishlist',
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
-            color: AppColors.darkText,
+            color: context.appForeground(AppColors.darkText),
           ),
         ),
         actions: [
@@ -47,9 +48,9 @@ class _WishlistPageState extends State<WishlistPage> {
                 onPressed: () {
                   WishlistManager.instance.clearWishlist();
                 },
-                child: const AppText(
+                child:  AppText(
                   'Clear All',
-                  style: TextStyle(color: AppColors.red, fontSize: 13),
+                  style: TextStyle(color: context.appForeground(AppColors.red), fontSize: 13),
                 ),
               );
             },
@@ -104,7 +105,7 @@ class _WishlistPageState extends State<WishlistPage> {
               child: Container(
                 height: 120,
                 decoration: BoxDecoration(
-                  color: AppColors.grey100,
+                  color: context.appSurface(AppColors.grey100),
                 ),
                 child: _buildProductImage(product),
               ),
@@ -120,10 +121,10 @@ class _WishlistPageState extends State<WishlistPage> {
                       product.name, fallback: 'Unnamed Product',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style:  TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.darkText,
+                        color: context.appForeground(AppColors.darkText),
                       ),
                     ),
                     const SizedBox(height: 6),
@@ -132,7 +133,7 @@ class _WishlistPageState extends State<WishlistPage> {
                         product.category!,
                         style: TextStyle(
                           fontSize: 12,
-                          color: AppColors.grey600,
+                          color: context.appForeground(AppColors.grey600),
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -143,10 +144,10 @@ class _WishlistPageState extends State<WishlistPage> {
                       children: [
                         AppText(
                           rupeeFormat.format(product.price ?? 0),
-                          style: const TextStyle(
+                          style:  TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
+                            color: context.appForeground(AppColors.primary),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -155,7 +156,7 @@ class _WishlistPageState extends State<WishlistPage> {
                             rupeeFormat.format(originalPrice),
                             style: TextStyle(
                               fontSize: 11,
-                              color: AppColors.grey500,
+                              color: context.appForeground(AppColors.grey500),
                               decoration: TextDecoration.lineThrough,
                               decorationColor: AppColors.grey400,
                             ),
@@ -173,8 +174,8 @@ class _WishlistPageState extends State<WishlistPage> {
                             icon: const Icon(Icons.favorite, size: 16),
                             label: const AppText('Remove', style: TextStyle(fontSize: 12)),
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: AppColors.red,
-                              side: const BorderSide(color: AppColors.red),
+                              foregroundColor: context.appForeground(AppColors.red),
+                              side:  BorderSide(color: context.appBorder(AppColors.red)),
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -196,8 +197,8 @@ class _WishlistPageState extends State<WishlistPage> {
                             icon: const Icon(Icons.visibility, size: 14),
                             label: const AppText('View', style: TextStyle(fontSize: 12)),
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: AppColors.white,
+                              backgroundColor: context.appSurface(AppColors.primary),
+                              foregroundColor: context.appForeground(AppColors.white),
                               padding: const EdgeInsets.symmetric(vertical: 6),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
@@ -219,11 +220,11 @@ class _WishlistPageState extends State<WishlistPage> {
 
   Widget _buildProductImage(Product product) {
     if (product.images.isEmpty) {
-      return const Center(
+      return  Center(
         child: Icon(
           Icons.shopping_bag,
           size: 40,
-          color: AppColors.grey400,
+          color: context.appForeground(AppColors.grey400),
         ),
       );
     }
@@ -252,11 +253,11 @@ class _WishlistPageState extends State<WishlistPage> {
           );
         },
         errorBuilder: (_, _, _) {
-          return const Center(
+          return  Center(
             child: Icon(
               Icons.broken_image,
               size: 40,
-              color: AppColors.grey400,
+              color: context.appForeground(AppColors.grey400),
             ),
           );
         },
@@ -275,22 +276,22 @@ class _WishlistPageState extends State<WishlistPage> {
               width: 100,
               height: 100,
               decoration: BoxDecoration(
-                color: AppColors.grey100,
+                color: context.appSurface(AppColors.grey100),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child:  Icon(
                 Icons.favorite_border,
                 size: 50,
-                color: AppColors.grey400,
+                color: context.appForeground(AppColors.grey400),
               ),
             ),
             const SizedBox(height: 24),
-            const AppText(
+             AppText(
               'Your Wishlist is Empty',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.darkText,
+                color: context.appForeground(AppColors.darkText),
               ),
             ),
             const SizedBox(height: 8),
@@ -299,7 +300,7 @@ class _WishlistPageState extends State<WishlistPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.grey600,
+                color: context.appForeground(AppColors.grey600),
               ),
             ),
           ],

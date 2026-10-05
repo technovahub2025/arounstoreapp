@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 // home_logic.dart
 import 'package:arunstore/adminscreen/dashboard.dart';
@@ -104,7 +105,7 @@ class HomeScreenLogic {
               Navigator.pop(context);
               await logoutUser(context);
             },
-            child: const AppText('Logout', style: TextStyle(color: Colors.red)),
+            child:  AppText('Logout', style: TextStyle(color: context.appForeground(Colors.red))),
           ),
         ],
       ),
@@ -134,9 +135,9 @@ class HomeScreenLogic {
             children: [
               if (isLoggedIn)
                 ListTile(
-                  leading: const CircleAvatar(
-                    backgroundColor: Color(0xFF15803D),
-                    child: Icon(Icons.person, color: Colors.white),
+                  leading:  CircleAvatar(
+                    backgroundColor: context.appSurface(Color(0xFF15803D)),
+                    child: Icon(Icons.person, color: context.appForeground(Colors.white)),
                   ),
                   title: AppText(
                     userName ?? 'My Account',
@@ -147,7 +148,7 @@ class HomeScreenLogic {
               
               if (isAdmin)
                 ListTile(
-                  leading: const Icon(Icons.dashboard, color: Colors.green),
+                  leading:  Icon(Icons.dashboard, color: context.appForeground(Colors.green)),
                   title: const AppText('Admin Dashboard'),
                   onTap: () {
                     Navigator.push(context, MaterialPageRoute(builder: (context) => const ProductDashboard()));
@@ -176,8 +177,8 @@ class HomeScreenLogic {
               
               if (isLoggedIn)
                 ListTile(
-                  leading: const Icon(Icons.logout, color: Colors.red),
-                  title: const AppText('Logout', style: TextStyle(color: Colors.red)),
+                  leading:  Icon(Icons.logout, color: context.appForeground(Colors.red)),
+                  title:  AppText('Logout', style: TextStyle(color: context.appForeground(Colors.red))),
                   onTap: () {
                     Navigator.pop(context);
                     onLogoutTap();
@@ -186,16 +187,16 @@ class HomeScreenLogic {
               
               if (!isLoggedIn) ...[
                 ListTile(
-                  leading: const Icon(Icons.login, color: Color(0xFF15803D)),
-                  title: const AppText('Login', style: TextStyle(color: Color(0xFF15803D))),
+                  leading:  Icon(Icons.login, color: context.appForeground(Color(0xFF15803D))),
+                  title:  AppText('Login', style: TextStyle(color: context.appForeground(Color(0xFF15803D)))),
                   onTap: () {
                     Navigator.pop(context);
                     onLoginTap();
                   },
                 ),
                 ListTile(
-                  leading: const Icon(Icons.person_add, color: Colors.blue),
-                  title: const AppText('Register', style: TextStyle(color: Colors.blue)),
+                  leading:  Icon(Icons.person_add, color: context.appForeground(Colors.blue)),
+                  title:  AppText('Register', style: TextStyle(color: context.appForeground(Colors.blue))),
                   onTap: () {
                     Navigator.pop(context);
                     onRegisterTap();

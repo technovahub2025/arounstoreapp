@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 
 
@@ -70,19 +71,19 @@ class _ProductDashboardState extends State<ProductDashboard> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : products.isEmpty
-              ? const Center(
+              ?  Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.inventory, size: 64, color: Colors.grey),
+                      Icon(Icons.inventory, size: 64, color: context.appForeground(Colors.grey)),
                       SizedBox(height: 16),
                       AppText(
                         'No products found',
-                        style: TextStyle(fontSize: 18, color: Colors.grey),
+                        style: TextStyle(fontSize: 18, color: context.appForeground(Colors.grey)),
                       ),
                       AppText(
                         'Tap + to add a product',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: context.appForeground(Colors.grey)),
                       ),
                     ],
                   ),
@@ -110,7 +111,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
                             height: 60,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: Colors.grey[100],
+                              color: context.appSurface(Colors.grey[100]),
                             ),
                             child: hasImages && imageUrl != null
                                 ? ClipRRect(
@@ -140,16 +141,16 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                         );
                                       },
                                       errorBuilder: (context, error, stackTrace) {
-                                        return const Center(
+                                        return  Center(
                                           child: Icon(Icons.broken_image,
-                                              color: Colors.grey),
+                                              color: context.appForeground(Colors.grey)),
                                         );
                                       },
                                     ),
                                   )
-                                : const Center(
+                                :  Center(
                                     child: Icon(Icons.image,
-                                        size: 30, color: Colors.grey),
+                                        size: 30, color: context.appForeground(Colors.grey)),
                                   ),
                           ),
 
@@ -174,9 +175,9 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                 children: [
                                   AppText(
                                     '₹${product.price.toStringAsFixed(2)}',
-                                    style: const TextStyle(
+                                    style:  TextStyle(
                                       fontWeight: FontWeight.bold,
-                                      color: Colors.green,
+                                      color: context.appForeground(Colors.green),
                                       fontSize: 14,
                                     ),
                                   ),
@@ -186,9 +187,9 @@ class _ProductDashboardState extends State<ProductDashboard> {
                               AppText(
                                 'Stock: ${product.stock}',
                                 style: TextStyle(
-                                  color: product.stock > 10
+                                  color: context.appForeground(product.stock > 10
                                       ? Colors.grey[600]
-                                      : Colors.orange,
+                                      : Colors.orange),
                                   fontSize: 13,
                                 ),
                                 maxLines: 1,
@@ -197,7 +198,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
                               AppText(
                                 'Category: ${product.category}',
                                 style: TextStyle(
-                                  color: Colors.grey[600],
+                                  color: context.appForeground(Colors.grey[600]),
                                   fontSize: 11,
                                 ),
                                 maxLines: 1,
@@ -211,8 +212,8 @@ class _ProductDashboardState extends State<ProductDashboard> {
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.edit_outlined,
-                                    size: 20, color: Colors.blue),
+                                icon:  Icon(Icons.edit_outlined,
+                                    size: 20, color: context.appForeground(Colors.blue)),
                                 onPressed: () async {
                                   await showDialog(
                                     context: context,
@@ -224,8 +225,8 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                 tooltip: context.tr('Edit'),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete_outline,
-                                    size: 20, color: Colors.red),
+                                icon:  Icon(Icons.delete_outline,
+                                    size: 20, color: context.appForeground(Colors.red)),
                                 onPressed: () => deleteProduct(product.id!),
                                 tooltip: context.tr('Delete'),
                               ),
@@ -269,9 +270,9 @@ class _ProductDashboardState extends State<ProductDashboard> {
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const AppText(
+            child:  AppText(
               'Delete',
-              style: TextStyle(color: Colors.red),
+              style: TextStyle(color: context.appForeground(Colors.red)),
             ),
           ),
         ],
@@ -285,7 +286,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: AppText(msg),
-        backgroundColor: Colors.red,
+        backgroundColor: context.appSurface(Colors.red),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -295,7 +296,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: AppText(msg),
-        backgroundColor: Colors.green,
+        backgroundColor: context.appSurface(Colors.green),
         behavior: SnackBarBehavior.floating,
       ),
     );

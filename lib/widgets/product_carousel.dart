@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
@@ -38,7 +39,7 @@ class ProductCarousel extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         if (products.isEmpty)
-          _buildEmptyState()
+          _buildEmptyState(context, )
         else if (isDesktop)
           _buildDesktopGrid(context, cardWidth, compact)
         else
@@ -103,13 +104,13 @@ class ProductCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context, ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: AppText(
         'No products available at the moment.',
         style: TextStyle(
-          color: AppColors.grey500,
+          color: context.appForeground(AppColors.grey500),
           fontSize: 14,
         ),
       ),

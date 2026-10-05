@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/screen/dashboard/categorypage.dart';
@@ -58,7 +59,7 @@ class CategoriesCarousel extends StatelessWidget {
               width: 200,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: context.appSurface(Colors.white),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -79,9 +80,9 @@ class CategoriesCarousel extends StatelessWidget {
                       borderRadius: const BorderRadius.vertical(
                         top: Radius.circular(12),
                       ),
-                      color: Colors.grey[200],
+                      color: context.appSurface(Colors.grey[200]),
                     ),
-                    child: _buildCategoryImage(imageUrl, categoryName),
+                    child: _buildCategoryImage(context, imageUrl, categoryName),
                   ),
                   
                   Padding(
@@ -103,17 +104,17 @@ class CategoriesCarousel extends StatelessWidget {
                           '${products.length} ${products.length == 1 ? 'product' : 'products'}',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Colors.grey[600],
+                            color: context.appForeground(Colors.grey[600]),
                           ),
                         ),
                         const SizedBox(height: 8),
                         if (products.isNotEmpty && products[0].price != null)
                           AppText(
                           'From ₹${products[0].price!.toStringAsFixed(2)}',
-                            style: const TextStyle(
+                            style:  TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w600,
-                              color: Colors.green,
+                              color: context.appForeground(Colors.green),
                             ),
                           ),
                       ],
@@ -144,23 +145,23 @@ class CategoriesCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildCategoryImage(String? imageUrl, String categoryName) {
+  Widget _buildCategoryImage(BuildContext context, String? imageUrl, String categoryName) {
     if (imageUrl == null || imageUrl.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+             Icon(
               Icons.category,
               size: 60,
-              color: Colors.grey,
+              color: context.appForeground(Colors.grey),
             ),
             const SizedBox(height: 5),
             AppText(
               categoryName,
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 12,
-                color: Colors.grey,
+                color: context.appForeground(Colors.grey),
               ),
               textAlign: TextAlign.center,
             ),
@@ -197,17 +198,17 @@ class CategoriesCarousel extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                 Icon(
                   Icons.broken_image,
                   size: 40,
-                  color: Colors.grey,
+                  color: context.appForeground(Colors.grey),
                 ),
                 const SizedBox(height: 5),
                 AppText(
                   categoryName,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 12,
-                    color: Colors.grey,
+                    color: context.appForeground(Colors.grey),
                   ),
                   textAlign: TextAlign.center,
                 ),

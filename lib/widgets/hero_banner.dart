@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -133,12 +134,12 @@ class _HeroBannerState extends State<HeroBanner> {
               fit: BoxFit.cover,
               loadingBuilder: (context, child, loadingProgress) {
                 if (loadingProgress == null) return child;
-                return Container(color: AppColors.grey200);
+                return Container(color: context.appSurface(AppColors.grey200));
               },
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  color: AppColors.green100,
-                   child: const Icon(Icons.broken_image, size: 40, color: AppColors.grey400),
+                  color: context.appSurface(AppColors.green100),
+                   child:  Icon(Icons.broken_image, size: 40, color: context.appForeground(AppColors.grey400)),
                 );
               },
             ),
@@ -149,11 +150,11 @@ class _HeroBannerState extends State<HeroBanner> {
                 gradient: LinearGradient(
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
-                  colors: [
+                  colors: context.appGradient([
                     Colors.black.withValues(alpha: 0.55),
                     Colors.black.withValues(alpha: 0.2),
                     Colors.transparent,
-                  ],
+                  ]),
                 ),
               ),
             ),
@@ -186,14 +187,14 @@ class _HeroBannerState extends State<HeroBanner> {
                 AppText(
                   slide.title,
                   style: AppTextStyles.displayLarge.copyWith(
-                    color: AppColors.white,
+                    color: context.appForeground(AppColors.white),
                     fontSize: 42,
                   ),
                 ),
                 AppText(
                   slide.subtitle,
                   style: AppTextStyles.displayLarge.copyWith(
-                    color: AppColors.green100,
+                    color: context.appForeground(AppColors.green100),
                     fontSize: 42,
                   ),
                 ),
@@ -201,7 +202,7 @@ class _HeroBannerState extends State<HeroBanner> {
                 AppText(
                   slide.description,
                   style: AppTextStyles.bodyLarge.copyWith(
-                    color: AppColors.white.withValues(alpha: 0.9),
+                    color: context.appForeground(AppColors.white.withValues(alpha: 0.9)),
                     fontSize: 16,
                   ),
                 ),
@@ -234,14 +235,14 @@ class _HeroBannerState extends State<HeroBanner> {
         AppText(
           slide.title,
           style: AppTextStyles.displayMedium.copyWith(
-            color: AppColors.white,
+            color: context.appForeground(AppColors.white),
             fontSize: 28,
           ),
         ),
         AppText(
           slide.subtitle,
           style: AppTextStyles.displayMedium.copyWith(
-            color: AppColors.green100,
+            color: context.appForeground(AppColors.green100),
             fontSize: 28,
           ),
         ),
@@ -249,7 +250,7 @@ class _HeroBannerState extends State<HeroBanner> {
         AppText(
           slide.description,
           style: AppTextStyles.bodySmall.copyWith(
-            color: AppColors.white.withValues(alpha: 0.9),
+            color: context.appForeground(AppColors.white.withValues(alpha: 0.9)),
             fontSize: 13,
           ),
         ),
@@ -284,8 +285,8 @@ class _HeroBannerState extends State<HeroBanner> {
             }
           },
       style: ElevatedButton.styleFrom(
-        backgroundColor: AppColors.primary,
-        foregroundColor: AppColors.white,
+        backgroundColor: context.appSurface(AppColors.primary),
+        foregroundColor: context.appForeground(AppColors.white),
         padding: EdgeInsets.symmetric(
           horizontal: small ? 16 : 32,
           vertical: small ? 10 : 14,
@@ -309,8 +310,8 @@ class _HeroBannerState extends State<HeroBanner> {
     return OutlinedButton(
       onPressed: () {},
       style: OutlinedButton.styleFrom(
-        side: const BorderSide(color: AppColors.white, width: 1.5),
-        foregroundColor: AppColors.white,
+        side:  BorderSide(color: context.appBorder(AppColors.white), width: 1.5),
+        foregroundColor: context.appForeground(AppColors.white),
         padding: EdgeInsets.symmetric(
           horizontal: small ? 16 : 32,
           vertical: small ? 10 : 14,
@@ -346,7 +347,7 @@ class _HeroBannerState extends State<HeroBanner> {
             height: 8,
             margin: const EdgeInsets.symmetric(horizontal: 3),
             decoration: BoxDecoration(
-              color: isActive ? AppColors.primary : AppColors.white.withValues(alpha: 0.4),
+              color: context.appSurface(isActive ? AppColors.primary : AppColors.white.withValues(alpha: 0.4)),
               borderRadius: BorderRadius.circular(4),
             ),
           );

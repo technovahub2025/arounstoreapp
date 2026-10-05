@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 
 
@@ -73,16 +74,16 @@ class CategoryImagesHorizontal extends StatelessWidget {
                   children: [
                    AppText(
   capitalizeFirst(categoryName),
-  style: const TextStyle(
+  style:  TextStyle(
     fontSize: 18,
     fontWeight: FontWeight.bold,
-    color: Colors.black87,
+    color: context.appForeground(Colors.black87),
   ),
 ),
-                    const Icon(
+                     Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
-                      color: Colors.grey,
+                      color: context.appForeground(Colors.grey),
                     ),
                   ],
                 ),
@@ -106,7 +107,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
                         margin: const EdgeInsets.only(right: 12),
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
+                          color: context.appSurface(Colors.white),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.withOpacity(0.2),
@@ -117,7 +118,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
                         ),
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: _buildProductImage(optimizedUrl, imgIndex + 1),
+                          child: _buildProductImage(context, optimizedUrl, imgIndex + 1),
                         ),
                       );
                     },
@@ -156,9 +157,9 @@ class CategoryImagesHorizontal extends StatelessWidget {
     return originalUrl;
   }
 
-  Widget _buildProductImage(String imageUrl, int imageNumber) {
+  Widget _buildProductImage(BuildContext context, String imageUrl, int imageNumber) {
     if (imageUrl.isEmpty) {
-      return _buildErrorWidget('Empty URL', imageNumber);
+      return _buildErrorWidget(context, 'Empty URL', imageNumber);
     }
     
     if (kDebugMode) {
@@ -175,7 +176,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
       },
-      placeholder: (context, url) => _buildLoadingWidget(imageNumber),
+      placeholder: (context, url) => _buildLoadingWidget(context, imageNumber),
       
       errorWidget: (context, url, error) {
         if (kDebugMode) {
@@ -190,14 +191,14 @@ class CategoryImagesHorizontal extends StatelessWidget {
             return CachedNetworkImage(
               imageUrl: fallbackUrl,
               fit: BoxFit.cover,
-              placeholder: (context, url) => _buildLoadingWidget(imageNumber),
+              placeholder: (context, url) => _buildLoadingWidget(context, imageNumber),
               errorWidget: (context, url2, error2) => 
-                  _buildErrorWidget('Fallback failed', imageNumber),
+                  _buildErrorWidget(context, 'Fallback failed', imageNumber),
             );
           }
         }
         
-        return _buildErrorWidget('Load failed', imageNumber);
+        return _buildErrorWidget(context, 'Load failed', imageNumber);
       },
       
       // Cache settings
@@ -235,9 +236,9 @@ class CategoryImagesHorizontal extends StatelessWidget {
     return originalUrl;
   }
 
-  Widget _buildLoadingWidget(int imageNumber) {
+  Widget _buildLoadingWidget(BuildContext context, int imageNumber) {
     return Container(
-      color: Colors.grey[100],
+      color: context.appSurface(Colors.grey[100]),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -249,9 +250,9 @@ class CategoryImagesHorizontal extends StatelessWidget {
             const SizedBox(height: 8),
             AppText(
               'Image $imageNumber',
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 10,
-                color: Colors.grey,
+                color: context.appForeground(Colors.grey),
               ),
             ),
           ],
@@ -260,24 +261,24 @@ class CategoryImagesHorizontal extends StatelessWidget {
     );
   }
 
-  Widget _buildErrorWidget(String errorType, int imageNumber) {
+  Widget _buildErrorWidget(BuildContext context, String errorType, int imageNumber) {
     return Container(
-      color: Colors.grey[100],
+      color: context.appSurface(Colors.grey[100]),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+             Icon(
               Icons.broken_image,
               size: 24,
-              color: Colors.grey,
+              color: context.appForeground(Colors.grey),
             ),
             const SizedBox(height: 4),
             AppText(
               'Img $imageNumber',
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 10,
-                color: Colors.grey,
+                color: context.appForeground(Colors.grey),
               ),
             ),
             if (kDebugMode)
@@ -285,9 +286,9 @@ class CategoryImagesHorizontal extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 4),
                 child: AppText(
                   errorType,
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 8,
-                    color: Colors.red,
+                    color: context.appForeground(Colors.red),
                   ),
                 ),
               ),

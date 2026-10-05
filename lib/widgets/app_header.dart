@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/cart/cartservice.dart';
@@ -70,7 +71,7 @@ class _AppHeaderState extends State<AppHeader> {
     return Container(
       height: 42,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.appSurface(AppColors.white),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
@@ -86,12 +87,12 @@ class _AppHeaderState extends State<AppHeader> {
         decoration: InputDecoration(
           hintText: 'Search for groceries, vegetables, fruits...',
           hintStyle: TextStyle(
-            color: AppColors.lightText,
+            color: context.appForeground(AppColors.lightText),
             fontSize: 14,
           ),
-          prefixIcon: const Icon(
+          prefixIcon:  Icon(
             Icons.search,
-            color: AppColors.primary,
+            color: context.appForeground(AppColors.primary),
             size: 20,
           ),
           border: InputBorder.none,
@@ -122,7 +123,7 @@ class _AppHeaderState extends State<AppHeader> {
 
   Widget _buildMobileSearchBar() {
     return Container(
-      color: AppColors.white,
+      color: context.appSurface(AppColors.white),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: _buildSearchBar(expanded: false),
     );
@@ -135,7 +136,7 @@ class _AppHeaderState extends State<AppHeader> {
     if (widget.navItems.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      color: AppColors.white,
+      color: context.appSurface(AppColors.white),
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Wrap(
         spacing: 4, runSpacing: 4,
@@ -146,7 +147,7 @@ class _AppHeaderState extends State<AppHeader> {
             child: TextButton(
               onPressed: () => widget.onNavTap?.call(item),
               style: TextButton.styleFrom(
-                foregroundColor: isActive ? AppColors.primary : AppColors.mutedText,
+                foregroundColor: context.appForeground(isActive ? AppColors.primary : AppColors.mutedText),
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
               child: AppText(
@@ -154,7 +155,7 @@ class _AppHeaderState extends State<AppHeader> {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: isActive ? AppColors.primary : AppColors.mutedText,
+                  color: context.appForeground(isActive ? AppColors.primary : AppColors.mutedText),
                 ),
               ),
             ),

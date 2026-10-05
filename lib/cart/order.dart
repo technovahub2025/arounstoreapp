@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:flutter/material.dart';
@@ -20,7 +21,7 @@ class orderscreen extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.appSurface(Colors.white),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(
@@ -64,9 +65,9 @@ class orderscreen extends StatelessWidget {
                 const SizedBox(height: 2),
                 AppText(
                   '₹${product.price ?? 0}',
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 13,
-                    color: Colors.green,
+                    color: context.appForeground(Colors.green),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

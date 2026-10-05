@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -67,10 +68,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       top: 6,
                       child: CircleAvatar(
                         radius: 8,
-                        backgroundColor: Colors.red,
+                        backgroundColor: context.appSurface(Colors.red),
                         child: AppText(
                           cartManager.totalItems.toString(),
-                          style: const TextStyle(fontSize: 10, color: Colors.white),
+                          style:  TextStyle(fontSize: 10, color: context.appForeground(Colors.white)),
                         ),
                       ),
                     ),
@@ -111,13 +112,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.blue[50],
+                        color: context.appSurface(Colors.blue[50]),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: AppText(
                         widget.product.category ?? 'Uncategorized',
-                        style: const TextStyle(
-                          color: Colors.blue,
+                        style:  TextStyle(
+                          color: context.appForeground(Colors.blue),
                           fontSize: 12,
                         ),
                       ),
@@ -128,7 +129,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         children: [
                           Icon(
                             Icons.star,
-                            color: Colors.amber[600],
+                            color: context.appForeground(Colors.amber[600]),
                             size: 20,
                           ),
                           const SizedBox(width: 4),
@@ -149,10 +150,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Price
                 AppText(
                   rupeeFormat.format(widget.product.price ?? 0),
-                  style: const TextStyle(
+                  style:  TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
-                    color: Colors.green,
+                    color: context.appForeground(Colors.green),
                   ),
                 ),
                 
@@ -165,9 +166,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       widget.product.stock != null && widget.product.stock! > 0
                           ? Icons.check_circle
                           : Icons.error,
-                      color: widget.product.stock != null && widget.product.stock! > 0
+                      color: context.appForeground(widget.product.stock != null && widget.product.stock! > 0
                           ? Colors.green
-                          : Colors.red,
+                          : Colors.red),
                     ),
                     const SizedBox(width: 8),
                     Expanded(child: AppText(
@@ -176,9 +177,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           : 'Out of stock',
                       style: TextStyle(
                         fontSize: 16,
-                        color: widget.product.stock != null && widget.product.stock! > 0
+                        color: context.appForeground(widget.product.stock != null && widget.product.stock! > 0
                             ? Colors.green
-                            : Colors.red,
+                            : Colors.red),
                       ),
                     )),
                   ],
@@ -199,7 +200,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   widget.product.description, fallback: 'No description available',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey[700],
+                    color: context.appForeground(Colors.grey[700]),
                     height: 1.5,
                   ),
                 ),
@@ -219,7 +220,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     const SizedBox(width: 16),
                     Container(
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey[300]!),
+                        border: Border.all(color: context.appBorder(Colors.grey[300]!)),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -260,7 +261,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: context.appSurface(Colors.white),
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withOpacity(0.2),
@@ -278,10 +279,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ? () => _addToCart(_quantity)
                     : null,
                 icon: const Icon(Icons.shopping_cart),
-                label: const AppText('Add to Cart', style: TextStyle(color: Colors.white)),
+                label:  AppText('Add to Cart', style: TextStyle(color: context.appForeground(Colors.white))),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: const Color(0xFF15803D),
+                  backgroundColor: context.appSurface(const Color(0xFF15803D)),
                 ),
               ),
             ),
@@ -294,10 +295,10 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 onPressed: widget.product.stock != null && widget.product.stock! > 0
                     ? _buyNow
                     : null,
-                child: const AppText('Buy Now', style: TextStyle(color: Colors.white)),
+                child:  AppText('Buy Now', style: TextStyle(color: context.appForeground(Colors.white))),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  backgroundColor: Colors.orange,
+                  backgroundColor: context.appSurface(Colors.orange),
                 ),
               ),
             ),
@@ -346,12 +347,12 @@ Widget _buildImageCarousel() {
                     },
                     errorBuilder: (context, error, stackTrace) {
                       return Container(
-                        color: Colors.grey[200],
-                        child: const Center(
+                        color: context.appSurface(Colors.grey[200]),
+                        child:  Center(
                           child: Icon(
                             Icons.broken_image,
                             size: 60,
-                            color: Colors.grey,
+                            color: context.appForeground(Colors.grey),
                           ),
                         ),
                       );
@@ -370,13 +371,13 @@ Widget _buildImageCarousel() {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: Colors.black54,
+                    color: context.appSurface(Colors.black54),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: AppText(
                     '${_selectedImageIndex + 1}/${images.length}',
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style:  TextStyle(
+                      color: context.appForeground(Colors.white),
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -393,13 +394,13 @@ Widget _buildImageCarousel() {
                     _showFullScreenImage(_selectedImageIndex),
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  decoration: const BoxDecoration(
-                    color: Colors.black54,
+                  decoration:  BoxDecoration(
+                    color: context.appSurface(Colors.black54),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
+                  child:  Icon(
                     Icons.fullscreen,
-                    color: Colors.white,
+                    color: context.appForeground(Colors.white),
                     size: 24,
                   ),
                 ),
@@ -436,9 +437,9 @@ Widget _buildImageCarousel() {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(
-                      color: _selectedImageIndex == index
+                      color: context.appBorder(_selectedImageIndex == index
                           ? Colors.blue
-                          : Colors.transparent,
+                          : Colors.transparent),
                       width: 2,
                     ),
                   ),
@@ -451,10 +452,10 @@ Widget _buildImageCarousel() {
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          color: Colors.grey[200],
-                          child: const Icon(
+                          color: context.appSurface(Colors.grey[200]),
+                          child:  Icon(
                             Icons.broken_image,
-                            color: Colors.grey,
+                            color: context.appForeground(Colors.grey),
                           ),
                         );
                       },
@@ -507,12 +508,12 @@ Widget _buildImageCarousel() {
                         },
                         errorBuilder: (context, error, stackTrace) {
                           return Container(
-                            color: Colors.black,
-                            child: const Center(
+                            color: context.appSurface(Colors.black),
+                            child:  Center(
                               child: Icon(
                                 Icons.broken_image,
                                 size: 60,
-                                color: Colors.grey,
+                                color: context.appForeground(Colors.grey),
                               ),
                             ),
                           );
@@ -532,12 +533,12 @@ Widget _buildImageCarousel() {
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.black54,
+                      color: context.appSurface(Colors.black54),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(
+                    child:  Icon(
                       Icons.close,
-                      color: Colors.white,
+                      color: context.appForeground(Colors.white),
                       size: 30,
                     ),
                   ),
@@ -556,13 +557,13 @@ Widget _buildImageCarousel() {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.black54,
+                      color: context.appSurface(Colors.black54),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: AppText(
                       '${initialIndex + 1}/${widget.product.images.length}',
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style:  TextStyle(
+                        color: context.appForeground(Colors.white),
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -584,9 +585,9 @@ Widget _buildImageCarousel() {
       if (CartManager.instance.isProductInCart(widget.product)) {
         // Show message that product is already in cart
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+           SnackBar(
             content: AppText('Product is already in cart'),
-            backgroundColor: Colors.blue,
+            backgroundColor: context.appSurface(Colors.blue),
             duration: Duration(seconds: 2),
           ),
         );
@@ -603,9 +604,9 @@ Widget _buildImageCarousel() {
     } else {
       // Show out of stock message
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: AppText('Product is out of stock'),
-          backgroundColor: Colors.red,
+          backgroundColor: context.appSurface(Colors.red),
           duration: Duration(seconds: 2),
         ),
       );
@@ -618,9 +619,9 @@ Widget _buildImageCarousel() {
       
       // Show checkout message (you can implement actual checkout navigation here)
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: AppText('Proceeding to checkout...'),
-          backgroundColor: Colors.orange,
+          backgroundColor: context.appSurface(Colors.orange),
           duration: Duration(seconds: 2),
         ),
       );
@@ -632,9 +633,9 @@ Widget _buildImageCarousel() {
       // );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+         SnackBar(
           content: AppText('Product is out of stock'),
-          backgroundColor: Colors.red,
+          backgroundColor: context.appSurface(Colors.red),
           duration: Duration(seconds: 2),
         ),
       );

@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/order.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -40,7 +41,7 @@ class _AllorderState extends State<Allorder> {
           margin: const EdgeInsets.only(bottom: 16),
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: context.appSurface(Colors.white),
             borderRadius: BorderRadius.circular(14),
             boxShadow: [
               BoxShadow(
@@ -58,7 +59,7 @@ class _AllorderState extends State<Allorder> {
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
-                  color: order.paymentSuccessful ? Colors.green.shade700 : Colors.red.shade700,
+                  color: context.appForeground(order.paymentSuccessful ? Colors.green.shade700 : Colors.red.shade700),
                 ),
               ),
               const SizedBox(height: 8),
@@ -114,8 +115,8 @@ class _AllorderState extends State<Allorder> {
   Widget _bottomBar() {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      decoration:  BoxDecoration(
+        color: context.appSurface(Colors.white),
         boxShadow: [
           BoxShadow(blurRadius: 6, color: Colors.black12),
         ],

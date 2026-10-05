@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/adminscreen/dashboard.dart';
 import 'package:arunstore/authmanager.dart';
@@ -59,7 +60,7 @@ void login() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: AppText(result['message']?.toString() ?? 'Login successful'),
-            backgroundColor: Colors.green,
+            backgroundColor: context.appSurface(Colors.green),
           ),
         );
         
@@ -124,7 +125,7 @@ void login() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: AppText(errorMsg),
-            backgroundColor: Colors.red,
+            backgroundColor: context.appSurface(Colors.red),
           ),
         );
       }
@@ -136,7 +137,7 @@ void login() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: AppText(errorMsg),
-          backgroundColor: Colors.red,
+          backgroundColor: context.appSurface(Colors.red),
         ),
       );
       
@@ -163,7 +164,7 @@ void login() async {
     return Scaffold(
       appBar: AppBar(
         title: AppText('Login'),
-        backgroundColor: Color(0xFF15803D),
+        backgroundColor: context.appSurface(Color(0xFF15803D)),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -182,7 +183,7 @@ void login() async {
                       Icon(
                         Icons.store,
                         size: 60,
-                        color: Color(0xFF15803D),
+                        color: context.appForeground(Color(0xFF15803D)),
                       ),
                       SizedBox(height: 10),
                       AppText(
@@ -190,7 +191,7 @@ void login() async {
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF15803D),
+                          color: context.appForeground(Color(0xFF15803D)),
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -203,7 +204,7 @@ void login() async {
                   'Login to your account',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.grey,
+                    color: context.appForeground(Colors.grey),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -216,18 +217,18 @@ void login() async {
                     padding: EdgeInsets.all(12),
                     margin: EdgeInsets.only(bottom: 16),
                     decoration: BoxDecoration(
-                      color: Colors.red[50],
+                      color: context.appSurface(Colors.red[50]),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(color: Colors.red[200]!),
+                      border: Border.all(color: context.appBorder(Colors.red[200]!)),
                     ),
                     child: Row(
                       children: [
-                        Icon(Icons.error_outline, color: Colors.red, size: 20),
+                        Icon(Icons.error_outline, color: context.appForeground(Colors.red), size: 20),
                         SizedBox(width: 10),
                         Expanded(
                           child: AppText(
                             _errorMessage!,
-                            style: TextStyle(color: Colors.red),
+                            style: TextStyle(color: context.appForeground(Colors.red)),
                           ),
                         ),
                       ],
@@ -242,16 +243,16 @@ void login() async {
                     labelText: 'Phone Number',
                     hintText: 'Enter your phone number',
                   
-                    prefixIcon: Icon(Icons.phone, color: Color(0xFF15803D)),
+                    prefixIcon: Icon(Icons.phone, color: context.appForeground(Color(0xFF15803D))),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF15803D)),
+                      borderSide: BorderSide(color: context.appBorder(Color(0xFF15803D))),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: context.appSurface(Colors.grey[50]),
                   ).localized(context),
                   keyboardType: TextInputType.phone,
                   validator: (val) {
@@ -273,12 +274,12 @@ void login() async {
                   decoration: InputDecoration(
                     labelText: 'Password',
                     hintText: 'Enter your password',
-                    prefixIcon: Icon(Icons.lock, color: Color(0xFF15803D)),
+                    prefixIcon: Icon(Icons.lock, color: context.appForeground(Color(0xFF15803D))),
                     // ADD THIS: suffixIcon for visibility toggle
                     suffixIcon: IconButton(
                       icon: Icon(
                         _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                        color: Color(0xFF15803D),
+                        color: context.appForeground(Color(0xFF15803D)),
                       ),
                       onPressed: _togglePasswordVisibility,
                     ),
@@ -287,10 +288,10 @@ void login() async {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(10),
-                      borderSide: BorderSide(color: Color(0xFF15803D)),
+                      borderSide: BorderSide(color: context.appBorder(Color(0xFF15803D))),
                     ),
                     filled: true,
-                    fillColor: Colors.grey[50],
+                    fillColor: context.appSurface(Colors.grey[50]),
                   ).localized(context),
                   // UPDATED: Use the visibility state
                   obscureText: !_isPasswordVisible,
@@ -316,7 +317,7 @@ void login() async {
                     },
                     child: AppText(
                       'Forgot Password?',
-                      style: TextStyle(color: Color(0xFF15803D)),
+                      style: TextStyle(color: context.appForeground(Color(0xFF15803D))),
                     ),
                   ),
                 ),
@@ -327,7 +328,7 @@ void login() async {
                 _isLoading
                     ? Center(
                         child: CircularProgressIndicator(
-                          color: Color(0xFF15803D),
+                          color: context.appForeground(Color(0xFF15803D)),
                         ),
                       )
                     : ElevatedButton(
@@ -343,8 +344,8 @@ void login() async {
                           ),
                         ),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color(0xFF15803D), // Changed to green
-                          foregroundColor: Colors.white, // White text
+                          backgroundColor: context.appSurface(Color(0xFF15803D)), // Changed to green
+                          foregroundColor: context.appForeground(Colors.white), // White text
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -363,7 +364,7 @@ void login() async {
                       padding: EdgeInsets.symmetric(horizontal: 16),
                       child: AppText(
                         'OR',
-                        style: TextStyle(color: Colors.grey),
+                        style: TextStyle(color: context.appForeground(Colors.grey)),
                       ),
                     ),
                     Expanded(
@@ -380,7 +381,7 @@ void login() async {
                   children: [
                     AppText(
                       "Don't have an account? ",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: context.appForeground(Colors.grey)),
                     ),
                     TextButton(
                       onPressed: navigateToSignup,
@@ -388,7 +389,7 @@ void login() async {
                         'SIGN UP',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF15803D),
+                          color: context.appForeground(Color(0xFF15803D)),
                         ),
                       ),
                     ),

@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/screen/settings/app_preferences.dart';
 import 'package:arunstore/screen/settings/policy_screen.dart';
 import 'package:flutter/material.dart';
@@ -103,7 +104,7 @@ class SettingsScreen extends StatelessWidget {
                               ),
                               leading: Icon(
                                 policy.icon,
-                                color: theme.colorScheme.primary,
+                                color: context.appForeground(theme.colorScheme.primary),
                               ),
                               title: Text(policy.label(prefs)),
                               trailing: const Icon(Icons.chevron_right),

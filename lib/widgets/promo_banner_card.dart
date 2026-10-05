@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -39,7 +40,7 @@ class PromoBannerCard extends StatelessWidget {
         height: cardHeight,
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: backgroundColor,
+          color: context.appSurface(backgroundColor),
           borderRadius: BorderRadius.circular(AppDimensions.radiusLarge),
           boxShadow: AppShadows.cardShadow,
         ),
@@ -52,20 +53,20 @@ class PromoBannerCard extends StatelessWidget {
               children: [
                 Icon(
                   icon,
-                  color: accentColor ?? AppColors.primary,
+                  color: context.appForeground(accentColor ?? AppColors.primary),
                   size: 24,
                 ),
                 if (offer != null)
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                     decoration: BoxDecoration(
-                      color: (accentColor ?? AppColors.primary).withValues(alpha: 0.15),
+                      color: context.appSurface((accentColor ?? AppColors.primary).withValues(alpha: 0.15)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: AppText(
                       offer!,
                       style: TextStyle(
-                        color: accentColor ?? AppColors.primary,
+                        color: context.appForeground(accentColor ?? AppColors.primary),
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
                       ),
@@ -90,7 +91,7 @@ class PromoBannerCard extends StatelessWidget {
                     subtitle!,
                     style: TextStyle(
                       fontSize: 11,
-                      color: AppColors.grey600,
+                      color: context.appForeground(AppColors.grey600),
                       height: 1.3,
                     ),
                     maxLines: 1,

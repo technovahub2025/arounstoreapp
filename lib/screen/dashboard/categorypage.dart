@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -80,7 +81,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackground(AppColors.background),
       body: SafeArea(
         child: Column(
           children: [
@@ -105,7 +106,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.appSurface(AppColors.white),
         boxShadow: [
           BoxShadow(
             color: AppColors.shadowLight,
@@ -117,7 +118,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       child: Row(
         children: [
           IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+            icon:  Icon(Icons.arrow_back, color: context.appForeground(AppColors.primary)),
             onPressed: () => Navigator.pop(context),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
@@ -126,16 +127,16 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           Expanded(
             child: AppText(
               'Shop by Category',
-              style: const TextStyle(
+              style:  TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: AppColors.darkText,
+                color: context.appForeground(AppColors.darkText),
               ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.search, color: AppColors.grey500),
+            icon:  Icon(Icons.search, color: context.appForeground(AppColors.grey500)),
             onPressed: () {
               showSearch(
                 context: context,
@@ -158,9 +159,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     return Container(
       width: sidebarWidth,
       decoration: BoxDecoration(
-        color: AppColors.white,
+        color: context.appSurface(AppColors.white),
         border: Border(
-          right: BorderSide(color: AppColors.border, width: 1),
+          right: BorderSide(color: context.appBorder(AppColors.border), width: 1),
         ),
       ),
       child: Column(
@@ -171,7 +172,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             child: AppText(
               'Categories',
               style: AppTextStyles.headingSmall.copyWith(
-                color: AppColors.grey600,
+                color: context.appForeground(AppColors.grey600),
                 fontSize: 13,
               ),
             ),
@@ -215,11 +216,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
     return Card(
       elevation: isSelected ? 2 : 0,
-      color: isSelected ? AppColors.green50 : AppColors.white,
+      color: context.appSurface(isSelected ? AppColors.green50 : AppColors.white),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isSelected ? AppColors.primary : AppColors.border,
+          color: context.appBorder(isSelected ? AppColors.primary : AppColors.border),
           width: isSelected ? 2 : 1,
         ),
       ),
@@ -235,7 +236,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.grey100,
+                  color: context.appSurface(AppColors.grey100),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: ClipRRect(
@@ -258,19 +259,19 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                               ),
                             );
                           },
-                          errorBuilder: (_, _, _) => const Center(
+                          errorBuilder: (_, _, _) =>  Center(
                             child: Icon(
                               Icons.category,
                               size: 20,
-                              color: AppColors.grey400,
+                              color: context.appForeground(AppColors.grey400),
                             ),
                           ),
                         )
-                      : const Center(
+                      :  Center(
                           child: Icon(
                             Icons.category,
                             size: 20,
-                            color: AppColors.grey400,
+                            color: context.appForeground(AppColors.grey400),
                           ),
                         ),
                 ),
@@ -287,14 +288,14 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                        color: isSelected ? AppColors.primary : AppColors.darkText,
+                        color: context.appForeground(isSelected ? AppColors.primary : AppColors.darkText),
                       ),
                     ),
                     AppText(
                       '$productCount items',
                       style: TextStyle(
                         fontSize: 11,
-                        color: isSelected ? AppColors.primary : AppColors.grey600,
+                        color: context.appForeground(isSelected ? AppColors.primary : AppColors.grey600),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -303,10 +304,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 ),
               ),
               if (isSelected)
-                const Icon(
+                 Icon(
                   Icons.check,
                   size: 16,
-                  color: AppColors.primary,
+                  color: context.appForeground(AppColors.primary),
                 ),
             ],
           ),
@@ -323,7 +324,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Container(
             decoration: BoxDecoration(
-              color: AppColors.white,
+              color: context.appSurface(AppColors.white),
               borderRadius: BorderRadius.circular(30),
               boxShadow: [
                 BoxShadow(
@@ -340,12 +341,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               decoration: InputDecoration(
                 hintText: 'Search products...',
                 hintStyle: TextStyle(
-                  color: AppColors.grey500,
+                  color: context.appForeground(AppColors.grey500),
                   fontSize: 13,
                 ),
                 prefixIcon: Icon(
                   Icons.search,
-                  color: AppColors.grey500,
+                  color: context.appForeground(AppColors.grey500),
                   size: 20,
                 ),
                 border: InputBorder.none,
@@ -356,7 +357,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 suffixIcon: _searchController.text.isNotEmpty
                     ? IconButton(
                         icon: const Icon(Icons.clear, size: 16),
-                        color: AppColors.grey400,
+                        color: context.appForeground(AppColors.grey400),
                         onPressed: () {
                           _searchController.clear();
                           _filterProducts('');
@@ -373,7 +374,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
             '${_filteredProducts.length} products found',
             style: TextStyle(
               fontSize: 13,
-              color: AppColors.grey600,
+              color: context.appForeground(AppColors.grey600),
             ),
           ),
         ),
@@ -445,7 +446,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 children: [
                   Container(
                     decoration: BoxDecoration(
-                      color: AppColors.grey100,
+                      color: context.appSurface(AppColors.grey100),
                     ),
                     child: _buildProductImage(product),
                   ),
@@ -459,13 +460,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.red,
+                          color: context.appSurface(AppColors.red),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: AppText(
                           '$discount% OFF',
-                          style: const TextStyle(
-                            color: AppColors.white,
+                          style:  TextStyle(
+                            color: context.appForeground(AppColors.white),
                             fontSize: 10,
                             fontWeight: FontWeight.w700,
                           ),
@@ -484,10 +485,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     product.name, fallback: 'Unnamed Product',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style:  TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.darkText,
+                      color: context.appForeground(AppColors.darkText),
                     ),
                   ),
                   const SizedBox(height: 6),
@@ -496,10 +497,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                     children: [
                       AppText(
                         rupeeFormat.format(product.price ?? 0),
-                        style: const TextStyle(
+                        style:  TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                          color: context.appForeground(AppColors.primary),
                         ),
                       ),
                       const SizedBox(width: 6),
@@ -508,7 +509,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           rupeeFormat.format(originalPrice),
                           style: TextStyle(
                             fontSize: 11,
-                            color: AppColors.grey500,
+                            color: context.appForeground(AppColors.grey500),
                             decoration: TextDecoration.lineThrough,
                             decorationColor: AppColors.grey400,
                           ),
@@ -521,7 +522,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       product.category!,
                       style: TextStyle(
                         fontSize: 11,
-                        color: AppColors.grey600,
+                        color: context.appForeground(AppColors.grey600),
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -537,11 +538,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
   Widget _buildProductImage(Product product) {
     if (product.images.isEmpty) {
-      return const Center(
+      return  Center(
         child: Icon(
           Icons.shopping_bag,
           size: 40,
-          color: AppColors.grey400,
+          color: context.appForeground(AppColors.grey400),
         ),
       );
     }
@@ -562,17 +563,17 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       loadingProgress.expectedTotalBytes!
                   : null,
               strokeWidth: 2,
-              color: AppColors.primary,
+              color: context.appForeground(AppColors.primary),
             ),
           ),
         );
       },
       errorBuilder: (_, _, _) {
-        return const Center(
+        return  Center(
           child: Icon(
             Icons.broken_image,
             size: 40,
-            color: AppColors.grey400,
+            color: context.appForeground(AppColors.grey400),
           ),
         );
       },
@@ -590,22 +591,22 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: AppColors.grey100,
+                color: context.appSurface(AppColors.grey100),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
+              child:  Icon(
                 Icons.inventory_2_outlined,
                 size: 40,
-                color: AppColors.grey500,
+                color: context.appForeground(AppColors.grey500),
               ),
             ),
             const SizedBox(height: 20),
-            const AppText(
+             AppText(
               'No products available',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.darkText,
+                color: context.appForeground(AppColors.darkText),
               ),
             ),
             const SizedBox(height: 8),
@@ -614,7 +615,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.grey600,
+                color: context.appForeground(AppColors.grey600),
               ),
             ),
           ],
@@ -630,18 +631,18 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(
+             Icon(
               Icons.search_off_outlined,
               size: 64,
-              color: AppColors.grey400,
+              color: context.appForeground(AppColors.grey400),
             ),
             const SizedBox(height: 16),
-            const AppText(
+             AppText(
               'No results found',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: AppColors.darkText,
+                color: context.appForeground(AppColors.darkText),
               ),
             ),
             const SizedBox(height: 8),
@@ -650,7 +651,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14,
-                color: AppColors.grey600,
+                color: context.appForeground(AppColors.grey600),
               ),
             ),
             const SizedBox(height: 16),
@@ -659,9 +660,9 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 _searchController.clear();
                 _filterProducts('');
               },
-              child: const AppText(
+              child:  AppText(
                 'Clear search',
-                style: TextStyle(color: AppColors.primary),
+                style: TextStyle(color: context.appForeground(AppColors.primary)),
               ),
             ),
           ],
@@ -702,15 +703,15 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
 
   @override
   Widget buildResults(BuildContext context) {
-    return _buildSearchResults();
+    return _buildSearchResults(context, );
   }
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    return _buildSearchResults();
+    return _buildSearchResults(context, );
   }
 
-  Widget _buildSearchResults() {
+  Widget _buildSearchResults(BuildContext context, ) {
     final lowerQuery = query.toLowerCase();
     final results = products.where((product) {
       final name = product.name?.toLowerCase() ?? '';
@@ -722,7 +723,7 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
       return Center(
         child: AppText(
           'Search for products',
-          style: TextStyle(color: AppColors.grey600),
+          style: TextStyle(color: context.appForeground(AppColors.grey600)),
         ),
       );
     }
@@ -731,11 +732,11 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: const [
+          children:  [
             Icon(
               Icons.search_off,
               size: 64,
-              color: AppColors.grey400,
+              color: context.appForeground(AppColors.grey400),
             ),
             SizedBox(height: 16),
             AppText('No products found'),
@@ -754,7 +755,7 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
             width: 50,
             height: 50,
             decoration: BoxDecoration(
-              color: AppColors.grey100,
+              color: context.appSurface(AppColors.grey100),
               borderRadius: BorderRadius.circular(8),
             ),
             child: product.images.isNotEmpty
@@ -763,14 +764,14 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
                     child: Image.network(
                       product.images[0],
                       fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) => const Icon(
+                      errorBuilder: (_, _, _) =>  Icon(
                         Icons.broken_image,
                         size: 40,
-                        color: AppColors.grey400,
+                        color: context.appForeground(AppColors.grey400),
                       ),
                     ),
                   )
-                : const Icon(Icons.shopping_bag, color: AppColors.grey400),
+                :  Icon(Icons.shopping_bag, color: context.appForeground(AppColors.grey400)),
           ),
           title: AppDataText(
             product.name, fallback: 'Unnamed Product',
@@ -779,7 +780,7 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
           ),
           subtitle: AppText(
               '₹${product.price?.toStringAsFixed(2) ?? '0.00'}',
-            style: const TextStyle(color: AppColors.primary),
+            style:  TextStyle(color: context.appForeground(AppColors.primary)),
           ),
           onTap: () {
             close(context, product);

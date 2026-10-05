@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -50,7 +51,7 @@ class _CartscreenState extends State<Cartscreen> {
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       padding: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.appSurface(Colors.white),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
           BoxShadow(color: Colors.grey.withOpacity(0.12), blurRadius: 4, offset: const Offset(0, 2)),
@@ -82,7 +83,7 @@ class _CartscreenState extends State<Cartscreen> {
                 const SizedBox(height: 2),
                 AppText(
                   '₹${(widget.product.price ?? 0.0).toStringAsFixed(2)}',
-                  style: const TextStyle(fontSize: 13, color: Colors.red, fontWeight: FontWeight.bold),
+                  style:  TextStyle(fontSize: 13, color: context.appForeground(Colors.red), fontWeight: FontWeight.bold),
                 ),
               ],
             ),
@@ -109,7 +110,7 @@ class _CartscreenState extends State<Cartscreen> {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(border: Border.all(color: Colors.black), borderRadius: BorderRadius.circular(4)),
+        decoration: BoxDecoration(border: Border.all(color: context.appBorder(Colors.black)), borderRadius: BorderRadius.circular(4)),
         child: Icon(icon, size: 12),
       ),
     );
