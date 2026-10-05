@@ -3,11 +3,11 @@ import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 
-class Cartscreen extends StatefulWidget {
+class Cartscreen extends StatelessWidget {
   final Product product;
   final int initialQuantity;
   final VoidCallback onRemove;
-  final Function(double delta) onQuantityChanged;
+  final ValueChanged<int> onQuantityChanged;
 
   const Cartscreen({
     super.key,
@@ -17,32 +17,13 @@ class Cartscreen extends StatefulWidget {
     required this.onQuantityChanged,
   });
 
-  @override
-  State<Cartscreen> createState() => _CartscreenState();
-}
-
-class _CartscreenState extends State<Cartscreen> {
-  late int localQuantity;
-
-  @override
-  void initState() {
-    super.initState();
-    localQuantity = widget.initialQuantity;
-  }
-
   void increase() {
-    setState(() {
-      localQuantity++;
-    });
-    widget.onQuantityChanged(widget.product.price ?? 0.0);
+    onQuantityChanged(initialQuantity + 1);
   }
 
   void decrease() {
-    if (localQuantity <= 0) return;
-    setState(() {
-      localQuantity--;
-    });
-    widget.onQuantityChanged(-(widget.product.price ?? 0.0));
+    if (initialQuantity <= 0) return;
+    onQuantityChanged(initialQuantity - 1);
   }
 
   @override
@@ -54,7 +35,11 @@ class _CartscreenState extends State<Cartscreen> {
         color: context.appSurface(Colors.white),
         borderRadius: BorderRadius.circular(10),
         boxShadow: [
-          BoxShadow(color: Colors.grey.withOpacity(0.12), blurRadius: 4, offset: const Offset(0, 2)),
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.12),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: Row(
@@ -62,7 +47,7 @@ class _CartscreenState extends State<Cartscreen> {
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
             child: Image.network(
-              widget.product.imageUrl ?? '',
+              product.imageUrl ?? '',
               width: 45,
               height: 45,
               fit: BoxFit.cover,
@@ -75,29 +60,40 @@ class _CartscreenState extends State<Cartscreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppDataText(
-                  widget.product.name, fallback: 'Unnamed',
+                  product.name,
+                  fallback: 'Unnamed',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const SizedBox(height: 2),
                 AppText(
-                  '₹${(widget.product.price ?? 0.0).toStringAsFixed(2)}',
-                  style:  TextStyle(fontSize: 13, color: context.appForeground(Colors.red), fontWeight: FontWeight.bold),
+                  '₹${(product.price ?? 0.0).toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: context.appForeground(Colors.red),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
           ),
           Row(
             children: [
-              _qtyButton(Icons.remove, decrease),
+              _qtyButton(context, Icons.remove, decrease),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: AppText(localQuantity.toString(), style: const TextStyle(fontSize: 14)),
+                child: AppText(
+                  initialQuantity.toString(),
+                  style: const TextStyle(fontSize: 14),
+                ),
               ),
-              _qtyButton(Icons.add, increase),
+              _qtyButton(context, Icons.add, increase),
               const SizedBox(width: 9),
-              _qtyButton(Icons.delete, widget.onRemove),
+              _qtyButton(context, Icons.delete, onRemove),
             ],
           ),
         ],
@@ -105,12 +101,15 @@ class _CartscreenState extends State<Cartscreen> {
     );
   }
 
-  Widget _qtyButton(IconData icon, VoidCallback onTap) {
+  Widget _qtyButton(BuildContext context, IconData icon, VoidCallback onTap) {
     return InkWell(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(border: Border.all(color: context.appBorder(Colors.black)), borderRadius: BorderRadius.circular(4)),
+        decoration: BoxDecoration(
+          border: Border.all(color: context.appBorder(Colors.black)),
+          borderRadius: BorderRadius.circular(4),
+        ),
         child: Icon(icon, size: 12),
       ),
     );

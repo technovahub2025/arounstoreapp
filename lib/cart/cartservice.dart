@@ -14,18 +14,21 @@ class CartPage extends StatefulWidget {
 
 class _CartPageState extends State<CartPage> {
   final cart = CartManager.instance;
-  double subtotal = 0.0;
 
   @override
   void initState() {
     super.initState();
-    subtotal = cart.subTotal.toDouble();
+    cart.addListener(_onCartChanged);
   }
 
-  void updateSubtotal(double delta) {
-    setState(() {
-      subtotal += delta;
-    });
+  void _onCartChanged() {
+    setState(() {});
+  }
+
+  @override
+  void dispose() {
+    cart.removeListener(_onCartChanged);
+    super.dispose();
   }
 
   @override
@@ -42,15 +45,12 @@ class _CartPageState extends State<CartPage> {
                     itemBuilder: (context, index) {
                       final item = cart.items[index];
                       return Cartscreen(
+                        key: ValueKey(item.product.id),
                         product: item.product,
                         initialQuantity: item.quantity,
-                        onRemove: () {
-                          setState(() {
-                            cart.remove(item.product);
-                            subtotal = cart.subTotal.toDouble();
-                          });
-                        },
-                        onQuantityChanged: updateSubtotal,
+                        onRemove: () => cart.remove(item.product),
+                        onQuantityChanged: (quantity) =>
+                            cart.updateQuantity(item.product, quantity),
                       );
                     },
                   ),
@@ -63,11 +63,12 @@ class _CartPageState extends State<CartPage> {
 
   Widget _bottomBar() {
     final total = cart.total.toDouble();
-    final shipping = 0.0;
+    final subtotal = cart.subTotal.toDouble();
+    final shipping = total - subtotal;
 
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration:  BoxDecoration(
+      decoration: BoxDecoration(
         color: context.appSurface(Colors.white),
         boxShadow: [BoxShadow(blurRadius: 6, color: Colors.black12)],
       ),
@@ -90,10 +91,12 @@ class _CartPageState extends State<CartPage> {
                   : () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const CheckoutScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const CheckoutScreen(),
+                        ),
                       );
                     },
-              child:  AppText(
+              child: AppText(
                 'Proceed to Checkout',
                 style: TextStyle(color: context.appForeground(Colors.white)),
               ),

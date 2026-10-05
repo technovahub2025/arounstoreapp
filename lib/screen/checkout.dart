@@ -46,7 +46,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   final _money = NumberFormat.currency(locale: 'en_IN', symbol: 'INR ', decimalDigits: 0);
 
   final _fullNameController = TextEditingController();
-  final _phoneController = TextEditingController(text: '9003530230');
+  final _phoneController = TextEditingController();
   final _address1Controller = TextEditingController();
   final _address2Controller = TextEditingController();
   final _cityController = TextEditingController();

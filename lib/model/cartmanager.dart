@@ -35,7 +35,7 @@
 //   }
 
 //    void remove(Product product) {
-//     _items.removeWhere((e) => e.product.id == product.id); 
+//     _items.removeWhere((e) => e.product.id == product.id);
 //   }
 
 //   int get subTotal {
@@ -70,16 +70,14 @@ class CartManager extends ChangeNotifier {
   }
 
   void addProduct(Product product, {int quantity = 1}) {
-    final index = _items.indexWhere(
-      (item) => item.product.id == product.id,
-    );
+    final index = _items.indexWhere((item) => item.product.id == product.id);
 
     if (index >= 0) {
       _items[index].quantity += quantity;
     } else {
       _items.add(CartItem(product: product, quantity: quantity));
     }
-    
+
     notifyListeners();
   }
 
@@ -127,23 +125,23 @@ class CartManager extends ChangeNotifier {
     return _items.any((item) => item.product.id == product.id);
   }
 
-  int get subTotal {
+  double get subTotal {
     double total = 0;
     for (var item in _items) {
       total += (item.product.price ?? 0) * item.quantity;
     }
-    return total.toInt();
+    return total;
   }
 
   void addProductWithQuantity(Product product, int quantity) {
     final index = _items.indexWhere((item) => item.product.id == product.id);
-    
+
     if (index >= 0) {
       _items[index].quantity += quantity;
     } else {
       _items.add(CartItem(product: product, quantity: quantity));
     }
-    
+
     notifyListeners();
   }
 
@@ -160,7 +158,7 @@ class CartManager extends ChangeNotifier {
   }
 
   // Calculate total with shipping (example)
-  int get total => subTotal + _calculateShipping();
+  double get total => subTotal + _calculateShipping();
 
   int get totalItems => _items.fold(0, (sum, item) => sum + item.quantity);
 
