@@ -1,4 +1,4 @@
-import 'package:arunstore/theme/theme_colors.dart';
+﻿import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/adminscreen/dashboard.dart';
 import 'package:arunstore/authmanager.dart';
@@ -60,7 +60,7 @@ void login() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: AppText(result['message']?.toString() ?? 'Login successful'),
-            backgroundColor: context.appSurface(Colors.green),
+            backgroundColor: Colors.green,
           ),
         );
         
@@ -125,7 +125,7 @@ void login() async {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: AppText(errorMsg),
-            backgroundColor: context.appSurface(Colors.red),
+            backgroundColor: Colors.red,
           ),
         );
       }
@@ -137,7 +137,7 @@ void login() async {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: AppText(errorMsg),
-          backgroundColor: context.appSurface(Colors.red),
+          backgroundColor: Colors.red,
         ),
       );
       
@@ -376,8 +376,7 @@ void login() async {
                 SizedBox(height: 20),
                 
                 // Sign up option
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
                     AppText(
                       "Don't have an account? ",
@@ -410,3 +409,4 @@ void login() async {
     super.dispose();
   }
 }
+

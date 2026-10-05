@@ -322,6 +322,11 @@ class AppTheme {
         selectedItemColor: scheme.primary,
         unselectedItemColor: scheme.onSurfaceVariant,
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: scheme.surfaceContainerHigh,
+        contentTextStyle: TextStyle(color: scheme.onSurface),
+        actionTextColor: scheme.primary,
+      ),
       drawerTheme: DrawerThemeData(backgroundColor: scheme.surface),
       dialogTheme: DialogThemeData(backgroundColor: scheme.surface),
       bottomSheetTheme: BottomSheetThemeData(backgroundColor: scheme.surface),
@@ -368,4 +373,5 @@ class AppTheme {
   static bool isTablet(BuildContext context) => screenWidth(context) >= AppBreakpoints.mobile && screenWidth(context) < AppBreakpoints.tablet;
   static bool isDesktop(BuildContext context) => screenWidth(context) >= AppBreakpoints.tablet;
 }
+
 

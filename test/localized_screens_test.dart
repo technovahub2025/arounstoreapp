@@ -37,40 +37,51 @@ void main() {
     'cart': const CartPage(),
     'admin product form': const ProductForm(),
   };
-  for (final entry in screens.entries) {
-    testWidgets('${entry.key} renders Tamil on a phone without overflow', (
-      tester,
-    ) async {
-      tester.view.physicalSize = const Size(390, 844);
-      tester.view.devicePixelRatio = 1;
-      addTearDown(tester.view.resetPhysicalSize);
-      addTearDown(tester.view.resetDevicePixelRatio);
-      SharedPreferences.setMockInitialValues({'app_language': 'ta'});
-      final prefs = AppPreferences(await SharedPreferences.getInstance());
-      await tester.pumpWidget(
-        MultiProvider(
-          providers: [
-            ChangeNotifierProvider.value(value: prefs),
-            ChangeNotifierProvider.value(value: CartManager.instance),
-            ChangeNotifierProvider.value(value: AuthManager()),
-          ],
-          child: MaterialApp(
-            theme: AppTheme.lightTheme,
-            locale: const Locale('ta'),
-            supportedLocales: const [Locale('en'), Locale('ta')],
-            localizationsDelegates: GlobalMaterialLocalizations.delegates,
-            home: entry.value,
-          ),
-        ),
+  for (final dark in [false, true]) {
+    for (final entry in screens.entries) {
+      testWidgets(
+        '${entry.key} renders Tamil on a phone without overflow (dark: $dark)',
+        (tester) async {
+          tester.view.physicalSize = const Size(390, 844);
+          tester.view.devicePixelRatio = 1;
+          addTearDown(tester.view.resetPhysicalSize);
+          addTearDown(tester.view.resetDevicePixelRatio);
+          SharedPreferences.setMockInitialValues({'app_language': 'ta'});
+          final prefs = AppPreferences(await SharedPreferences.getInstance());
+          await tester.pumpWidget(
+            MultiProvider(
+              providers: [
+                ChangeNotifierProvider.value(value: prefs),
+                ChangeNotifierProvider.value(value: CartManager.instance),
+                ChangeNotifierProvider.value(value: AuthManager()),
+              ],
+              child: MaterialApp(
+                theme: dark ? AppTheme.darkTheme : AppTheme.lightTheme,
+                locale: const Locale('ta'),
+                supportedLocales: const [Locale('en'), Locale('ta')],
+                localizationsDelegates: GlobalMaterialLocalizations.delegates,
+                home: entry.value,
+              ),
+            ),
+          );
+          await tester.pumpAndSettle();
+          expect(tester.takeException(), isNull);
+          if (dark) {
+            for (final element in find.byType(Scaffold).evaluate()) {
+              final color =
+                  (element.widget as Scaffold).backgroundColor ??
+                  Theme.of(element).scaffoldBackgroundColor;
+              expect(color.computeLuminance(), lessThan(0.2));
+            }
+          }
+          if (entry.key == 'product detail') {
+            expect(find.text('Green Tea'), findsWidgets);
+            expect(find.text('4 பொருட்கள் இருப்பில் உள்ளன'), findsOneWidget);
+          }
+          await tester.pumpWidget(const SizedBox());
+          await tester.pump();
+        },
       );
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      if (entry.key == 'product detail') {
-        expect(find.text('Green Tea'), findsWidgets);
-        expect(find.text('4 பொருட்கள் இருப்பில் உள்ளன'), findsOneWidget);
-      }
-      await tester.pumpWidget(const SizedBox());
-      await tester.pump();
-    });
+    }
   }
 }

@@ -1,3 +1,4 @@
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/authmanager.dart';
@@ -143,7 +144,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
         },
       ),
       _loading
-          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          ?  Center(child: CircularProgressIndicator(color: context.appForeground(AppColors.primary)))
           : _error != null
               ? Center(child: AppText(_error ?? 'Error loading categories'))
               : CategoryFilterPage(
@@ -176,16 +177,16 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
-              color: AppColors.primary,
+              color: context.appSurface(AppColors.primary),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.storefront, color: AppColors.white, size: 32),
+                   Icon(Icons.storefront, color: context.appForeground(AppColors.white), size: 32),
                   const SizedBox(height: 12),
-                  const AppText(
+                   AppText(
                     'Aroun Stores',
                     style: TextStyle(
-                      color: AppColors.white,
+                      color: context.appForeground(AppColors.white),
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -194,7 +195,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
                     const SizedBox(height: 4),
                     Text(
                       user!.name,
-                      style: const TextStyle(color: Colors.white70),
+                      style:  TextStyle(color: context.appForeground(Colors.white70)),
                     ),
                   ],
                 ],
@@ -263,9 +264,9 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
 
     return BottomNavigationBar(
       type: BottomNavigationBarType.fixed,
-      backgroundColor: AppColors.white,
-      selectedItemColor: AppColors.primary,
-      unselectedItemColor: AppColors.grey500,
+      backgroundColor: context.appSurface(AppColors.white),
+      selectedItemColor: context.appForeground(AppColors.primary),
+      unselectedItemColor: context.appForeground(AppColors.grey500),
       elevation: 8,
       currentIndex: _currentIndex,
       onTap: _onNavTap,
@@ -293,9 +294,9 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
                     width: 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
+                      color: context.appSurface(AppColors.primary),
                       shape: BoxShape.circle,
-                      border: Border.all(color: AppColors.white, width: 1),
+                      border: Border.all(color: context.appBorder(AppColors.white), width: 1),
                     ),
                   ),
                 ),
