@@ -63,7 +63,7 @@ class _CartPageState extends State<CartPage> {
 
   Widget _bottomBar() {
     final total = cart.total.toDouble();
-    final shipping = (total - subtotal).clamp(0.0, double.infinity);
+    final shipping = 0.0;
 
     return Container(
       padding: const EdgeInsets.all(16),

@@ -169,6 +169,6 @@ class CartManager extends ChangeNotifier {
     if (subTotal > 500) {
       return 0;
     }
-    return 50; // Default shipping charge
+    return 0; // Default shipping charge
   }
 }
