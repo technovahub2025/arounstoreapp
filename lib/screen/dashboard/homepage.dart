@@ -6,6 +6,7 @@ import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/screen/dashboard/wishlist.dart';
 import 'package:arunstore/screen/mobile_account.dart';
+import 'package:arunstore/screen/settings/settings_screen.dart';
 import 'package:arunstore/service/homescreenfunction.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:arunstore/widgets/app_footer.dart';
@@ -42,6 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'Combo Deals',
     'Blog',
     'Contact Us',
+    'Settings',
   ];
   final String _activeNavItem = 'Home';
 
@@ -83,6 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
     if (_logic == null) return;
 
     switch (item) {
+      case 'Settings':
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+        );
+        break;
       case 'Shop by Category':
       case 'Shop':
         _logic!.openAllCategoriesFilter(context, _logic!.categoryMap);
@@ -677,6 +684,10 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildDrawerItem('Contact', Icons.contact_phone, onTap: () {
             Navigator.pop(context);
             _showContactInfo();
+          }),
+          _buildDrawerItem('Settings', Icons.settings_outlined, onTap: () {
+            Navigator.pop(context);
+            _handleNavTap('Settings');
           }),
           _buildDrawerItem('Filter Products', Icons.filter_alt, onTap: () {
             Navigator.pop(context);

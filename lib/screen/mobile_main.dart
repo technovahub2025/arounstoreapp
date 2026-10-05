@@ -7,6 +7,7 @@ import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/screen/loginscreen.dart';
 import 'package:arunstore/screen/mobile_home.dart';
 import 'package:arunstore/screen/mobile_account.dart';
+import 'package:arunstore/screen/settings/settings_screen.dart';
 import 'package:arunstore/service/categoryservice.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
@@ -237,6 +238,16 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
               onTap: () {
                 Navigator.pop(context);
                 _onNavTap(2);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings_outlined),
+              title: const Text('Settings'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+                );
               },
             ),
           ],

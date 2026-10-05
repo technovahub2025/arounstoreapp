@@ -1,5 +1,6 @@
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
+import 'package:arunstore/screen/settings/settings_screen.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,15 @@ class MobileAccountScreen extends StatelessWidget {
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.darkText,
         elevation: 0,
+        actions: [
+          IconButton(
+            tooltip: 'Settings',
+            icon: const Icon(Icons.settings_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         child: authManager.isLoggedIn && user != null
