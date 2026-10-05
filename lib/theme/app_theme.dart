@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class AppColors {
   const AppColors._();
@@ -178,27 +178,15 @@ class AppShadows {
   const AppShadows._();
 
   static const List<BoxShadow> cardShadow = [
-    BoxShadow(
-      color: AppColors.shadow,
-      blurRadius: 8,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: AppColors.shadow, blurRadius: 8, offset: Offset(0, 2)),
   ];
 
   static const List<BoxShadow> cardShadowHover = [
-    BoxShadow(
-      color: AppColors.shadow,
-      blurRadius: 12,
-      offset: Offset(0, 4),
-    ),
+    BoxShadow(color: AppColors.shadow, blurRadius: 12, offset: Offset(0, 4)),
   ];
 
   static const List<BoxShadow> headerShadow = [
-    BoxShadow(
-      color: AppColors.shadow,
-      blurRadius: 6,
-      offset: Offset(0, 2),
-    ),
+    BoxShadow(color: AppColors.shadow, blurRadius: 6, offset: Offset(0, 2)),
   ];
 }
 
@@ -213,74 +201,78 @@ class AppTheme {
       onPrimary: AppColors.white,
       secondary: AppColors.primaryLight,
       surface: AppColors.white,
-  
+
       onSurface: AppColors.darkText,
     ),
-        primaryColor: AppColors.primary,
-        scaffoldBackgroundColor: AppColors.background,
-        canvasColor: AppColors.background,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: AppColors.white,
-          foregroundColor: AppColors.darkText,
-          elevation: 0,
-          shadowColor: AppColors.shadow,
-          centerTitle: false,
-          surfaceTintColor: Colors.transparent,
+    primaryColor: AppColors.primary,
+    scaffoldBackgroundColor: AppColors.background,
+    canvasColor: AppColors.background,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: AppColors.white,
+      foregroundColor: AppColors.darkText,
+      elevation: 0,
+      shadowColor: AppColors.shadow,
+      centerTitle: false,
+      surfaceTintColor: Colors.transparent,
+    ),
+    bottomNavigationBarTheme: const BottomNavigationBarThemeData(
+      backgroundColor: AppColors.white,
+      selectedItemColor: AppColors.primary,
+      unselectedItemColor: AppColors.grey500,
+      elevation: 8,
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
         ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: AppColors.white,
-          selectedItemColor: AppColors.primary,
-          unselectedItemColor: AppColors.grey500,
-          elevation: 8,
+        textStyle: AppTextStyles.labelLarge.copyWith(color: AppColors.white),
+        elevation: 2,
+      ),
+    ),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        textStyle: AppTextStyles.labelMedium,
+      ),
+    ),
+    cardTheme: const CardThemeData(
+      color: AppColors.white,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.all(
+          Radius.circular(AppDimensions.radiusLarge),
         ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-            ),
-            textStyle: AppTextStyles.labelLarge.copyWith(color: AppColors.white),
-            elevation: 2,
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            textStyle: AppTextStyles.labelMedium,
-          ),
-        ),
-        cardTheme: const CardThemeData(
-          color: AppColors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusLarge)),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: AppColors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-            borderSide: const BorderSide(color: AppColors.border),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-            borderSide: const BorderSide(color: AppColors.border),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
-            borderSide: const BorderSide(color: AppColors.primary, width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-        ),
-        scrollbarTheme: ScrollbarThemeData(
-          thumbColor: WidgetStateProperty.all(AppColors.lightText.withValues(alpha: 0.3)),
-          thickness: WidgetStateProperty.all(6),
-          radius: const Radius.circular(10),
-        ),
-        fontFamily: 'Inter',
+      ),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+        borderSide: const BorderSide(color: AppColors.border),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+        borderSide: const BorderSide(color: AppColors.primary, width: 2),
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+    ),
+    scrollbarTheme: ScrollbarThemeData(
+      thumbColor: WidgetStateProperty.all(
+        AppColors.lightText.withValues(alpha: 0.3),
+      ),
+      thickness: WidgetStateProperty.all(6),
+      radius: const Radius.circular(10),
+    ),
+    fontFamily: 'Inter',
   );
 
   static final ThemeData darkTheme = _buildDarkTheme();
@@ -314,7 +306,9 @@ class AppTheme {
         color: scheme.surface,
         elevation: 0,
         shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusLarge)),
+          borderRadius: BorderRadius.all(
+            Radius.circular(AppDimensions.radiusLarge),
+          ),
         ),
       ),
       bottomNavigationBarTheme: BottomNavigationBarThemeData(
@@ -348,7 +342,10 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
           borderSide: BorderSide(color: scheme.primary, width: 2),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -366,12 +363,17 @@ class AppTheme {
       ),
     );
   }
-  static double screenWidth(BuildContext context) => MediaQuery.of(context).size.width;
-  static double screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
 
-  static bool isMobile(BuildContext context) => screenWidth(context) < AppBreakpoints.mobile;
-  static bool isTablet(BuildContext context) => screenWidth(context) >= AppBreakpoints.mobile && screenWidth(context) < AppBreakpoints.tablet;
-  static bool isDesktop(BuildContext context) => screenWidth(context) >= AppBreakpoints.tablet;
+  static double screenWidth(BuildContext context) =>
+      MediaQuery.of(context).size.width;
+  static double screenHeight(BuildContext context) =>
+      MediaQuery.of(context).size.height;
+
+  static bool isMobile(BuildContext context) =>
+      screenWidth(context) < AppBreakpoints.mobile;
+  static bool isTablet(BuildContext context) =>
+      screenWidth(context) >= AppBreakpoints.mobile &&
+      screenWidth(context) < AppBreakpoints.tablet;
+  static bool isDesktop(BuildContext context) =>
+      screenWidth(context) >= AppBreakpoints.tablet;
 }
-
-

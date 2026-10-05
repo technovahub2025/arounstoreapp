@@ -1,4 +1,4 @@
-﻿import 'package:arunstore/theme/theme_colors.dart';
+import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/adminscreen/dashboard.dart';
 import 'package:arunstore/authmanager.dart';
@@ -409,4 +409,3 @@ void login() async {
     super.dispose();
   }
 }
-
