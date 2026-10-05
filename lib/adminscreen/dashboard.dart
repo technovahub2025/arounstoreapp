@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 
 
 import 'package:arunstore/model/model/productmodel.dart';
@@ -55,12 +56,12 @@ class _ProductDashboardState extends State<ProductDashboard> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Dashboard'),
+        title: const AppText('Product Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: fetchProducts,
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
           )
         ],
       ),
@@ -75,11 +76,11 @@ class _ProductDashboardState extends State<ProductDashboard> {
                     children: [
                       Icon(Icons.inventory, size: 64, color: Colors.grey),
                       SizedBox(height: 16),
-                      Text(
+                      AppText(
                         'No products found',
                         style: TextStyle(fontSize: 18, color: Colors.grey),
                       ),
-                      Text(
+                      AppText(
                         'Tap + to add a product',
                         style: TextStyle(color: Colors.grey),
                       ),
@@ -171,7 +172,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
                               const SizedBox(height: 4),
                               Row(
                                 children: [
-                                  Text(
+                                  AppText(
                                     '₹${product.price.toStringAsFixed(2)}',
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
@@ -182,7 +183,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                 ],
                               ),
                               const SizedBox(height: 2),
-                              Text(
+                              AppText(
                                 'Stock: ${product.stock}',
                                 style: TextStyle(
                                   color: product.stock > 10
@@ -193,7 +194,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              Text(
+                              AppText(
                                 'Category: ${product.category}',
                                 style: TextStyle(
                                   color: Colors.grey[600],
@@ -220,13 +221,13 @@ class _ProductDashboardState extends State<ProductDashboard> {
                                   );
                                   fetchProducts();
                                 },
-                                tooltip: 'Edit',
+                                tooltip: context.tr('Edit'),
                               ),
                               IconButton(
                                 icon: const Icon(Icons.delete_outline,
                                     size: 20, color: Colors.red),
                                 onPressed: () => deleteProduct(product.id!),
-                                tooltip: 'Delete',
+                                tooltip: context.tr('Delete'),
                               ),
                             ],
                           ),
@@ -241,7 +242,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
       // ---------- FAB ----------
       floatingActionButton: FloatingActionButton.extended(
         icon: const Icon(Icons.add),
-        label: const Text('Add Product'),
+        label: const AppText('Add Product'),
         onPressed: () async {
           await showDialog(
             context: context,
@@ -259,16 +260,16 @@ class _ProductDashboardState extends State<ProductDashboard> {
     final result = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Confirm Delete'),
-        content: const Text('Are you sure you want to delete this product?'),
+        title: const AppText('Confirm Delete'),
+        content: const AppText('Are you sure you want to delete this product?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text(
+            child: const AppText(
               'Delete',
               style: TextStyle(color: Colors.red),
             ),
@@ -283,7 +284,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
+        content: AppText(msg),
         backgroundColor: Colors.red,
         behavior: SnackBarBehavior.floating,
       ),
@@ -293,7 +294,7 @@ class _ProductDashboardState extends State<ProductDashboard> {
   void _showSuccess(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(msg),
+        content: AppText(msg),
         backgroundColor: Colors.green,
         behavior: SnackBarBehavior.floating,
       ),

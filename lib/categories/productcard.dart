@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -40,7 +41,7 @@ class ProductCard extends StatelessWidget {
          
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('${product.name} is already in cart'),
+              content: AppText('${product.name} is already in cart'),
               backgroundColor: Colors.blue,
               duration: const Duration(seconds: 2),
               action: SnackBarAction(
@@ -62,7 +63,7 @@ class ProductCard extends StatelessWidget {
           // Show success message
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Added ${product.name} to cart'),
+              content: AppText('Added ${product.name} to cart'),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 2),
               action: SnackBarAction(
@@ -84,7 +85,7 @@ class ProductCard extends StatelessWidget {
         // Show out of stock message
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Product is out of stock'),
+            content: AppText('Product is out of stock'),
             backgroundColor: Colors.red,
             duration: Duration(seconds: 2),
           ),
@@ -159,7 +160,7 @@ class ProductCard extends StatelessWidget {
                                           color: Colors.grey,
                                         ),
                                         SizedBox(height: 10),
-                                        Text(
+                                        AppText(
                                           'Failed to load image',
                                           style: TextStyle(
                                             color: Colors.white,
@@ -264,7 +265,7 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                       child: const Center(
-                        child: Text(
+                        child: AppText(
                           'OUT OF STOCK',
                           style: TextStyle(
                             color: Colors.white,
@@ -294,7 +295,7 @@ class ProductCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      child: Text(
+                      child: AppText(
                         quantityInCart.toString(),
                         style: const TextStyle(
                           color: Colors.white,
@@ -331,8 +332,8 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Product Name
-                  Text(
-                    product.name ?? 'Unnamed Product',
+                  AppDataText(
+                    product.name, fallback: 'Unnamed Product',
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -356,7 +357,7 @@ class ProductCard extends StatelessWidget {
                           color: Colors.blue[50],
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: AppText(
                           product.category ?? 'Uncategorized',
                           style: TextStyle(
                             fontSize: 10,
@@ -375,7 +376,7 @@ class ProductCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Price
-                      Text(
+                      AppText(
                         rupeeFormat.format(product.price ?? 0),
                         style: const TextStyle(
                           fontSize: 18,
@@ -403,7 +404,7 @@ class ProductCard extends StatelessWidget {
                                 color: Colors.amber[700],
                               ),
                               const SizedBox(width: 4),
-                              Text(
+                              AppText(
                                 product.rating!.toStringAsFixed(1),
                                 style: TextStyle(
                                   fontSize: 12,
@@ -430,7 +431,7 @@ class ProductCard extends StatelessWidget {
                         isInCart ? Icons.shopping_cart_checkout : Icons.add_shopping_cart,
                         size: 20,
                       ),
-                      label: Text(
+                      label: AppText(
                         isInCart ? 'In Cart ($quantityInCart)' : 'Add to Cart',
                         style: const TextStyle(
                           fontSize: 14,
@@ -503,7 +504,7 @@ class ProductCard extends StatelessWidget {
                 color: Colors.grey,
               ),
               SizedBox(height: 4),
-              Text(
+              AppText(
                 'Image failed to load',
                 style: TextStyle(
                   fontSize: 10,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 
@@ -72,14 +73,14 @@ class _CartscreenState extends State<Cartscreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.product.name ?? 'Unnamed',
+                AppDataText(
+                  widget.product.name, fallback: 'Unnamed',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '₹${(widget.product.price ?? 0.0).toStringAsFixed(2)}',
                   style: const TextStyle(fontSize: 13, color: Colors.red, fontWeight: FontWeight.bold),
                 ),
@@ -91,7 +92,7 @@ class _CartscreenState extends State<Cartscreen> {
               _qtyButton(Icons.remove, decrease),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
-                child: Text(localQuantity.toString(), style: const TextStyle(fontSize: 14)),
+                child: AppText(localQuantity.toString(), style: const TextStyle(fontSize: 14)),
               ),
               _qtyButton(Icons.add, increase),
               const SizedBox(width: 9),

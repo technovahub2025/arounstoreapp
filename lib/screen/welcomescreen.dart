@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
 class WelcomePage extends StatelessWidget {
@@ -20,7 +21,7 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 30),
 
-              const Text(
+              const AppText(
                 'Welcome',
                 style: TextStyle(
                   fontSize: 32,
@@ -31,7 +32,7 @@ class WelcomePage extends StatelessWidget {
 
               const SizedBox(height: 10),
 
-              const Text(
+              const AppText(
                 'Let’s get started',
                 style: TextStyle(
                   fontSize: 16,
@@ -56,7 +57,7 @@ class WelcomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                child: const Text(
+                child: const AppText(
                   'Login',
                   style: TextStyle(
                     fontSize: 18,

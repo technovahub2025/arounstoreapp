@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:convert';
 
 import 'package:arunstore/authmanager.dart';
@@ -36,15 +37,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final phone = await showDialog<String>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text('Reset password'),
+        title: const AppText('Reset password'),
         content: TextField(
           controller: phoneController,
           keyboardType: TextInputType.phone,
-          decoration: const InputDecoration(labelText: 'Phone number'),
+          decoration:  InputDecoration(labelText: 'Phone number').localized(context),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(dialogContext, phoneController.text.trim()), child: const Text('Send reset link')),
+          TextButton(onPressed: () => Navigator.pop(dialogContext), child: const AppText('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, phoneController.text.trim()), child: const AppText('Send reset link')),
         ],
       ),
     );
@@ -57,9 +58,9 @@ class _LoginScreenState extends State<LoginScreen> {
       final message = data['message']?.toString() ?? (response.statusCode >= 200 && response.statusCode < 300
           ? 'Password reset instructions sent.'
           : 'Could not send reset instructions. Please try again.');
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: AppText(message)));
     } catch (_) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Could not connect to reset your password.')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: AppText('Could not connect to reset your password.')));
     }
   }
 
@@ -111,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(
+              content: AppText(
                 result['message']?.toString() ??
                     'Login successful',
               ),
@@ -160,7 +161,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(errorMsg),
+              content: AppText(errorMsg),
               backgroundColor: Colors.red.shade700,
               behavior: SnackBarBehavior.floating,
               margin: const EdgeInsets.all(16),
@@ -181,7 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMsg),
+            content: AppText(errorMsg),
             backgroundColor: Colors.red.shade700,
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.all(16),
@@ -301,7 +302,7 @@ class _LoginScreenState extends State<LoginScreen> {
           width: 1.5,
         ),
       ),
-    );
+    ).localized(context);
   }
 
   // ============================================================
@@ -385,7 +386,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 20),
 
-                    const Text(
+                    const AppText(
                       'Welcome Back!',
                       textAlign: TextAlign.center,
 
@@ -399,7 +400,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     const SizedBox(height: 7),
 
-                    Text(
+                    AppText(
                       'Login to continue shopping with us',
                       textAlign: TextAlign.center,
 
@@ -457,7 +458,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         // TITLE
                         // ==================================================
 
-                        const Text(
+                        const AppText(
                           'Sign In',
                           textAlign: TextAlign.center,
 
@@ -470,7 +471,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                         const SizedBox(height: 6),
 
-                        Text(
+                        AppText(
                           'Enter your details to access your account',
                           textAlign: TextAlign.center,
 
@@ -521,7 +522,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 const SizedBox(width: 10),
 
                                 Expanded(
-                                  child: Text(
+                                  child: AppText(
                                     _errorMessage!,
                                     style: TextStyle(
                                       color:
@@ -539,7 +540,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         // PHONE LABEL
                         // ==================================================
 
-                        const Text(
+                        const AppText(
                           'Phone Number',
                           style: TextStyle(
                             fontSize: 13,
@@ -555,6 +556,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         // ==================================================
 
                         TextFormField(
+                          errorBuilder: localizedFormError,
                           controller: _phoneController,
 
                           keyboardType:
@@ -595,7 +597,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         // PASSWORD LABEL
                         // ==================================================
 
-                        const Text(
+                        const AppText(
                           'Password',
                           style: TextStyle(
                             fontSize: 13,
@@ -611,6 +613,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         // ==================================================
 
                         TextFormField(
+                          errorBuilder: localizedFormError,
                           controller:
                               _passwordController,
 
@@ -683,7 +686,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
 
-                            child: const Text(
+                            child: const AppText(
                               'Forgot Password?',
                               style: TextStyle(
                                 color: Color(0xFF15803D),
@@ -745,7 +748,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.center,
                                     children: [
-                                      Text(
+                                      AppText(
                                         'LOGIN',
                                         style: TextStyle(
                                           fontSize: 15,
@@ -789,7 +792,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 horizontal: 14,
                               ),
 
-                              child: Text(
+                              child: AppText(
                                 'OR',
                                 style: TextStyle(
                                   fontSize: 11,
@@ -816,13 +819,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         // SIGN UP
                         // ==================================================
 
-                        Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center,
+                        Wrap(
+                          alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, runSpacing: 4,
 
                           children: [
 
-                            Text(
+                            AppText(
                               "Don't have an account?",
                               style: TextStyle(
                                 fontSize: 13,
@@ -842,7 +844,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
 
-                              child: const Text(
+                              child: const AppText(
                                 'Sign Up',
                                 style: TextStyle(
                                   color:
@@ -873,7 +875,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     horizontal: 20,
                   ),
 
-                  child: Text(
+                  child: AppText(
                     'Fresh products • Easy shopping • Delivered to you',
                     textAlign: TextAlign.center,
 

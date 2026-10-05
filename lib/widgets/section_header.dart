@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
 class SectionHeader extends StatelessWidget {
@@ -25,7 +26,7 @@ class SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   title,
                   style: const TextStyle(
                     fontSize: 20,
@@ -36,7 +37,7 @@ class SectionHeader extends StatelessWidget {
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
-                  Text(
+                  AppText(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 13,
@@ -57,7 +58,7 @@ class SectionHeader extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  Text(
+                  AppText(
                     viewAllText,
                     style: const TextStyle(
                       fontSize: 13,

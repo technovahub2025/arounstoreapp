@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/model/wishlist_manager.dart';
@@ -27,7 +28,7 @@ class _WishlistPageState extends State<WishlistPage> {
         backgroundColor: AppColors.white,
         elevation: 1,
         foregroundColor: AppColors.darkText,
-        title: const Text(
+        title: const AppText(
           'My Wishlist',
           style: TextStyle(
             fontSize: 20,
@@ -46,7 +47,7 @@ class _WishlistPageState extends State<WishlistPage> {
                 onPressed: () {
                   WishlistManager.instance.clearWishlist();
                 },
-                child: const Text(
+                child: const AppText(
                   'Clear All',
                   style: TextStyle(color: AppColors.red, fontSize: 13),
                 ),
@@ -115,8 +116,8 @@ class _WishlistPageState extends State<WishlistPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      product.name ?? 'Unnamed Product',
+                    AppDataText(
+                      product.name, fallback: 'Unnamed Product',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -127,7 +128,7 @@ class _WishlistPageState extends State<WishlistPage> {
                     ),
                     const SizedBox(height: 6),
                     if (product.category != null)
-                      Text(
+                      AppText(
                         product.category!,
                         style: TextStyle(
                           fontSize: 12,
@@ -140,7 +141,7 @@ class _WishlistPageState extends State<WishlistPage> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        Text(
+                        AppText(
                           rupeeFormat.format(product.price ?? 0),
                           style: const TextStyle(
                             fontSize: 16,
@@ -150,7 +151,7 @@ class _WishlistPageState extends State<WishlistPage> {
                         ),
                         const SizedBox(width: 6),
                         if (discount != null && discount > 0 && originalPrice != null)
-                          Text(
+                          AppText(
                             rupeeFormat.format(originalPrice),
                             style: TextStyle(
                               fontSize: 11,
@@ -170,7 +171,7 @@ class _WishlistPageState extends State<WishlistPage> {
                               WishlistManager.instance.toggleWishlist(product);
                             },
                             icon: const Icon(Icons.favorite, size: 16),
-                            label: const Text('Remove', style: TextStyle(fontSize: 12)),
+                            label: const AppText('Remove', style: TextStyle(fontSize: 12)),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.red,
                               side: const BorderSide(color: AppColors.red),
@@ -193,7 +194,7 @@ class _WishlistPageState extends State<WishlistPage> {
                               );
                             },
                             icon: const Icon(Icons.visibility, size: 14),
-                            label: const Text('View', style: TextStyle(fontSize: 12)),
+                            label: const AppText('View', style: TextStyle(fontSize: 12)),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: AppColors.primary,
                               foregroundColor: AppColors.white,
@@ -284,7 +285,7 @@ class _WishlistPageState extends State<WishlistPage> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text(
+            const AppText(
               'Your Wishlist is Empty',
               style: TextStyle(
                 fontSize: 20,
@@ -293,7 +294,7 @@ class _WishlistPageState extends State<WishlistPage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            AppText(
               'Tap the heart icon on any product to add it to your wishlist',
               textAlign: TextAlign.center,
               style: TextStyle(

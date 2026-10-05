@@ -1,3 +1,6 @@
+﻿import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:arunstore/screen/settings/app_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/screen/splash.dart';
@@ -12,9 +15,11 @@ void main() async {
 
   final authManager = AuthManager();
   await authManager.initialize();
+  final preferences = AppPreferences(await SharedPreferences.getInstance());
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(value: preferences),
         ChangeNotifierProvider(create: (_) => AuthManager()),
         ChangeNotifierProvider(create: (_) => CartManager.instance),
         ChangeNotifierProvider.value(value: OrderHistoryService.instance),
@@ -29,11 +34,18 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final preferences = context.watch<AppPreferences>();
     return MaterialApp(
-      title: 'Aroun Stores',
+      title: preferences.text('Aroun Stores', 'அருண் ஸ்டோர்ஸ்'),
+      locale: Locale(preferences.isTamil ? 'ta' : 'en'),
+      supportedLocales: const [Locale('en'), Locale('ta')],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: preferences.isDark ? ThemeMode.dark : ThemeMode.light,
       home: const SplashScreen(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
+

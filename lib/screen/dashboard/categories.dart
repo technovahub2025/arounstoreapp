@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/screen/dashboard/categorypage.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +26,7 @@ class CategoriesCarousel extends StatelessWidget {
       return Container(
         height: 200,
         alignment: Alignment.center,
-        child: const Text('No categories available'),
+        child: const AppText('No categories available'),
       );
     }
 
@@ -88,7 +89,7 @@ class CategoriesCarousel extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        AppText(
                           categoryName,
                           style: const TextStyle(
                             fontSize: 16,
@@ -98,7 +99,7 @@ class CategoriesCarousel extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                         ),
                         const SizedBox(height: 4),
-                        Text(
+                        AppText(
                           '${products.length} ${products.length == 1 ? 'product' : 'products'}',
                           style: TextStyle(
                             fontSize: 12,
@@ -107,7 +108,7 @@ class CategoriesCarousel extends StatelessWidget {
                         ),
                         const SizedBox(height: 8),
                         if (products.isNotEmpty && products[0].price != null)
-                          Text(
+                          AppText(
                           'From ₹${products[0].price!.toStringAsFixed(2)}',
                             style: const TextStyle(
                               fontSize: 14,
@@ -155,7 +156,7 @@ class CategoriesCarousel extends StatelessWidget {
               color: Colors.grey,
             ),
             const SizedBox(height: 5),
-            Text(
+            AppText(
               categoryName,
               style: const TextStyle(
                 fontSize: 12,
@@ -202,7 +203,7 @@ class CategoriesCarousel extends StatelessWidget {
                   color: Colors.grey,
                 ),
                 const SizedBox(height: 5),
-                Text(
+                AppText(
                   categoryName,
                   style: const TextStyle(
                     fontSize: 12,
@@ -218,4 +219,3 @@ class CategoriesCarousel extends StatelessWidget {
     );
   }
 }
-

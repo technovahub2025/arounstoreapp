@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:flutter/material.dart';
@@ -140,7 +141,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                 Row(
                   children: [
                     const Expanded(
-                      child: Text(
+                      child: AppText(
                         'Sort Products',
                         style: TextStyle(
                           fontSize: 20,
@@ -237,7 +238,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
             const SizedBox(width: 14),
 
             Expanded(
-              child: Text(
+              child: AppText(
                 title,
                 style: TextStyle(
                   fontSize: 15,
@@ -294,7 +295,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
           },
         ),
 
-        title: const Text(
+        title: const AppText(
           'Categories',
           style: TextStyle(
             fontSize: 20,
@@ -306,12 +307,12 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
         actions: [
           if (widget.onProfileTap != null)
             IconButton(
-              tooltip: 'My Profile',
+              tooltip: context.tr('My Profile'),
               icon: const Icon(Icons.person_outline_rounded),
               onPressed: widget.onProfileTap,
             ),
           IconButton(
-            tooltip: 'Sort',
+            tooltip: context.tr('Sort'),
             icon: const Icon(
               Icons.tune_rounded,
               size: 24,
@@ -370,7 +371,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                     const SizedBox(width: 12),
 
                     const Expanded(
-                      child: Text(
+                      child: AppText(
                         'Categories',
                         style: TextStyle(
                           fontSize: 20,
@@ -422,7 +423,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
+                        child: const AppText(
                           'Select All',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
@@ -450,7 +451,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
-                        child: const Text(
+                        child: const AppText(
                           'Clear All',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
@@ -474,7 +475,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                 ),
                 child: Row(
                   children: [
-                    Text(
+                    AppText(
                       'Categories',
                       style: TextStyle(
                         fontSize: 13,
@@ -485,7 +486,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
 
                     const Spacer(),
 
-                    Text(
+                    AppText(
                       '${_selectedCategories.length}/${categoryNames.length}',
                       style: TextStyle(
                         fontSize: 12,
@@ -514,7 +515,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                 color: Colors.grey.shade400,
                               ),
                               const SizedBox(height: 12),
-                              Text(
+                              AppText(
                                 'No categories available',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -631,7 +632,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                       // CATEGORY NAME
                                       // ==================================================
                                       Expanded(
-                                        child: Text(
+                                        child: AppText(
                                           category,
                                           maxLines: 2,
                                           overflow:
@@ -672,7 +673,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                                           borderRadius:
                                               BorderRadius.circular(20),
                                         ),
-                                        child: Text(
+                                        child: AppText(
                                           '$productCount',
                                           textAlign: TextAlign.center,
                                           style: TextStyle(
@@ -740,7 +741,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                     crossAxisAlignment:
                         CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      const AppText(
                         'Products',
                         style: TextStyle(
                           fontSize: 17,
@@ -750,7 +751,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
 
                       const SizedBox(height: 3),
 
-                      Text(
+                      AppText(
                         '${_filteredProducts.length} products found',
                         style: TextStyle(
                           fontSize: 12,
@@ -783,7 +784,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                           color: Colors.grey.shade700,
                         ),
                         const SizedBox(width: 5),
-                        Text(
+                        AppText(
                           _getSortLabel(),
                           style: TextStyle(
                             fontSize: 12,
@@ -864,7 +865,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
 
             const SizedBox(height: 20),
 
-            const Text(
+            const AppText(
               'No products found',
               style: TextStyle(
                 fontSize: 19,
@@ -875,7 +876,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
 
             const SizedBox(height: 8),
 
-            Text(
+            AppText(
               'Try selecting different categories',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -892,7 +893,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                 Icons.refresh_rounded,
                 size: 18,
               ),
-              label: const Text(
+              label: const AppText(
                 'Show All Products',
               ),
               style: OutlinedButton.styleFrom(
@@ -1015,8 +1016,8 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       CrossAxisAlignment.start,
                   children: [
                     // Product name
-                    Text(
-                      product.name ?? 'Unnamed Product',
+                    AppDataText(
+                      product.name, fallback: 'Unnamed Product',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -1034,7 +1035,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       Padding(
                         padding:
                             const EdgeInsets.only(bottom: 4),
-                        child: Text(
+                        child: AppText(
                           product.category!,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -1046,7 +1047,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       ),
 
                     // Price
-                    Text(
+                    AppText(
                       rupeeFormat.format(product.price ?? 0),
                       style: TextStyle(
                         fontSize: 16,

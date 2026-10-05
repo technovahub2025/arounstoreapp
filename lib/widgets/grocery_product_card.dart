@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -101,7 +102,7 @@ class GroceryProductCard extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Text(
+              child: AppText(
                 '$discount% OFF',
                 style: const TextStyle(
                   color: AppColors.white,
@@ -128,7 +129,7 @@ class GroceryProductCard extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Text(
+              child: AppText(
                 quantityInCart.toString(),
                 style: const TextStyle(
                   color: AppColors.white,
@@ -148,7 +149,7 @@ class GroceryProductCard extends StatelessWidget {
                 ),
               ),
               child: const Center(
-                child: Text(
+                child: AppText(
                   'OUT OF STOCK',
                   style: TextStyle(
                     color: AppColors.white,
@@ -176,8 +177,8 @@ class GroceryProductCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              product.name ?? 'Unnamed Product',
+            AppDataText(
+              product.name, fallback: 'Unnamed Product',
               style: AppTextStyles.headingSmall.copyWith(
                 fontSize: 13,
                 height: 1.2,
@@ -187,7 +188,7 @@ class GroceryProductCard extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             if (product.category != null)
-              Text(
+              AppText(
                 product.category!,
                 style: TextStyle(
                   fontSize: 11,
@@ -200,7 +201,7 @@ class GroceryProductCard extends StatelessWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
+                AppText(
                   rupeeFormat.format(product.price ?? 0),
                   style: AppTextStyles.headingSmall.copyWith(
                     fontSize: 15,
@@ -211,7 +212,7 @@ class GroceryProductCard extends StatelessWidget {
                 if (originalPrice != null &&
                     originalPrice > (product.price ?? 0))
                   Flexible(
-                    child: Text(
+                    child: AppText(
                       rupeeFormat.format(originalPrice),
                       style: TextStyle(
                         fontSize: 11,
@@ -232,8 +233,8 @@ class GroceryProductCard extends StatelessWidget {
                         color: AppColors.green100,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(
-                        'Save \$discount%',
+                      child: AppText(
+                        'Save $discount%',
                         style: TextStyle(
                           fontSize: 10,
                           color: AppColors.green700,
@@ -257,7 +258,7 @@ class GroceryProductCard extends StatelessWidget {
                     color: Color(0xFFD97706),
                   ),
                   const SizedBox(width: 2),
-                  Text(
+                  AppText(
                     product.rating!.toStringAsFixed(1),
                     style: TextStyle(
                       fontSize: 11,
@@ -298,7 +299,7 @@ class GroceryProductCard extends StatelessWidget {
             isInCart ? Icons.shopping_cart : Icons.add_shopping_cart,
             size: 14,
           ),
-          label: Text(
+          label: AppText(
             isInCart ? 'In Cart ($quantityInCart)' : 'Add to Cart',
             style: TextStyle(
               fontSize: compact ? 11 : 13,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartscreen.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/screen/checkout.dart';
@@ -29,12 +30,12 @@ class _CartPageState extends State<CartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Cart')),
+      appBar: AppBar(title: const AppText('Your Cart')),
       body: Column(
         children: [
           Expanded(
             child: cart.items.isEmpty
-                ? const Center(child: Text('Cart is empty'))
+                ? const Center(child: AppText('Cart is empty'))
                 : ListView.builder(
                     itemCount: cart.items.length,
                     itemBuilder: (context, index) {
@@ -91,7 +92,7 @@ class _CartPageState extends State<CartPage> {
                         MaterialPageRoute(builder: (_) => const CheckoutScreen()),
                       );
                     },
-              child: const Text(
+              child: const AppText(
                 'Proceed to Checkout',
                 style: TextStyle(color: Colors.white),
               ),
@@ -106,8 +107,8 @@ class _CartPageState extends State<CartPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label),
-        Text(
+        Expanded(child: AppText(label)),
+        AppText(
           'INR ${value.toStringAsFixed(2)}',
           style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null,
         ),
@@ -115,4 +116,3 @@ class _CartPageState extends State<CartPage> {
     );
   }
 }
-

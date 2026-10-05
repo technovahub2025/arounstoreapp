@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 
 
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -70,7 +71,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                   Text(
+                   AppText(
   capitalizeFirst(categoryName),
   style: const TextStyle(
     fontSize: 18,
@@ -246,7 +247,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(const Color(0xFF15803D)),
             ),
             const SizedBox(height: 8),
-            Text(
+            AppText(
               'Image $imageNumber',
               style: const TextStyle(
                 fontSize: 10,
@@ -272,7 +273,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
               color: Colors.grey,
             ),
             const SizedBox(height: 4),
-            Text(
+            AppText(
               'Img $imageNumber',
               style: const TextStyle(
                 fontSize: 10,
@@ -282,7 +283,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
             if (kDebugMode)
               Padding(
                 padding: const EdgeInsets.only(top: 4),
-                child: Text(
+                child: AppText(
                   errorType,
                   style: const TextStyle(
                     fontSize: 8,

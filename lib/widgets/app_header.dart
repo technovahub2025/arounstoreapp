@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -106,7 +107,7 @@ class _AppHeaderState extends State<AppHeader> {
                   },
                 )
               : null,
-        ),
+        ).localized(context),
         style: const TextStyle(fontSize: 14),
         onTap: () => _toggleSearchFocus(true),
         onEditingComplete: () {
@@ -136,7 +137,8 @@ class _AppHeaderState extends State<AppHeader> {
     return Container(
       color: AppColors.white,
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Row(
+      child: Wrap(
+        spacing: 4, runSpacing: 4,
         children: widget.navItems.map((item) {
           final isActive = widget.activeNavItem == item;
           return Container(
@@ -147,7 +149,7 @@ class _AppHeaderState extends State<AppHeader> {
                 foregroundColor: isActive ? AppColors.primary : AppColors.mutedText,
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
-              child: Text(
+              child: AppText(
                 item,
                 style: TextStyle(
                   fontSize: 13,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:io';
 import 'package:arunstore/adminservice/productapiservice.dart';
 import 'package:arunstore/model/model/productmodel.dart';
@@ -183,7 +184,7 @@ class _ProductFormState extends State<ProductForm> {
   void _showSuccess(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: AppText(message),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 2),
       ),
@@ -193,7 +194,7 @@ class _ProductFormState extends State<ProductForm> {
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(message),
+        content: AppText(message),
         backgroundColor: Colors.red,
         duration: const Duration(seconds: 3),
       ),
@@ -212,7 +213,7 @@ class _ProductFormState extends State<ProductForm> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                AppText(
                   widget.product == null ? 'Add Product' : 'Edit Product',
                   style: const TextStyle(
                     fontSize: 18,
@@ -254,7 +255,7 @@ class _ProductFormState extends State<ProductForm> {
 
                 ElevatedButton.icon(
                   icon: const Icon(Icons.image),
-                  label: const Text('Pick Image (Max 2MB)'),
+                  label: const AppText('Pick Image (Max 2MB)'),
                   onPressed: _pickImage,
                 ),
 
@@ -269,7 +270,7 @@ class _ProductFormState extends State<ProductForm> {
                           backgroundColor: Colors.grey[300],
                         ),
                         onPressed: _isSaving ? null : () => Navigator.pop(context),
-                        child: const Text(
+                        child: const AppText(
                           'Cancel',
                           style: TextStyle(color: Colors.black),
                         ),
@@ -291,7 +292,7 @@ class _ProductFormState extends State<ProductForm> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Save'),
+                            : const AppText('Save'),
                       ),
                     ),
                   ],
@@ -379,7 +380,7 @@ class _ProductFormState extends State<ProductForm> {
                     children: [
                       Icon(Icons.image, size: 40, color: Colors.grey),
                       SizedBox(height: 5),
-                      Text('AVIF Image', style: TextStyle(fontSize: 12)),
+                      AppText('AVIF Image', style: TextStyle(fontSize: 12)),
                     ],
                   ),
                 ),
@@ -436,7 +437,7 @@ class _ProductFormState extends State<ProductForm> {
         children: [
           Icon(Icons.image, size: 40, color: Colors.grey),
           SizedBox(height: 5),
-          Text(
+          AppText(
             'No image selected',
             style: TextStyle(color: Colors.grey),
           ),
@@ -454,6 +455,7 @@ class _ProductFormState extends State<ProductForm> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: TextFormField(
+        errorBuilder: localizedFormError,
         controller: controller,
         keyboardType: keyboardType,
         maxLines: maxLines,
@@ -490,7 +492,7 @@ class _ProductFormState extends State<ProductForm> {
             horizontal: 12,
             vertical: 12,
           ),
-        ),
+        ).localized(context),
       ),
     );
   }

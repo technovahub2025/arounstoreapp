@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -43,7 +44,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.product.name ?? 'Product Details'),
+        title: AppDataText(widget.product.name, fallback: 'Product Details'),
         actions: [
          
           Consumer<CartManager>(
@@ -67,7 +68,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       child: CircleAvatar(
                         radius: 8,
                         backgroundColor: Colors.red,
-                        child: Text(
+                        child: AppText(
                           cartManager.totalItems.toString(),
                           style: const TextStyle(fontSize: 10, color: Colors.white),
                         ),
@@ -91,8 +92,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Product Name
-                Text(
-                  widget.product.name ?? 'Unnamed Product',
+                AppDataText(
+                  widget.product.name, fallback: 'Unnamed Product',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -113,7 +114,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         color: Colors.blue[50],
                         borderRadius: BorderRadius.circular(20),
                       ),
-                      child: Text(
+                      child: AppText(
                         widget.product.category ?? 'Uncategorized',
                         style: const TextStyle(
                           color: Colors.blue,
@@ -131,7 +132,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             size: 20,
                           ),
                           const SizedBox(width: 4),
-                          Text(
+                          AppText(
                             widget.product.rating!.toStringAsFixed(1),
                             style: const TextStyle(
                               fontSize: 16,
@@ -146,7 +147,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 const SizedBox(height: 16),
                 
                 // Price
-                Text(
+                AppText(
                   rupeeFormat.format(widget.product.price ?? 0),
                   style: const TextStyle(
                     fontSize: 28,
@@ -169,7 +170,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           : Colors.red,
                     ),
                     const SizedBox(width: 8),
-                    Text(
+                    Expanded(child: AppText(
                       widget.product.stock != null && widget.product.stock! > 0
                           ? '${widget.product.stock} items available'
                           : 'Out of stock',
@@ -179,14 +180,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                             ? Colors.green
                             : Colors.red,
                       ),
-                    ),
+                    )),
                   ],
                 ),
                 
                 const SizedBox(height: 24),
                 
                 // Description
-                const Text(
+                const AppText(
                   'Description',
                   style: TextStyle(
                     fontSize: 18,
@@ -194,8 +195,8 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  widget.product.description ?? 'No description available',
+                AppDataText(
+                  widget.product.description, fallback: 'No description available',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey[700],
@@ -208,7 +209,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 // Quantity Selector
                 Row(
                   children: [
-                    const Text(
+                    const AppText(
                       'Quantity:',
                       style: TextStyle(
                         fontSize: 16,
@@ -232,7 +233,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           Container(
                             width: 40,
                             alignment: Alignment.center,
-                            child: Text(
+                            child: AppText(
                               _quantity.toString(),
                               style: const TextStyle(
                                 fontSize: 16,
@@ -277,7 +278,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ? () => _addToCart(_quantity)
                     : null,
                 icon: const Icon(Icons.shopping_cart),
-                label: const Text('Add to Cart', style: TextStyle(color: Colors.white)),
+                label: const AppText('Add to Cart', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: const Color(0xFF15803D),
@@ -293,7 +294,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 onPressed: widget.product.stock != null && widget.product.stock! > 0
                     ? _buyNow
                     : null,
-                child: const Text('Buy Now', style: TextStyle(color: Colors.white)),
+                child: const AppText('Buy Now', style: TextStyle(color: Colors.white)),
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   backgroundColor: Colors.orange,
@@ -372,7 +373,7 @@ Widget _buildImageCarousel() {
                     color: Colors.black54,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
+                  child: AppText(
                     '${_selectedImageIndex + 1}/${images.length}',
                     style: const TextStyle(
                       color: Colors.white,
@@ -558,7 +559,7 @@ Widget _buildImageCarousel() {
                       color: Colors.black54,
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
+                    child: AppText(
                       '${initialIndex + 1}/${widget.product.images.length}',
                       style: const TextStyle(
                         color: Colors.white,
@@ -584,7 +585,7 @@ Widget _buildImageCarousel() {
         // Show message that product is already in cart
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Product is already in cart'),
+            content: AppText('Product is already in cart'),
             backgroundColor: Colors.blue,
             duration: Duration(seconds: 2),
           ),
@@ -603,7 +604,7 @@ Widget _buildImageCarousel() {
       // Show out of stock message
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Product is out of stock'),
+          content: AppText('Product is out of stock'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),
@@ -618,7 +619,7 @@ Widget _buildImageCarousel() {
       // Show checkout message (you can implement actual checkout navigation here)
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Proceeding to checkout...'),
+          content: AppText('Proceeding to checkout...'),
           backgroundColor: Colors.orange,
           duration: Duration(seconds: 2),
         ),
@@ -632,7 +633,7 @@ Widget _buildImageCarousel() {
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Product is out of stock'),
+          content: AppText('Product is out of stock'),
           backgroundColor: Colors.red,
           duration: Duration(seconds: 2),
         ),

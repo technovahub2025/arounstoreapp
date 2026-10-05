@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
@@ -123,7 +124,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
           ),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
+            child: AppText(
               'Shop by Category',
               style: const TextStyle(
                 fontSize: 20,
@@ -167,7 +168,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         children: [
           Padding(
             padding: const EdgeInsets.all(16),
-            child: Text(
+            child: AppText(
               'Categories',
               style: AppTextStyles.headingSmall.copyWith(
                 color: AppColors.grey600,
@@ -279,7 +280,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       categoryName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -289,7 +290,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         color: isSelected ? AppColors.primary : AppColors.darkText,
                       ),
                     ),
-                    Text(
+                    AppText(
                       '$productCount items',
                       style: TextStyle(
                         fontSize: 11,
@@ -362,13 +363,13 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                         },
                       )
                     : null,
-              ),
+              ).localized(context),
             ),
           ),
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          child: Text(
+          child: AppText(
             '${_filteredProducts.length} products found',
             style: TextStyle(
               fontSize: 13,
@@ -461,7 +462,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                           color: AppColors.red,
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: Text(
+                        child: AppText(
                           '$discount% OFF',
                           style: const TextStyle(
                             color: AppColors.white,
@@ -479,8 +480,8 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    product.name ?? 'Unnamed Product',
+                  AppDataText(
+                    product.name, fallback: 'Unnamed Product',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -493,7 +494,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
+                      AppText(
                         rupeeFormat.format(product.price ?? 0),
                         style: const TextStyle(
                           fontSize: 15,
@@ -503,7 +504,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                       ),
                       const SizedBox(width: 6),
                       if (hasDiscount && originalPrice != null)
-                        Text(
+                        AppText(
                           rupeeFormat.format(originalPrice),
                           style: TextStyle(
                             fontSize: 11,
@@ -516,7 +517,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                   ),
                   const SizedBox(height: 4),
                   if (product.category != null)
-                    Text(
+                    AppText(
                       product.category!,
                       style: TextStyle(
                         fontSize: 11,
@@ -599,7 +600,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
             ),
             const SizedBox(height: 20),
-            const Text(
+            const AppText(
               'No products available',
               style: TextStyle(
                 fontSize: 18,
@@ -608,7 +609,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            AppText(
               'There are no products in $_selectedCategory',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -635,7 +636,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               color: AppColors.grey400,
             ),
             const SizedBox(height: 16),
-            const Text(
+            const AppText(
               'No results found',
               style: TextStyle(
                 fontSize: 18,
@@ -644,7 +645,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            AppText(
               'Try searching with different keywords',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -658,7 +659,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 _searchController.clear();
                 _filterProducts('');
               },
-              child: const Text(
+              child: const AppText(
                 'Clear search',
                 style: TextStyle(color: AppColors.primary),
               ),
@@ -719,7 +720,7 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
 
     if (query.isEmpty) {
       return Center(
-        child: Text(
+        child: AppText(
           'Search for products',
           style: TextStyle(color: AppColors.grey600),
         ),
@@ -737,7 +738,7 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
               color: AppColors.grey400,
             ),
             SizedBox(height: 16),
-            Text('No products found'),
+            AppText('No products found'),
           ],
         ),
       );
@@ -771,12 +772,12 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
                   )
                 : const Icon(Icons.shopping_bag, color: AppColors.grey400),
           ),
-          title: Text(
-            product.name ?? 'Unnamed Product',
+          title: AppDataText(
+            product.name, fallback: 'Unnamed Product',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
-          subtitle: Text(
+          subtitle: AppText(
               '₹${product.price?.toStringAsFixed(2) ?? '0.00'}',
             style: const TextStyle(color: AppColors.primary),
           ),

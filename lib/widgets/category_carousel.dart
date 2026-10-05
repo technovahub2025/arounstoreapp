@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
@@ -82,7 +83,7 @@ class CategoryCarousel extends StatelessWidget {
     return SizedBox(
       height: 160,
       child: Center(
-        child: Text(
+        child: AppText(
           'No categories available',
           style: TextStyle(
             color: AppColors.grey500,
@@ -150,7 +151,7 @@ class CategoryCard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 8),
-            Text(
+            AppText(
               name,
               style: AppTextStyles.caption.copyWith(
                 color: AppColors.darkText,
@@ -161,7 +162,7 @@ class CategoryCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            Text(
+            AppText(
               '$productCount items',
               style: TextStyle(
                 fontSize: 10,

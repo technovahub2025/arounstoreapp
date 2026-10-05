@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:arunstore/widgets/grocery_product_card.dart';
@@ -105,7 +106,7 @@ class ProductCarousel extends StatelessWidget {
   Widget _buildEmptyState() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-      child: Text(
+      child: AppText(
         'No products available at the moment.',
         style: TextStyle(
           color: AppColors.grey500,

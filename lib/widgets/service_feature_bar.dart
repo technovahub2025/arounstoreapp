@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -90,7 +91,7 @@ class ServiceFeatureBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              AppText(
                 item.title,
                 style: TextStyle(
                   fontSize: isDesktop ? 14 : 12,
@@ -100,7 +101,7 @@ class ServiceFeatureBar extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              Text(
+              AppText(
                 item.subtitle,
                 style: TextStyle(
                   fontSize: isDesktop ? 12 : 11,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/order.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/service/order_history_service.dart';
@@ -22,7 +23,7 @@ class _AllorderState extends State<Allorder> {
         final orders = orderHistory.orders;
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Your Order')),
+          appBar: AppBar(title: const AppText('Your Order')),
           body: orders.isNotEmpty ? _buildOrderHistory(orders) : _buildCartFallback(),
         );
       },
@@ -52,7 +53,7 @@ class _AllorderState extends State<Allorder> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 order.paymentSuccessful ? 'Payment successful' : 'Payment ${order.paymentStatus.toLowerCase()}',
                 style: TextStyle(
                   fontSize: 18,
@@ -61,16 +62,16 @@ class _AllorderState extends State<Allorder> {
                 ),
               ),
               const SizedBox(height: 8),
-              Text('Order ID: ${order.orderId}'),
-              if (order.paymentSuccessful) Text('Payment ID: ${order.paymentId}'),
-              Text('Placed on: ${order.createdAt}'),
+              AppText('Order ID: ${order.orderId}'),
+              if (order.paymentSuccessful) AppText('Payment ID: ${order.paymentId}'),
+              AppText('Placed on: ${order.createdAt}'),
               const SizedBox(height: 12),
               _summaryRow('Subtotal', order.subtotal),
               _summaryRow('Shipping', order.shipping),
               const Divider(),
               _summaryRow('Total', order.total, bold: true),
               const SizedBox(height: 14),
-              const Text(
+              const AppText(
                 'Items',
                 style: TextStyle(fontWeight: FontWeight.w700),
               ),
@@ -93,7 +94,7 @@ class _AllorderState extends State<Allorder> {
       children: [
         Expanded(
           child: cart.items.isEmpty
-              ? const Center(child: Text('Order is empty'))
+              ? const Center(child: AppText('Order is empty'))
               : ListView.builder(
                   itemCount: cart.items.length,
                   itemBuilder: (context, index) {
@@ -134,8 +135,8 @@ class _AllorderState extends State<Allorder> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label),
-        Text(
+        AppText(label),
+        AppText(
           'INR ${value.toStringAsFixed(2)}',
           style: bold ? const TextStyle(fontWeight: FontWeight.bold) : null,
         ),

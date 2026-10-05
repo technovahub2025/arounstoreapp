@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
 class HeroSection extends StatelessWidget {
@@ -63,7 +64,7 @@ class HeroSection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              AppText(
                                 'Discover Amazing',
                                 style: TextStyle(
                                   fontSize: 42,
@@ -71,7 +72,7 @@ class HeroSection extends StatelessWidget {
                                   color: Colors.grey[900],
                                 ),
                               ),
-                              Text(
+                              AppText(
                                 'Products',
                                 style: TextStyle(
                                   fontSize: 42,
@@ -80,7 +81,7 @@ class HeroSection extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              Text(
+                              AppText(
                                 'Explore a wide range of Snacks, Juice, Soap, and home products at the best prices. New arrivals every week!',
                                 style: TextStyle(
                                   fontSize: 16,
@@ -103,7 +104,7 @@ class HeroSection extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(30),
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: const AppText(
                                       'Shop Now',
                                       style: TextStyle(
                                         fontSize: 16,
@@ -128,7 +129,7 @@ class HeroSection extends StatelessWidget {
                                         borderRadius: BorderRadius.circular(30),
                                       ),
                                     ),
-                                    child: const Text(
+                                    child: const AppText(
                                       'Learn More',
                                       style: TextStyle(
                                         fontSize: 16,
@@ -151,7 +152,7 @@ class HeroSection extends StatelessWidget {
                                       color: const Color(0xFF15803D).withOpacity(0.1),
                                       borderRadius: BorderRadius.circular(20),
                                     ),
-                                    child: Text(
+                                    child: AppText(
                                       'New Arrival',
                                       style: TextStyle(
                                         color: const Color(0xFF15803D),
@@ -160,7 +161,7 @@ class HeroSection extends StatelessWidget {
                                     ),
                                   ),
                                   const SizedBox(width: 12),
-                                  Text(
+                                  AppText(
                                     'Check out the latest collection!',
                                     style: TextStyle(
                                       color: Colors.grey[600],
@@ -204,7 +205,7 @@ class HeroSection extends StatelessWidget {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            AppText(
                               'Discover Amazing',
                               style: TextStyle(
                                 fontSize: 28,
@@ -212,7 +213,7 @@ class HeroSection extends StatelessWidget {
                                 color: Colors.grey[900],
                               ),
                             ),
-                            Text(
+                            AppText(
                               'Products',
                               style: TextStyle(
                                 fontSize: 28,
@@ -221,7 +222,7 @@ class HeroSection extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 12),
-                            Text(
+                            AppText(
                               'Explore a wide range of products at the best prices.',
                               style: TextStyle(
                                 fontSize: 14,
@@ -248,7 +249,7 @@ class HeroSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: const Text(
+                              child: const AppText(
                                 'Shop Now',
                                 style: TextStyle(
                                   color: Colors.white,
@@ -270,7 +271,7 @@ class HeroSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(30),
                                 ),
                               ),
-                              child: const Text(
+                              child: const AppText(
                                 'Learn More',
                                 style: TextStyle(
                                   color: Color(0xFF15803D),

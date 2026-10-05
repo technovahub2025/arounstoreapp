@@ -1,25 +1,37 @@
-import 'package:arunstore/theme/app_theme.dart';
+import 'package:arunstore/screen/settings/app_preferences.dart';
+import 'package:arunstore/screen/settings/policy_content.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 enum StorePolicy {
-  privacy('Privacy Policy', Icons.privacy_tip_outlined),
-  terms('Terms & Conditions', Icons.description_outlined);
+  privacy('Privacy Policy', 'தனியுரிமைக் கொள்கை', Icons.privacy_tip_outlined),
+  terms(
+    'Terms & Conditions',
+    'விதிமுறைகள் மற்றும் நிபந்தனைகள்',
+    Icons.description_outlined,
+  );
 
-  const StorePolicy(this.title, this.icon);
-
+  const StorePolicy(this.title, this.tamilTitle, this.icon);
   final String title;
+  final String tamilTitle;
   final IconData icon;
+
+  String label(AppPreferences prefs) => prefs.text(title, tamilTitle);
 }
 
 class PolicyScreen extends StatelessWidget {
   const PolicyScreen({super.key, required this.policy});
-
   final StorePolicy policy;
 
   @override
   Widget build(BuildContext context) {
+    final prefs = context.watch<AppPreferences>();
+    final theme = Theme.of(context);
+    final sections = policy == StorePolicy.privacy
+        ? privacySections
+        : termsSections;
     return Scaffold(
-      appBar: AppBar(title: Text(policy.title)),
+      appBar: AppBar(title: Text(policy.label(prefs))),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
@@ -35,31 +47,41 @@ class PolicyScreen extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(policy.icon, color: AppColors.primary, size: 40),
+                        Icon(
+                          policy.icon,
+                          color: theme.colorScheme.primary,
+                          size: 40,
+                        ),
                         const SizedBox(height: 20),
-                        Text(policy.title, style: AppTextStyles.headingLarge),
+                        Text(
+                          policy.label(prefs),
+                          style: theme.textTheme.headlineSmall,
+                        ),
                         const SizedBox(height: 8),
-                        const Text(
-                          'Aroun Stores',
-                          style: TextStyle(color: AppColors.mutedText),
+                        Text(prefs.text('Aroun Stores', 'அருண் ஸ்டோர்ஸ்')),
+                        const SizedBox(height: 8),
+                        Text(
+                          prefs.text(
+                            'Draft for review',
+                            'மதிப்பாய்வுக்கான வரைவு',
+                          ),
+                          style: theme.textTheme.bodySmall,
                         ),
                         const SizedBox(height: 24),
-                        // Replace this placeholder with the approved policy text.
-                        const SelectableText(
-                          'Content coming soon',
-                          style: AppTextStyles.headingMedium,
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          policy == StorePolicy.privacy
-                              ? 'The Privacy Policy has not been published yet. '
-                                    'Please check back later.'
-                              : 'The Terms & Conditions have not been published '
-                                    'yet. Please check back later.',
-                          style: AppTextStyles.bodyLarge.copyWith(
-                            color: AppColors.mediumText,
+                        for (final section in sections) ...[
+                          SelectableText(
+                            prefs.text(section.$1, section.$3),
+                            style: theme.textTheme.titleMedium,
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          SelectableText(
+                            prefs.text(section.$2, section.$4),
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              height: 1.6,
+                            ),
+                          ),
+                          const SizedBox(height: 24),
+                        ],
                       ],
                     ),
                   ),

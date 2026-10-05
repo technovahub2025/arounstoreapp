@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -68,9 +69,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
             children: [
               const Icon(Icons.error_outline, size: 48, color: AppColors.red),
               const SizedBox(height: 12),
-              Text(widget.error ?? 'An error occurred'),
+              AppText(widget.error ?? 'An error occurred'),
               const SizedBox(height: 12),
-              ElevatedButton(onPressed: () {}, child: const Text('Retry')),
+              ElevatedButton(onPressed: () {}, child: const AppText('Retry')),
             ],
           ),
         ),
@@ -112,11 +113,11 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           children: [
             if (widget.onMenuTap != null)
               IconButton(
-                tooltip: 'Open navigation menu',
+                tooltip: context.tr('Open navigation menu'),
                 icon: const Icon(Icons.menu_rounded),
                 onPressed: widget.onMenuTap,
               ),
-            Text(
+            AppText(
               'AROUN STORES',
               style: TextStyle(
                 fontSize: 20,
@@ -161,7 +162,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                 color: AppColors.red,
                 shape: BoxShape.circle,
               ),
-              child: Text(
+              child: AppText(
                 count.toString(),
                 style: const TextStyle(
                   fontSize: 10,
@@ -204,7 +205,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                     },
                   )
                 : null,
-          ),
+          ).localized(context),
           onSubmitted: (value) {
             if (value.trim().isNotEmpty) {
               widget.onSearchSubmitted?.call(value.trim());
@@ -221,7 +222,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AppText(
             'Shop by Category',
             style: AppTextStyles.headingMedium.copyWith(color: AppColors.darkText),
           ),
@@ -316,7 +317,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
+          child: AppText(
             'Special Offers',
             style: TextStyle(
               fontSize: 20,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/authmodel.dart';
 import 'package:arunstore/screen/loginscreen.dart';
 import 'package:arunstore/service/authservice.dart';
@@ -43,7 +44,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Registration successful!'),
+            content: AppText('Registration successful!'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
@@ -60,7 +61,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Registration failed! ${response.body}'),
+            content: AppText('Registration failed! ${response.body}'),
             backgroundColor: Colors.red,
             behavior: SnackBarBehavior.floating,
           ),
@@ -71,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error: $e'),
+          content: AppText('Error: $e'),
           backgroundColor: Colors.red,
           behavior: SnackBarBehavior.floating,
         ),
@@ -150,7 +151,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         color: Colors.green.shade700,
         fontWeight: FontWeight.w600,
       ),
-    );
+    ).localized(context);
   }
 
   @override
@@ -238,7 +239,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 16),
 
-                  const Text(
+                  const AppText(
                     'Create Account',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -251,7 +252,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   const SizedBox(height: 7),
 
-                  Text(
+                  AppText(
                     'Join us and start shopping with ease',
                     textAlign: TextAlign.center,
                     style: TextStyle(
@@ -318,7 +319,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 crossAxisAlignment:
                                     CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  const AppText(
                                     'Let’s get you started',
                                     style: TextStyle(
                                       fontSize: 16,
@@ -327,7 +328,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                     ),
                                   ),
                                   const SizedBox(height: 3),
-                                  Text(
+                                  AppText(
                                     'Create your account in a few simple steps.',
                                     style: TextStyle(
                                       fontSize: 12.5,
@@ -346,7 +347,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // =================================================
                       // FULL NAME
                       // =================================================
-                      Text(
+                      AppText(
                         'Full Name',
                         style: TextStyle(
                           fontSize: 13,
@@ -358,6 +359,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
 
                       TextFormField(
+                        errorBuilder: localizedFormError,
                         controller: _nameController,
                         textCapitalization: TextCapitalization.words,
                         decoration: _inputDecoration(
@@ -378,7 +380,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // =================================================
                       // PHONE NUMBER
                       // =================================================
-                      Text(
+                      AppText(
                         'Phone Number',
                         style: TextStyle(
                           fontSize: 13,
@@ -390,6 +392,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
 
                       TextFormField(
+                        errorBuilder: localizedFormError,
                         controller: _phoneController,
                         keyboardType: TextInputType.phone,
                         decoration: _inputDecoration(
@@ -412,7 +415,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // =================================================
                       // PASSWORD
                       // =================================================
-                      Text(
+                      AppText(
                         'Password',
                         style: TextStyle(
                           fontSize: 13,
@@ -424,6 +427,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 8),
 
                       TextFormField(
+                        errorBuilder: localizedFormError,
                         controller: _passwordController,
                         obscureText: !_showPassword,
                         decoration: _inputDecoration(
@@ -477,7 +481,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             const SizedBox(width: 8),
                             Expanded(
-                              child: Text(
+                              child: AppText(
                                 'Password must contain at least 6 characters',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -538,7 +542,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                       size: 21,
                                     ),
                                     SizedBox(width: 9),
-                                    Text(
+                                    AppText(
                                       'Create Account',
                                       style: TextStyle(
                                         fontSize: 16,
@@ -567,7 +571,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             padding: const EdgeInsets.symmetric(
                               horizontal: 14,
                             ),
-                            child: Text(
+                            child: AppText(
                               'OR',
                               style: TextStyle(
                                 fontSize: 12,
@@ -602,10 +606,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: Colors.grey.shade200,
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Wrap(
+                          alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, runSpacing: 4,
                           children: [
-                            Text(
+                            AppText(
                               'Already have an account?',
                               style: TextStyle(
                                 color: Colors.grey.shade600,
@@ -622,7 +626,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 tapTargetSize:
                                     MaterialTapTargetSize.shrinkWrap,
                               ),
-                              child: Text(
+                              child: AppText(
                                 'Sign In',
                                 style: TextStyle(
                                   color: Colors.green.shade700,
@@ -640,8 +644,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       // =================================================
                       // BOTTOM MESSAGE
                       // =================================================
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
+                      Wrap(
+                        alignment: WrapAlignment.center, crossAxisAlignment: WrapCrossAlignment.center, runSpacing: 4,
                         children: [
                           Icon(
                             Icons.verified_user_outlined,
@@ -649,7 +653,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             color: Colors.grey.shade500,
                           ),
                           const SizedBox(width: 6),
-                          Text(
+                          AppText(
                             'Your information is kept secure',
                             style: TextStyle(
                               fontSize: 11.5,

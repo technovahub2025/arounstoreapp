@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/cart/allorder.dart';
@@ -144,7 +145,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
       _loading
           ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
           : _error != null
-              ? Center(child: Text(_error ?? 'Error loading categories'))
+              ? Center(child: AppText(_error ?? 'Error loading categories'))
               : CategoryFilterPage(
                   categories: _categoryMap,
                   onProfileTap: () => _onNavTap(2),
@@ -181,7 +182,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
                 children: [
                   const Icon(Icons.storefront, color: AppColors.white, size: 32),
                   const SizedBox(height: 12),
-                  const Text(
+                  const AppText(
                     'Aroun Stores',
                     style: TextStyle(
                       color: AppColors.white,
@@ -201,7 +202,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.home_outlined),
-              title: const Text('Home'),
+              title: const AppText('Home'),
               onTap: () {
                 Navigator.pop(context);
                 _onNavTap(0);
@@ -209,7 +210,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.category_outlined),
-              title: const Text('Categories'),
+              title: const AppText('Categories'),
               onTap: () {
                 Navigator.pop(context);
                 _onNavTap(1);
@@ -218,7 +219,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.shopping_cart_outlined),
-              title: const Text('Cart'),
+              title: const AppText('Cart'),
               onTap: () {
                 Navigator.pop(context);
                 _openCart();
@@ -226,7 +227,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.shopping_bag_outlined),
-              title: const Text('Orders'),
+              title: const AppText('Orders'),
               onTap: () {
                 Navigator.pop(context);
                 _openOrders();
@@ -234,7 +235,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.person_outline),
-              title: const Text('My Profile'),
+              title: const AppText('My Profile'),
               onTap: () {
                 Navigator.pop(context);
                 _onNavTap(2);
@@ -242,7 +243,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.settings_outlined),
-              title: const Text('Settings'),
+              title: const AppText('Settings'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.of(context).push(
@@ -269,13 +270,13 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
       currentIndex: _currentIndex,
       onTap: _onNavTap,
       items: [
-        const BottomNavigationBarItem(
+         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: context.tr('Home'),
         ),
-        const BottomNavigationBarItem(
+         BottomNavigationBarItem(
           icon: Icon(Icons.category),
-          label: 'Categories',
+          label: context.tr('Categories'),
         ),
         BottomNavigationBarItem(
           icon: Stack(
@@ -300,7 +301,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
                 ),
             ],
           ),
-          label: 'Account',
+          label: context.tr('Account'),
         ),
       ],
     );

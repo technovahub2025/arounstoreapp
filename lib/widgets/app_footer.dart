@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -108,7 +109,7 @@ class AppFooter extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            AppText(
               title,
               style: TextStyle(
                 fontSize: 16,
@@ -129,7 +130,7 @@ class AppFooter extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 8),
       child: InkWell(
         onTap: link.onTap,
-        child: Text(
+        child: AppText(
           link.title,
           style: TextStyle(
             fontSize: 13,
@@ -168,7 +169,7 @@ class AppFooter extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Text(
+          AppText(
             '© 2024 Aroun Stores. All rights reserved.',
             style: TextStyle(
               fontSize: 12,
@@ -288,7 +289,7 @@ class _FooterColumn extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        AppText(
           title,
           style: TextStyle(
             fontSize: 16,
@@ -299,7 +300,7 @@ class _FooterColumn extends StatelessWidget {
         const SizedBox(height: 14),
         ...links.map((link) => Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
+              child: AppText(
                 link.title,
                 style: TextStyle(
                   fontSize: 13,

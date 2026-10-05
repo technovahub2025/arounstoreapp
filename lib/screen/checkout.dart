@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:async';
 
 import 'package:arunstore/authmanager.dart';
@@ -325,7 +326,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             _errorMessage = 'Payment wasn’t completed. Please try again.';
           });
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Payment timed out. Please try again.')),
+            const SnackBar(content: AppText('Payment timed out. Please try again.')),
           );
         }
       });
@@ -394,7 +395,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Navigator.of(context).pushReplacementNamed(widget.successRedirectTo);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Payment verified successfully.')),
+          const SnackBar(content: AppText('Payment verified successfully.')),
         );
       }
     } catch (_) {
@@ -425,7 +426,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _errorMessage = wasCanceled ? 'Payment canceled.' : 'Payment failed. Please try again.';
     });
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-      content: Text(wasCanceled ? 'Payment canceled.' : 'Payment failed.'),
+      content: AppText(wasCanceled ? 'Payment canceled.' : 'Payment failed.'),
     ));
   }
 
@@ -466,7 +467,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         return Scaffold(
           backgroundColor: const Color(0xFFF4F7FB),
           appBar: AppBar(
-            title: const Text('Checkout'),
+            title: const AppText('Checkout'),
             backgroundColor: Colors.white,
             foregroundColor: const Color(0xFF0F172A),
             elevation: 0,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +24,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
     if (email.isEmpty || !email.contains('@')) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a valid email address'),
+          content: AppText('Please enter a valid email address'),
           backgroundColor: AppColors.red,
         ),
       );
@@ -36,7 +37,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
 
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Thank you! "$email" has been subscribed to our newsletter.'),
+        content: AppText('Thank you! "$email" has been subscribed to our newsletter.'),
         backgroundColor: AppColors.green600,
       ),
     );
@@ -75,7 +76,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
           constraints: const BoxConstraints(maxWidth: 600),
           child: Column(
             children: [
-              Text(
+              AppText(
                 'Stay Updated with Fresh Deals & Offers!',
                 style: AppTextStyles.headingLarge.copyWith(
                   color: AppColors.white,
@@ -84,7 +85,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 10),
-              Text(
+              AppText(
                 'Subscribe to our newsletter and never miss the best offers.',
                 style: AppTextStyles.bodyMedium.copyWith(
                   color: AppColors.white.withValues(alpha: 0.9),
@@ -122,7 +123,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                             horizontal: 20,
                             vertical: 14,
                           ),
-                        ),
+                        ).localized(context),
                         style: AppTextStyles.bodyMedium,
                         onSubmitted: (_) => _subscribe(),
                       ),
@@ -149,7 +150,7 @@ class _NewsletterSectionState extends State<NewsletterSection> {
                               color: AppColors.green700,
                             ),
                           )
-                        : const Text(
+                        : const AppText(
                             'Subscribe',
                             style: TextStyle(
                               fontSize: 14,

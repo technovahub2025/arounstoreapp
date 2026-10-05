@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -61,7 +62,7 @@ class PromoBannerCard extends StatelessWidget {
                       color: (accentColor ?? AppColors.primary).withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(
+                    child: AppText(
                       offer!,
                       style: TextStyle(
                         color: accentColor ?? AppColors.primary,
@@ -75,7 +76,7 @@ class PromoBannerCard extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   title,
                   style: AppTextStyles.headingSmall.copyWith(
                     fontSize: isDesktop ? 15 : 14,
@@ -85,7 +86,7 @@ class PromoBannerCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 if (subtitle != null)
-                  Text(
+                  AppText(
                     subtitle!,
                     style: TextStyle(
                       fontSize: 11,

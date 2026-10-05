@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
 import 'package:arunstore/screen/settings/settings_screen.dart';
@@ -21,13 +22,13 @@ class MobileAccountScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('My Profile'),
+        title: const AppText('My Profile'),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.darkText,
         elevation: 0,
         actions: [
           IconButton(
-            tooltip: 'Settings',
+            tooltip: context.tr('Settings'),
             icon: const Icon(Icons.settings_outlined),
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const SettingsScreen()),
@@ -39,7 +40,7 @@ class MobileAccountScreen extends StatelessWidget {
         child: authManager.isLoggedIn && user != null
             ? _buildProfile(context, user)
             : const Center(
-                child: Text(
+                child: AppText(
                   'No profile data available',
                   style: TextStyle(color: AppColors.grey600),
                 ),
@@ -83,7 +84,7 @@ class MobileAccountScreen extends StatelessWidget {
                     children: [
                       SizedBox(
                         width: 72,
-                        child: Text(
+                        child: AppText(
                           detail.$1,
                           style: const TextStyle(
                             color: AppColors.grey600,
@@ -113,7 +114,7 @@ class MobileAccountScreen extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onLogoutTap,
             icon: const Icon(Icons.logout),
-            label: const Text('Logout'),
+            label: const AppText('Logout'),
             style: OutlinedButton.styleFrom(
               foregroundColor: AppColors.red,
               side: const BorderSide(color: AppColors.red),

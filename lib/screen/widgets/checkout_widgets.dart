@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 
 class CheckoutSectionCard extends StatelessWidget {
@@ -30,7 +31,7 @@ class CheckoutSectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          AppText(
             title,
             style: const TextStyle(
               fontSize: 20,
@@ -39,7 +40,7 @@ class CheckoutSectionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             subtitle,
             style: TextStyle(
               color: Colors.grey.shade600,
@@ -75,6 +76,7 @@ class CheckoutTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextFormField(
+      errorBuilder: localizedFormError,
       controller: controller,
       keyboardType: keyboardType,
       validator: validator,
@@ -101,7 +103,7 @@ class CheckoutTextField extends StatelessWidget {
           borderSide: const BorderSide(color: Color(0xFFEF4444)),
         ),
         contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-      ),
+      ).localized(context),
     );
   }
 }
@@ -130,7 +132,7 @@ class CheckoutNoticeBanner extends StatelessWidget {
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: borderColor),
       ),
-      child: Text(
+      child: AppText(
         message,
         style: TextStyle(
           color: textColor,
@@ -168,8 +170,8 @@ class PriceRow extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: style),
-          Text(formatter(value), style: style),
+          AppText(label, style: style),
+          AppText(formatter(value), style: style),
         ],
       ),
     );
@@ -223,7 +225,7 @@ class CheckoutCartItemTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -233,12 +235,12 @@ class CheckoutCartItemTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   'Qty $quantity',
                   style: TextStyle(color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 6),
-                Text(
+                AppText(
                   priceText,
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
@@ -277,7 +279,7 @@ class CheckoutCartItemList extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
-        child: Text(emptyMessage),
+        child: AppText(emptyMessage),
       );
     }
 
@@ -510,31 +512,31 @@ class CheckoutShippingForm extends StatelessWidget {
                       ),
                     )
                   : isPreparingOrder
-                      ? const Text(
+                      ? const AppText(
                           'Preparing payment...',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                         )
                   : !hasRequiredDetails
-                      ? const Text(
+                      ? const AppText(
                           'Fill details to continue',
                           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                         )
                       : !hasAuthToken
-                          ? const Text(
+                          ? const AppText(
                               'Log in to continue',
                               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                             )
                           : !hasRazorpayKey
-                              ? const Text(
+                              ? const AppText(
                                   'Payments unavailable',
                                   style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                 )
                               : !isOrderReady
-                                  ? const Text(
+                                  ? const AppText(
                                       'Prepare payment',
                                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                     )
-                              : Text(
+                              : AppText(
                                   'Pay now - ${formatTotal(total)}',
                                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                                 ),

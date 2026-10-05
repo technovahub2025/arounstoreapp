@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:flutter/material.dart';
 
@@ -51,8 +52,8 @@ class orderscreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  product.name ?? 'Unnamed',
+                AppDataText(
+                  product.name, fallback: 'Unnamed',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -61,7 +62,7 @@ class orderscreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '₹${product.price ?? 0}',
                   style: const TextStyle(
                     fontSize: 13,

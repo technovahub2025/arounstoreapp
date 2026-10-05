@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:async';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/screen/app_home.dart';
@@ -97,7 +98,7 @@ class _SplashScreenState extends State<SplashScreen> {
                         color: const Color(0xFF15803D).withOpacity(0.7),
                       ),
                       const SizedBox(height: 20),
-                      Text(
+                      AppText(
                         'Loading...',
                         style: TextStyle(
                           fontSize: 16,

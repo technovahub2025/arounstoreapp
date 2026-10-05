@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
@@ -145,7 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$feature - Coming Soon!')),
+      SnackBar(content: AppText('$feature - Coming Soon!')),
     );
   }
 
@@ -161,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
+            const AppText(
               'Contact Us',
               style: TextStyle(
                 fontSize: 20,
@@ -190,14 +191,14 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 label,
                 style: TextStyle(
                   fontSize: 12,
                   color: AppColors.grey500,
                 ),
               ),
-              Text(
+              AppText(
                 value,
                 style: TextStyle(
                   fontSize: 14,
@@ -314,7 +315,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       color: AppColors.white,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Row(
+      child: Wrap(
+        spacing: 4, runSpacing: 4,
         children: _navItems.map((item) {
           final isActive = _activeNavItem == item;
           return TextButton(
@@ -323,7 +325,7 @@ class _HomeScreenState extends State<HomeScreen> {
               foregroundColor: isActive ? AppColors.primary : AppColors.mutedText,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             ),
-            child: Text(
+            child: AppText(
               item,
               style: TextStyle(
                 fontSize: 13,
@@ -343,7 +345,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
+          child: AppText(
             'Shop by Category',
             style: AppTextStyles.headingLarge.copyWith(
               color: AppColors.darkText,
@@ -431,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         const Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
+          child: AppText(
             'Special Offers',
             style: TextStyle(
               fontSize: 20,
@@ -447,7 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLogo() {
-    return Text(
+    return AppText(
       'AROUN STORES',
       style: AppTextStyles.displaySmall.copyWith(
         color: AppColors.primary,
@@ -487,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: AppColors.red,
                     shape: BoxShape.circle,
                   ),
-                  child: Text(
+                  child: AppText(
                     cartManager.totalItems.toString(),
                     style: const TextStyle(
                       fontSize: 10,
@@ -571,7 +573,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const CircularProgressIndicator(color: AppColors.primary),
           const SizedBox(height: 10),
-          Text(message, style: TextStyle(color: AppColors.grey600)),
+          AppText(message, style: TextStyle(color: AppColors.grey600)),
         ],
       ),
     );
@@ -587,7 +589,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           const Icon(Icons.error_outline, color: AppColors.red, size: 40),
           const SizedBox(height: 10),
-          Text(
+          AppText(
             _logic?.error ?? 'An error occurred',
             textAlign: TextAlign.center,
             style: TextStyle(color: AppColors.grey700),
@@ -609,7 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppColors.primary,
             ),
-            child: const Text('Retry'),
+            child: const AppText('Retry'),
           ),
         ],
       ),
@@ -626,7 +628,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Icon(Icons.category_outlined, size: 40, color: AppColors.grey400),
           SizedBox(height: 10),
-          Text('No categories found'),
+          AppText('No categories found'),
         ],
       ),
     );
@@ -646,7 +648,7 @@ class _HomeScreenState extends State<HomeScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                const Text(
+                const AppText(
                   'AROUN STORES',
                   style: TextStyle(
                     color: AppColors.white,
@@ -656,7 +658,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 8),
                 if (_logic!.authManager.currentUser != null)
-                  Text(
+                  AppText(
                     _logic!.authManager.currentUser!.phone ?? '',
                     style: const TextStyle(
                       fontSize: 18,
@@ -732,7 +734,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildDrawerItem(String title, IconData icon, {VoidCallback? onTap}) {
     return ListTile(
       leading: Icon(icon, color: AppColors.primary),
-      title: Text(
+      title: AppText(
         title,
         style: TextStyle(
           color: AppColors.darkText,
@@ -770,13 +772,13 @@ class _HomeScreenState extends State<HomeScreen> {
         }
       },
       items: [
-        const BottomNavigationBarItem(
+         BottomNavigationBarItem(
           icon: Icon(Icons.home),
-          label: 'Home',
+          label: context.tr('Home'),
         ),
-        const BottomNavigationBarItem(
+         BottomNavigationBarItem(
           icon: Icon(Icons.category),
-          label: 'Categories',
+          label: context.tr('Categories'),
         ),
         BottomNavigationBarItem(
           icon: Stack(
@@ -797,10 +799,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
             ],
           ),
-          label: 'Account',
+          label: context.tr('Account'),
         ),
       ],
     );
   }
 }
-

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class AppColors {
   const AppColors._();
@@ -283,6 +283,84 @@ class AppTheme {
         fontFamily: 'Inter',
   );
 
+  static final ThemeData darkTheme = _buildDarkTheme();
+
+  static ThemeData _buildDarkTheme() {
+    final scheme = ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      brightness: Brightness.dark,
+      primary: const Color(0xFF6EE79B),
+      surface: const Color(0xFF17211C),
+      onSurface: const Color(0xFFE5EEE7),
+      onSurfaceVariant: const Color(0xFFB8C6BC),
+      outline: const Color(0xFF64756A),
+      outlineVariant: const Color(0xFF35443B),
+    );
+    return ThemeData(
+      useMaterial3: true,
+      brightness: Brightness.dark,
+      colorScheme: scheme,
+      fontFamily: 'Inter',
+      scaffoldBackgroundColor: const Color(0xFF0F1713),
+      canvasColor: scheme.surface,
+      appBarTheme: AppBarTheme(
+        backgroundColor: scheme.surface,
+        foregroundColor: scheme.onSurface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: false,
+      ),
+      cardTheme: CardThemeData(
+        color: scheme.surface,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(AppDimensions.radiusLarge)),
+        ),
+      ),
+      bottomNavigationBarTheme: BottomNavigationBarThemeData(
+        backgroundColor: scheme.surface,
+        selectedItemColor: scheme.primary,
+        unselectedItemColor: scheme.onSurfaceVariant,
+      ),
+      drawerTheme: DrawerThemeData(backgroundColor: scheme.surface),
+      dialogTheme: DialogThemeData(backgroundColor: scheme.surface),
+      bottomSheetTheme: BottomSheetThemeData(backgroundColor: scheme.surface),
+      dividerTheme: DividerThemeData(color: scheme.outlineVariant),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: scheme.surfaceContainerHigh,
+        labelStyle: TextStyle(color: scheme.onSurfaceVariant),
+        hintStyle: TextStyle(color: scheme.onSurfaceVariant),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+          borderSide: BorderSide(color: scheme.outlineVariant),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+          borderSide: BorderSide(color: scheme.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+          ),
+          textStyle: AppTextStyles.labelLarge,
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(foregroundColor: scheme.primary),
+      ),
+    );
+  }
   static double screenWidth(BuildContext context) => MediaQuery.of(context).size.width;
   static double screenHeight(BuildContext context) => MediaQuery.of(context).size.height;
 
@@ -290,3 +368,4 @@ class AppTheme {
   static bool isTablet(BuildContext context) => screenWidth(context) >= AppBreakpoints.mobile && screenWidth(context) < AppBreakpoints.tablet;
   static bool isDesktop(BuildContext context) => screenWidth(context) >= AppBreakpoints.tablet;
 }
+

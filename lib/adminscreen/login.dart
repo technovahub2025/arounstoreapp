@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/adminscreen/dashboard.dart';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
@@ -57,7 +58,7 @@ void login() async {
       if (result.containsKey('success') && result['success'] is bool && result['success'] == true) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(result['message']?.toString() ?? 'Login successful'),
+            content: AppText(result['message']?.toString() ?? 'Login successful'),
             backgroundColor: Colors.green,
           ),
         );
@@ -122,7 +123,7 @@ void login() async {
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMsg),
+            content: AppText(errorMsg),
             backgroundColor: Colors.red,
           ),
         );
@@ -134,7 +135,7 @@ void login() async {
       });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(errorMsg),
+          content: AppText(errorMsg),
           backgroundColor: Colors.red,
         ),
       );
@@ -161,7 +162,7 @@ void login() async {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Login'),
+        title: AppText('Login'),
         backgroundColor: Color(0xFF15803D),
       ),
       body: SingleChildScrollView(
@@ -184,7 +185,7 @@ void login() async {
                         color: Color(0xFF15803D),
                       ),
                       SizedBox(height: 10),
-                      Text(
+                      AppText(
                         'AROUN STORES',
                         style: TextStyle(
                           fontSize: 28,
@@ -198,7 +199,7 @@ void login() async {
                 ),
                 
                 SizedBox(height: 10),
-                Text(
+                AppText(
                   'Login to your account',
                   style: TextStyle(
                     fontSize: 16,
@@ -224,7 +225,7 @@ void login() async {
                         Icon(Icons.error_outline, color: Colors.red, size: 20),
                         SizedBox(width: 10),
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             _errorMessage!,
                             style: TextStyle(color: Colors.red),
                           ),
@@ -235,6 +236,7 @@ void login() async {
                 
                 // Phone field
                 TextFormField(
+                  errorBuilder: localizedFormError,
                   controller: _phoneController,
                   decoration: InputDecoration(
                     labelText: 'Phone Number',
@@ -250,7 +252,7 @@ void login() async {
                     ),
                     filled: true,
                     fillColor: Colors.grey[50],
-                  ),
+                  ).localized(context),
                   keyboardType: TextInputType.phone,
                   validator: (val) {
                     if (val!.isEmpty) {
@@ -266,6 +268,7 @@ void login() async {
                 
                 // Password field with visibility toggle - UPDATED
                 TextFormField(
+                  errorBuilder: localizedFormError,
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
@@ -288,7 +291,7 @@ void login() async {
                     ),
                     filled: true,
                     fillColor: Colors.grey[50],
-                  ),
+                  ).localized(context),
                   // UPDATED: Use the visibility state
                   obscureText: !_isPasswordVisible,
                   validator: (val) {
@@ -311,7 +314,7 @@ void login() async {
                       // Navigate to forgot password screen
                       // Navigator.pushNamed(context, '/forgot-password');
                     },
-                    child: Text(
+                    child: AppText(
                       'Forgot Password?',
                       style: TextStyle(color: Color(0xFF15803D)),
                     ),
@@ -331,7 +334,7 @@ void login() async {
                         onPressed: login,
                         child: Padding(
                           padding: EdgeInsets.all(16),
-                          child: Text(
+                          child: AppText(
                             'LOGIN',
                             style: TextStyle(
                               fontSize: 16,
@@ -358,7 +361,7 @@ void login() async {
                     ),
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16),
-                      child: Text(
+                      child: AppText(
                         'OR',
                         style: TextStyle(color: Colors.grey),
                       ),
@@ -375,13 +378,13 @@ void login() async {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
+                    AppText(
                       "Don't have an account? ",
                       style: TextStyle(color: Colors.grey),
                     ),
                     TextButton(
                       onPressed: navigateToSignup,
-                      child: Text(
+                      child: AppText(
                         'SIGN UP',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,

@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +27,7 @@ class PromoTopBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   Widget _buildPromoText() {
-    return const Text(
+    return const AppText(
       'FOR MODERN GROCERY SHOPPING, SHOP WITH US!',
       style: TextStyle(
         color: Colors.white,
@@ -45,7 +46,7 @@ class PromoTopBar extends StatelessWidget implements PreferredSizeWidget {
           size: 16,
         ),
         SizedBox(width: 6),
-        Text(
+        AppText(
           '1800-123-4560',
           style: TextStyle(
             color: Colors.white,
@@ -53,7 +54,7 @@ class PromoTopBar extends StatelessWidget implements PreferredSizeWidget {
           ),
         ),
         SizedBox(width: 4),
-        Text(
+        AppText(
           '|',
           style: TextStyle(
             color: Colors.white70,
@@ -67,7 +68,7 @@ class PromoTopBar extends StatelessWidget implements PreferredSizeWidget {
           size: 16,
         ),
         SizedBox(width: 6),
-        Text(
+        AppText(
           'support@arounstores.com',
           style: TextStyle(
             color: Colors.white,
@@ -89,7 +90,7 @@ class PromoTopBar extends StatelessWidget implements PreferredSizeWidget {
           borderRadius: BorderRadius.circular(16),
         ),
       ),
-      child: const Text(
+      child: const AppText(
         'Get Pro',
         style: TextStyle(
           fontSize: 12,

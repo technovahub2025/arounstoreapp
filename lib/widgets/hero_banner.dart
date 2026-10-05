@@ -1,3 +1,4 @@
+import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
@@ -59,10 +60,36 @@ class _HeroBannerState extends State<HeroBanner> {
   Widget build(BuildContext context) {
     final isDesktop = AppTheme.isDesktop(context);
     final screenHeight = AppTheme.screenHeight(context);
-    final heroHeight = isDesktop
+    final baseHeight = isDesktop
         ? (screenHeight > 800 ? 500.0 : 400.0)
         : (screenHeight > 700 ? 280.0 : 240.0);
 
+    // Measure translated copy because Tamil and larger text can need more lines.
+    final contentWidth = ((MediaQuery.sizeOf(context).width - 32 -
+        (isDesktop ? 80 : 40)) * (isDesktop ? 5 / 9 : 1)).clamp(1.0, double.infinity);
+    double measure(String text, TextStyle style) {
+      final painter = TextPainter(
+        text: TextSpan(text: context.tr(text), style: style),
+        textDirection: Directionality.of(context),
+        textScaler: MediaQuery.textScalerOf(context),
+      )..layout(maxWidth: contentWidth);
+      final height = painter.height;
+      painter.dispose();
+      return height;
+    }
+    var heroHeight = baseHeight;
+    for (final slide in _slides) {
+      final heading = isDesktop
+          ? AppTextStyles.displayLarge.copyWith(fontSize: 42)
+          : AppTextStyles.displayMedium.copyWith(fontSize: 28);
+      final body = isDesktop
+          ? AppTextStyles.bodyLarge.copyWith(fontSize: 16)
+          : AppTextStyles.bodySmall.copyWith(fontSize: 13);
+      final requiredHeight = measure(slide.title, heading) +
+          measure(slide.subtitle, heading) + measure(slide.description, body) +
+          (isDesktop ? 40 : 26) + 112 + 48;
+      if (requiredHeight > heroHeight) heroHeight = requiredHeight;
+    }
     return Container(
       width: double.infinity,
       height: heroHeight,
@@ -156,14 +183,14 @@ class _HeroBannerState extends State<HeroBanner> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
+                AppText(
                   slide.title,
                   style: AppTextStyles.displayLarge.copyWith(
                     color: AppColors.white,
                     fontSize: 42,
                   ),
                 ),
-                Text(
+                AppText(
                   slide.subtitle,
                   style: AppTextStyles.displayLarge.copyWith(
                     color: AppColors.green100,
@@ -171,7 +198,7 @@ class _HeroBannerState extends State<HeroBanner> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Text(
+                AppText(
                   slide.description,
                   style: AppTextStyles.bodyLarge.copyWith(
                     color: AppColors.white.withValues(alpha: 0.9),
@@ -179,10 +206,11 @@ class _HeroBannerState extends State<HeroBanner> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                Row(
+                Wrap(
+                  spacing: 10, runSpacing: 8,
                   children: [
                     _buildPrimaryButton(slide.primaryButtonText),
-                    const SizedBox(width: 16),
+
                     _buildSecondaryButton(slide.secondaryButtonText),
                   ],
                 ),
@@ -203,14 +231,14 @@ class _HeroBannerState extends State<HeroBanner> {
       mainAxisSize: MainAxisSize.max,
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text(
+        AppText(
           slide.title,
           style: AppTextStyles.displayMedium.copyWith(
             color: AppColors.white,
             fontSize: 28,
           ),
         ),
-        Text(
+        AppText(
           slide.subtitle,
           style: AppTextStyles.displayMedium.copyWith(
             color: AppColors.green100,
@@ -218,7 +246,7 @@ class _HeroBannerState extends State<HeroBanner> {
           ),
         ),
         const SizedBox(height: 10),
-        Text(
+        AppText(
           slide.description,
           style: AppTextStyles.bodySmall.copyWith(
             color: AppColors.white.withValues(alpha: 0.9),
@@ -226,10 +254,11 @@ class _HeroBannerState extends State<HeroBanner> {
           ),
         ),
         const SizedBox(height: 16),
-        Row(
+        Wrap(
+          spacing: 10, runSpacing: 8,
           children: [
             _buildPrimaryButton(slide.primaryButtonText, small: true),
-            const SizedBox(width: 10),
+
             _buildSecondaryButton(slide.secondaryButtonText, small: true),
           ],
         ),
@@ -266,7 +295,7 @@ class _HeroBannerState extends State<HeroBanner> {
         ),
         elevation: 4,
       ),
-      child: Text(
+      child: AppText(
         text,
         style: TextStyle(
           fontSize: small ? 13 : 15,
@@ -290,7 +319,7 @@ class _HeroBannerState extends State<HeroBanner> {
           borderRadius: BorderRadius.circular(30),
         ),
       ),
-      child: Text(
+      child: AppText(
         text,
         style: TextStyle(
           fontSize: small ? 13 : 15,
