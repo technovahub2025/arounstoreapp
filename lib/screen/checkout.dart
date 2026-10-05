@@ -1,7 +1,6 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:async';
-
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/config/app_env.dart';
 import 'package:arunstore/model/cartmanager.dart';
