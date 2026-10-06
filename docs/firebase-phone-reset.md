@@ -1,5 +1,11 @@
 # Firebase SMS password recovery
 
+Status: removed from the Flutter app at the user's request. The forgot-password
+screen and Firebase Auth dependency have been removed, so the app no longer
+launches SMS verification or its CAPTCHA flow. The instructions below describe
+the previous implementation, not an available app feature. Backend recovery
+endpoints and Firebase Console settings have not been changed by this removal.
+
 The login screen's Forgot Password link opens Firebase phone verification on
 Android or web. After SMS verification, the app sends a Firebase ID token and
 new password to POST /api/auth/reset-password. Node verifies the token with

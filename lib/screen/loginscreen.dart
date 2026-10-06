@@ -1,6 +1,6 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
-import 'package:arunstore/screen/forgot_password_screen.dart';
+
 
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
@@ -33,17 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   bool _isPasswordVisible = false;
 
-  Future<void> _forgotPassword() async {
-    final changed = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(builder: (_) => ForgotPasswordScreen(initialPhone: _phoneController.text.trim())),
-    );
-    if (changed == true && mounted) {
-      _passwordController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: AppText('Password updated. Sign in with your new password.')),
-      );
-    }
-  }
   // ============================================================
   // LOGIN
   // ============================================================
@@ -643,38 +632,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             return null;
                           },
-                        ),
-
-                        const SizedBox(height: 6),
-
-                        // ==================================================
-                        // FORGOT PASSWORD
-                        // ==================================================
-
-                        Align(
-                          alignment:
-                              Alignment.centerRight,
-
-                          child: TextButton(
-                            onPressed: _forgotPassword,
-
-                            style: TextButton.styleFrom(
-                              padding:
-                                  const EdgeInsets.symmetric(
-                                horizontal: 4,
-                                vertical: 4,
-                              ),
-                            ),
-
-                            child:  AppText(
-                              'Forgot Password?',
-                              style: TextStyle(
-                                color: context.appForeground(Color(0xFF15803D)),
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ),
                         ),
 
                         const SizedBox(height: 12),
