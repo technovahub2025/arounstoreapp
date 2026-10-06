@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "207310636692",
+    "project_id": "arounstore-2b00e",
+    "storage_bucket": "arounstore-2b00e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207310636692:android:ad6d08cb57233779a45681",
+        "android_client_info": {
+          "package_name": "com.example.arounstore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwmk-PnMwOnWZfaAIhfrM_Ws62vjFn6LU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:207310636692:android:7d7ea676f7efb88da45681",
+        "android_client_info": {
+          "package_name": "com.example.arunstore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCwmk-PnMwOnWZfaAIhfrM_Ws62vjFn6LU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

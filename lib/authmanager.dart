@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:arunstore/service/push_notification_service.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -214,6 +215,7 @@ class AuthManager with ChangeNotifier {
   
   // Logout
   Future<void> logout() async {
+    await PushNotificationService.instance.unregister(_token);
     if (kDebugMode) {
     
     }

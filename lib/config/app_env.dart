@@ -1,4 +1,8 @@
 class AppEnv {
+  static const pushBaseUrl = String.fromEnvironment(
+    'PUSH_BASE_URL',
+    defaultValue: 'https://aroun-shopping-website-ysi0.onrender.com/api/push',
+  );
   const AppEnv._();
 
   /// Public Razorpay key ID used by the client checkout flow.
@@ -12,6 +16,7 @@ class AppEnv {
   /// Public backend base URL for Razorpay order creation and verification.
   static const String paymentBaseUrl = String.fromEnvironment(
     'PAYMENT_BASE_URL',
-    defaultValue: 'https://aroun-shopping-website-ysi0.onrender.com/api/payment',
+    defaultValue:
+        'https://aroun-shopping-website-ysi0.onrender.com/api/payment',
   );
 }

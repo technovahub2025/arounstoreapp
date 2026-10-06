@@ -48,6 +48,8 @@ dependencies:
   universal_html: ^2.3.0
   flutter_secure_storage: ^10.0.0
   flutter_launcher_icons: ^0.13.1
+  firebase_core: ^4.15.0
+  firebase_messaging: ^16.7.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -81,6 +83,7 @@ flutter:
    - assets/aroune.jpg
    - assets/arounebg.png
    - assets/imglog.avif
+   - assets/banners/
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
