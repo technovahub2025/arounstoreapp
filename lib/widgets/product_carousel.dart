@@ -12,6 +12,7 @@ class ProductCarousel extends StatelessWidget {
   final List<Product> products;
   final Function(String)? onCategoryTap;
   final ScrollController? controller;
+  final VoidCallback? onViewAllTap;
 
   const ProductCarousel({
     super.key,
@@ -20,6 +21,7 @@ class ProductCarousel extends StatelessWidget {
     required this.products,
     this.onCategoryTap,
     this.controller,
+    this.onViewAllTap,
   });
 
   @override
@@ -36,10 +38,11 @@ class ProductCarousel extends StatelessWidget {
         SectionHeader(
           title: title,
           subtitle: subtitle,
+          onViewAllTap: onViewAllTap,
         ),
         const SizedBox(height: 8),
         if (products.isEmpty)
-          _buildEmptyState(context, )
+          _buildEmptyState(context)
         else if (isDesktop)
           _buildDesktopGrid(context, cardWidth, compact)
         else
@@ -48,7 +51,11 @@ class ProductCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildDesktopGrid(BuildContext context, double cardWidth, bool compact) {
+  Widget _buildDesktopGrid(
+    BuildContext context,
+    double cardWidth,
+    bool compact,
+  ) {
     final crossAxisCount = _calculateCrossAxisCount();
 
     return Padding(
@@ -80,7 +87,11 @@ class ProductCarousel extends StatelessWidget {
     return 4;
   }
 
-  Widget _buildMobileCarousel(BuildContext context, double cardWidth, bool compact) {
+  Widget _buildMobileCarousel(
+    BuildContext context,
+    double cardWidth,
+    bool compact,
+  ) {
     return SizedBox(
       height: (compact ? 240 : 280) + 40,
       child: ListView.builder(
@@ -104,7 +115,7 @@ class ProductCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, ) {
+  Widget _buildEmptyState(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: AppText(

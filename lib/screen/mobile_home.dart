@@ -7,6 +7,8 @@ import 'package:arunstore/theme/app_theme.dart';
 import 'package:arunstore/widgets/hero_banner.dart';
 import 'package:arunstore/widgets/category_carousel.dart';
 import 'package:arunstore/widgets/product_carousel.dart';
+import 'package:arunstore/widgets/home_product_sections.dart';
+import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/widgets/promo_banner_card.dart';
 import 'package:arunstore/widgets/service_feature_bar.dart';
 
@@ -56,8 +58,10 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
   @override
   Widget build(BuildContext context) {
     if (widget.loading) {
-      return  Center(
-        child: CircularProgressIndicator(color: context.appForeground(AppColors.primary)),
+      return Center(
+        child: CircularProgressIndicator(
+          color: context.appForeground(AppColors.primary),
+        ),
       );
     }
 
@@ -68,7 +72,11 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-               Icon(Icons.error_outline, size: 48, color: context.appForeground(AppColors.red)),
+              Icon(
+                Icons.error_outline,
+                size: 48,
+                color: context.appForeground(AppColors.red),
+              ),
               const SizedBox(height: 12),
               AppText(widget.error ?? 'An error occurred'),
               const SizedBox(height: 12),
@@ -91,10 +99,20 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
             children: [
               _buildAppBar(),
               _buildSearchBar(),
-              HeroBanner(categoryMap: widget.categoryMap),
-              _buildCategorySection(),
-              _buildDealProductsSection(),
-              _buildPromoStrip(),
+              if (_searchController.text.trim().isEmpty) ...[
+                HeroBanner(categoryMap: widget.categoryMap),
+                _buildCategorySection(),
+              ],
+              HomeProductSections(
+                categories: widget.categoryMap,
+                allProducts: widget.allProducts,
+                query: _searchController.text,
+                onCategoryTap: widget.onCategoryTap,
+              ),
+              if (_searchController.text.trim().isEmpty) ...[
+                _buildDealProductsSection(),
+                _buildPromoStrip(),
+              ],
               const ServiceFeatureBar(),
               const SizedBox(height: 24),
             ],
@@ -159,13 +177,13 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
             top: 4,
             child: Container(
               padding: const EdgeInsets.all(4),
-              decoration:  BoxDecoration(
+              decoration: BoxDecoration(
                 color: context.appSurface(AppColors.red),
                 shape: BoxShape.circle,
               ),
               child: AppText(
                 count.toString(),
-                style:  TextStyle(
+                style: TextStyle(
                   fontSize: 10,
                   color: context.appForeground(AppColors.white),
                   fontWeight: FontWeight.bold,
@@ -188,13 +206,25 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         ),
         child: TextField(
           controller: _searchController,
+          textInputAction: TextInputAction.search,
+          onChanged: (_) => setState(() {}),
           style: const TextStyle(fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Search for groceries...',
-            hintStyle: TextStyle(color: context.appForeground(AppColors.grey500), fontSize: 13),
-            prefixIcon: Icon(Icons.search, color: context.appForeground(AppColors.grey500), size: 20),
+            hintStyle: TextStyle(
+              color: context.appForeground(AppColors.grey500),
+              fontSize: 13,
+            ),
+            prefixIcon: Icon(
+              Icons.search,
+              color: context.appForeground(AppColors.grey500),
+              size: 20,
+            ),
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 12,
+            ),
             suffixIcon: _searchController.text.isNotEmpty
                 ? IconButton(
                     icon: const Icon(Icons.clear, size: 16),
@@ -225,7 +255,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         children: [
           AppText(
             'Shop by Category',
-            style: AppTextStyles.headingMedium.copyWith(color: context.appForeground(AppColors.darkText)),
+            style: AppTextStyles.headingMedium.copyWith(
+              color: context.appForeground(AppColors.darkText),
+            ),
           ),
           const SizedBox(height: 12),
           if (widget.categoryMap.isEmpty)
@@ -261,7 +293,9 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
   }
 
   Widget _buildDealProductsSection() {
-    final products = _dealProducts.isNotEmpty ? _dealProducts : widget.allProducts;
+    final products = _dealProducts.isNotEmpty
+        ? _dealProducts
+        : widget.allProducts;
     if (products.isEmpty) return const SizedBox.shrink();
 
     return ProductCarousel(
@@ -269,7 +303,19 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
       subtitle: _dealProducts.isNotEmpty
           ? 'Special discounts just for you'
           : 'Handpicked for you',
-      products: products,
+      products: products.take(4).toList(),
+      onViewAllTap: () {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => CategoryFilterPage(
+              categories: {
+                _dealProducts.isNotEmpty ? 'Best Deals' : 'Top Products':
+                    products,
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -316,7 +362,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-         Padding(
+        Padding(
           padding: EdgeInsets.symmetric(horizontal: 16),
           child: AppText(
             'Special Offers',

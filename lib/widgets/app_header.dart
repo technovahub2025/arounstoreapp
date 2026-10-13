@@ -51,21 +51,13 @@ class _AppHeaderState extends State<AppHeader> {
         return Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-          
-          
             if (isWide) _buildDesktopNavigation(),
-            if (!isWide) _buildMobileSearchBar(),
+            _buildMobileSearchBar(),
           ],
         );
       },
     );
   }
-
- 
-
- 
-
- 
 
   Widget _buildSearchBar({bool expanded = true}) {
     return Container(
@@ -83,6 +75,7 @@ class _AppHeaderState extends State<AppHeader> {
       ),
       child: TextField(
         controller: widget.searchController,
+        textInputAction: TextInputAction.search,
         onChanged: widget.onSearchChanged,
         decoration: InputDecoration(
           hintText: 'Search for groceries, vegetables, fruits...',
@@ -90,15 +83,19 @@ class _AppHeaderState extends State<AppHeader> {
             color: context.appForeground(AppColors.lightText),
             fontSize: 14,
           ),
-          prefixIcon:  Icon(
+          prefixIcon: Icon(
             Icons.search,
             color: context.appForeground(AppColors.primary),
             size: 20,
           ),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            vertical: 12,
+            horizontal: 16,
+          ),
           isDense: true,
-          suffixIcon: _isSearchFocused && widget.searchController.text.isNotEmpty
+          suffixIcon:
+              _isSearchFocused && widget.searchController.text.isNotEmpty
               ? IconButton(
                   icon: const Icon(Icons.clear, size: 16),
                   onPressed: () {
@@ -129,9 +126,6 @@ class _AppHeaderState extends State<AppHeader> {
     );
   }
 
-
-
-
   Widget _buildDesktopNavigation() {
     if (widget.navItems.isEmpty) return const SizedBox.shrink();
 
@@ -139,7 +133,8 @@ class _AppHeaderState extends State<AppHeader> {
       color: context.appSurface(AppColors.white),
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Wrap(
-        spacing: 4, runSpacing: 4,
+        spacing: 4,
+        runSpacing: 4,
         children: widget.navItems.map((item) {
           final isActive = widget.activeNavItem == item;
           return Container(
@@ -147,21 +142,28 @@ class _AppHeaderState extends State<AppHeader> {
             child: TextButton(
               onPressed: () => widget.onNavTap?.call(item),
               style: TextButton.styleFrom(
-                foregroundColor: context.appForeground(isActive ? AppColors.primary : AppColors.mutedText),
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                foregroundColor: context.appForeground(
+                  isActive ? AppColors.primary : AppColors.mutedText,
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
               ),
               child: AppText(
                 item,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-                  color: context.appForeground(isActive ? AppColors.primary : AppColors.mutedText),
+                  color: context.appForeground(
+                    isActive ? AppColors.primary : AppColors.mutedText,
+                  ),
                 ),
               ),
             ),
           );
         }).toList(),
       ),
-     );
+    );
   }
 }
