@@ -16,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
 
   final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -34,6 +35,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       User user = User(
         name: _nameController.text.trim(),
+        email: _emailController.text.trim(),
         phone: _phoneController.text.trim(),
         password: _passwordController.text,
       );
@@ -379,6 +381,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       const SizedBox(height: 17),
 
                       // =================================================
+                      // EMAIL
+                      // =================================================
+                      AppText(
+                        'Email Address',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                          color: context.appForeground(Colors.grey.shade800),
+                        ),
+                      ),
+
+                      const SizedBox(height: 8),
+
+                      TextFormField(
+                        errorBuilder: localizedFormError,
+                        controller: _emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        textCapitalization: TextCapitalization.none,
+                        autofillHints: const [AutofillHints.email],
+                        decoration: _inputDecoration(
+                          label: 'Email Address',
+                          hint: 'Enter your email address',
+                          icon: Icons.email_outlined,
+                        ),
+                        validator: (val) {
+                          final email = val?.trim() ?? '';
+                          if (email.isEmpty ||
+                              !RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(email)) {
+                            return 'Please enter a valid email address';
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 17),
+
+                      // =================================================
                       // PHONE NUMBER
                       // =================================================
                       AppText(
@@ -677,6 +716,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
