@@ -3,10 +3,15 @@ import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 
 class ProductController {
   static const String apiUrl = 'https://aroun-shopping-website-ysi0.onrender.com/api/products';
+  static const String _productCacheKey = 'products_cache_v1';
+  static const String _productCacheTimeKey = 'products_cache_time_v1';
+  static const Duration _productCacheTtl = Duration(minutes: 2);
+  static Future<List<Product>>? _productsRequest;
   
   // Add AuthManager reference
   AuthManager? _authManager;
@@ -51,6 +56,22 @@ class ProductController {
   }
 
   Future<List<Product>> fetchProducts() async {
+    // Reuse a fresh response across screens, and share concurrent requests.
+    final cached = await _readCachedProducts();
+    if (cached != null && cached.isFresh) return cached.products;
+    final existingRequest = _productsRequest;
+    if (existingRequest != null) return existingRequest;
+
+    final request = _fetchProductsFromApi(cached?.products);
+    _productsRequest = request;
+    try {
+      return await request;
+    } finally {
+      if (identical(_productsRequest, request)) _productsRequest = null;
+    }
+  }
+
+  Future<List<Product>> _fetchProductsFromApi(List<Product>? staleProducts) async {
     try {
       final response = await http.get(
         Uri.parse(apiUrl),
@@ -71,7 +92,11 @@ class ProductController {
           print('Products fetched: ${jsonList.length}');
         }
         
-        return jsonList.map((json) => Product.fromJson(json)).toList();
+        final products = jsonList
+            .map((json) => Product.fromJson(json as Map<String, dynamic>))
+            .toList();
+        await _writeCachedProducts(response.body);
+        return products;
       } else if (response.statusCode == 401) {
         // Token expired or invalid
         if (kDebugMode) {
@@ -81,14 +106,48 @@ class ProductController {
         // You can trigger logout if needed
         // _authManager?.logout();
         
-        return [];
+        return staleProducts ?? [];
       } else {
         debugPrint('API Error: ${response.statusCode} - ${response.body}');
-        return [];
+        return staleProducts ?? [];
       }
     } catch (e) {
       debugPrint('Network error: $e');
-      return [];
+      return staleProducts ?? [];
+    }
+  }
+
+  Future<_CachedProducts?> _readCachedProducts() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final body = prefs.getString(_productCacheKey);
+      final cachedAt = prefs.getInt(_productCacheTimeKey);
+      if (body == null || cachedAt == null) return null;
+      final decoded = json.decode(body) as List<dynamic>;
+      final products = decoded
+          .map((item) => Product.fromJson(item as Map<String, dynamic>))
+          .toList();
+      final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
+      return _CachedProducts(
+        products,
+        age >= 0 && age < _productCacheTtl.inMilliseconds,
+      );
+    } catch (e) {
+      debugPrint('Could not read product cache: $e');
+      return null;
+    }
+  }
+
+  Future<void> _writeCachedProducts(String body) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_productCacheKey, body);
+      await prefs.setInt(
+        _productCacheTimeKey,
+        DateTime.now().millisecondsSinceEpoch,
+      );
+    } catch (e) {
+      debugPrint('Could not save product cache: $e');
     }
   }
 
@@ -139,4 +198,11 @@ class ProductController {
     }
   }
   
+}
+
+class _CachedProducts {
+  final List<Product> products;
+  final bool isFresh;
+
+  const _CachedProducts(this.products, this.isFresh);
 }
