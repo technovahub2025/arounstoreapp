@@ -8,10 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductController {
   static const String apiUrl = 'https://aroun-shopping-website-ysi0.onrender.com/api/products';
-  static const String _productCacheKey = 'products_cache_v1';
-  static const String _productCacheTimeKey = 'products_cache_time_v1';
   static const Duration _productCacheTtl = Duration(minutes: 2);
-  static Future<List<Product>>? _productsRequest;
+  static const int pageSize = 20;
+  static final Map<int, Future<ProductPage>> _productRequests = {};
   
   // Add AuthManager reference
   AuthManager? _authManager;
@@ -55,26 +54,24 @@ class ProductController {
     return headers;
   }
 
-  Future<List<Product>> fetchProducts() async {
-    // Reuse a fresh response across screens, and share concurrent requests.
-    final cached = await _readCachedProducts();
-    if (cached != null && cached.isFresh) return cached.products;
-    final existingRequest = _productsRequest;
+  Future<ProductPage> fetchProductPage({int page = 1}) async {
+    final cached = await _readCachedPage(page);
+    if (cached != null && cached.isFresh) return cached.page;
+    final existingRequest = _productRequests[page];
     if (existingRequest != null) return existingRequest;
-
-    final request = _fetchProductsFromApi(cached?.products);
-    _productsRequest = request;
+    final request = _fetchPageFromApi(page, cached?.page);
+    _productRequests[page] = request;
     try {
       return await request;
     } finally {
-      if (identical(_productsRequest, request)) _productsRequest = null;
+      if (identical(_productRequests[page], request)) _productRequests.remove(page);
     }
   }
 
-  Future<List<Product>> _fetchProductsFromApi(List<Product>? staleProducts) async {
+  Future<ProductPage> _fetchPageFromApi(int page, ProductPage? stalePage) async {
     try {
       final response = await http.get(
-        Uri.parse(apiUrl),
+        Uri.parse(apiUrl).replace(queryParameters: {'page': '$page', 'limit': '$pageSize'}),
         headers: _getHeaders(), // Use headers with auth
       );
       
@@ -86,17 +83,31 @@ class ProductController {
       }
 
       if (response.statusCode == 200) {
-        final List<dynamic> jsonList = json.decode(response.body);
-        
-        if (kDebugMode) {
-          print('Products fetched: ${jsonList.length}');
-        }
-        
-        final products = jsonList
-            .map((json) => Product.fromJson(json as Map<String, dynamic>))
+        final decoded = json.decode(response.body);
+        final List<dynamic> rawProducts = decoded is List
+            ? decoded
+            : (decoded['products'] ?? decoded['data'] ?? decoded['items']) as List<dynamic>;
+        final allProducts = rawProducts
+            .map((item) => Product.fromJson(item as Map<String, dynamic>))
             .toList();
-        await _writeCachedProducts(response.body);
-        return products;
+        final start = (page - 1) * pageSize;
+        final products = decoded is List && allProducts.length > pageSize
+            ? allProducts.skip(start).take(pageSize).toList()
+            : allProducts;
+        final hasMore = decoded is Map<String, dynamic>
+            ? (decoded['hasMore'] as bool? ??
+                (decoded['totalPages'] is num
+                    ? page < (decoded['totalPages'] as num).toInt()
+                    : products.length == pageSize))
+            : decoded is List && allProducts.length > pageSize
+                ? start + products.length < allProducts.length
+                : products.length == pageSize;
+        if (kDebugMode) {
+          print('Products fetched for page $page: ${products.length}');
+        }
+        final result = ProductPage(products: products, hasMore: hasMore);
+        await _writeCachedPage(page, result);
+        return result;
       } else if (response.statusCode == 401) {
         // Token expired or invalid
         if (kDebugMode) {
@@ -106,30 +117,30 @@ class ProductController {
         // You can trigger logout if needed
         // _authManager?.logout();
         
-        return staleProducts ?? [];
+        return stalePage ?? const ProductPage(products: [], hasMore: false);
       } else {
         debugPrint('API Error: ${response.statusCode} - ${response.body}');
-        return staleProducts ?? [];
+        return stalePage ?? const ProductPage(products: [], hasMore: false);
       }
     } catch (e) {
       debugPrint('Network error: $e');
-      return staleProducts ?? [];
+      return stalePage ?? const ProductPage(products: [], hasMore: false);
     }
   }
 
-  Future<_CachedProducts?> _readCachedProducts() async {
+  Future<_CachedPage?> _readCachedPage(int page) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final body = prefs.getString(_productCacheKey);
-      final cachedAt = prefs.getInt(_productCacheTimeKey);
+      final body = prefs.getString('products_page_$page');
+      final cachedAt = prefs.getInt('products_page_time_$page');
       if (body == null || cachedAt == null) return null;
-      final decoded = json.decode(body) as List<dynamic>;
-      final products = decoded
+      final decoded = json.decode(body) as Map<String, dynamic>;
+      final products = (decoded['products'] as List<dynamic>)
           .map((item) => Product.fromJson(item as Map<String, dynamic>))
           .toList();
       final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
-      return _CachedProducts(
-        products,
+      return _CachedPage(
+        ProductPage(products: products, hasMore: decoded['hasMore'] as bool),
         age >= 0 && age < _productCacheTtl.inMilliseconds,
       );
     } catch (e) {
@@ -138,18 +149,24 @@ class ProductController {
     }
   }
 
-  Future<void> _writeCachedProducts(String body) async {
+  Future<void> _writeCachedPage(int page, ProductPage result) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_productCacheKey, body);
+      await prefs.setString('products_page_$page', json.encode({
+        'products': result.products.map((product) => product.toJson()).toList(),
+        'hasMore': result.hasMore,
+      }));
       await prefs.setInt(
-        _productCacheTimeKey,
+        'products_page_time_$page',
         DateTime.now().millisecondsSinceEpoch,
       );
     } catch (e) {
       debugPrint('Could not save product cache: $e');
     }
   }
+
+  Future<List<Product>> fetchProducts() async =>
+      (await fetchProductPage()).products;
 
   // Group products by category
   Future<Map<String, List<Product>>> fetchProductsByCategory() async {
@@ -200,9 +217,16 @@ class ProductController {
   
 }
 
-class _CachedProducts {
+class ProductPage {
   final List<Product> products;
+  final bool hasMore;
+
+  const ProductPage({required this.products, required this.hasMore});
+}
+
+class _CachedPage {
+  final ProductPage page;
   final bool isFresh;
 
-  const _CachedProducts(this.products, this.isFresh);
+  const _CachedPage(this.page, this.isFresh);
 }

@@ -21,6 +21,9 @@ class HomeScreenLogic {
   Map<String, List<Product>> categoryMap = {};
   List<Product> allProducts = [];
   bool loading = true;
+  bool loadingMore = false;
+  bool hasMoreProducts = true;
+  int _productPage = 1;
   String? error;
   bool authLoading = true;
   bool isAdmin = false;
@@ -254,9 +257,9 @@ class HomeScreenLogic {
       loading = true;
       error = null;
       
-       final data = await controller.fetchProductsByCategory();
-       categoryMap = data;
-       allProducts = data.values.expand((products) => products).toList();
+       final page = await controller.fetchProductPage();
+       _addProducts(page.products);
+       hasMoreProducts = page.hasMore;
        loading = false;
       
     } catch (e, stackTrace) {
@@ -269,6 +272,29 @@ class HomeScreenLogic {
       allProducts = [];
       loading = false;
       error = 'Failed to load categories. Please check your internet connection.';
+    }
+  }
+
+  Future<void> loadMoreProducts() async {
+    if (loadingMore || !hasMoreProducts) return;
+    loadingMore = true;
+    try {
+      final nextPage = _productPage + 1;
+      final page = await controller.fetchProductPage(page: nextPage);
+      _addProducts(page.products);
+      _productPage = nextPage;
+      hasMoreProducts = page.hasMore;
+    } finally {
+      loadingMore = false;
+    }
+  }
+
+  void _addProducts(List<Product> products) {
+    for (final product in products) {
+      allProducts.add(product);
+      final category = product.category?.trim();
+      final key = category == null || category.isEmpty ? 'Uncategorized' : category;
+      categoryMap.putIfAbsent(key, () => []).add(product);
     }
   }
 

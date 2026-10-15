@@ -29,6 +29,9 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
   Map<String, List<Product>> _categoryMap = {};
   List<Product> _allProducts = [];
   bool _loading = true;
+  bool _loadingMore = false;
+  bool _hasMore = true;
+  int _productPage = 1;
   String? _error;
 
   @override
@@ -39,11 +42,20 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
 
   Future<void> _loadData() async {
     try {
-      final data = await _productController.fetchProductsByCategory();
+      final page = await _productController.fetchProductPage();
+      final data = <String, List<Product>>{};
+      for (final product in page.products) {
+        final name = product.category?.trim();
+        data.putIfAbsent(
+          name == null || name.isEmpty ? 'Uncategorized' : name,
+          () => [],
+        ).add(product);
+      }
       if (mounted) {
         setState(() {
           _categoryMap = data;
-          _allProducts = data.values.expand((p) => p).toList();
+          _allProducts = page.products;
+          _hasMore = page.hasMore;
           _loading = false;
         });
       }
@@ -56,6 +68,30 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
           _loading = false;
         });
       }
+    }
+  }
+
+  Future<void> _loadMoreProducts() async {
+    if (_loadingMore || !_hasMore) return;
+    setState(() => _loadingMore = true);
+    try {
+      final nextPage = _productPage + 1;
+      final page = await _productController.fetchProductPage(page: nextPage);
+      if (!mounted) return;
+      setState(() {
+        _productPage = nextPage;
+        _hasMore = page.hasMore;
+        _allProducts.addAll(page.products);
+        for (final product in page.products) {
+          final name = product.category?.trim();
+          _categoryMap.putIfAbsent(
+            name == null || name.isEmpty ? 'Uncategorized' : name,
+            () => [],
+          ).add(product);
+        }
+      });
+    } finally {
+      if (mounted) setState(() => _loadingMore = false);
     }
   }
 
@@ -128,6 +164,9 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
         categoryMap: _categoryMap,
         allProducts: _allProducts,
         loading: _loading,
+        loadingMore: _loadingMore,
+        hasMore: _hasMore,
+        onLoadMore: _loadMoreProducts,
         error: _error,
         onMenuTap: () => _scaffoldKey.currentState?.openDrawer(),
         onCategoryTap: (categoryName) {

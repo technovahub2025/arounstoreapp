@@ -278,8 +278,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildBody(BuildContext context) {
     if (_logic == null) return const SizedBox.shrink();
 
-    return SingleChildScrollView(
-      child: Column(
+    return NotificationListener<ScrollNotification>(
+      onNotification: (notification) {
+        if (notification.metrics.extentAfter < 800 &&
+            _logic!.hasMoreProducts &&
+            !_logic!.loadingMore) {
+          _logic!.loadMoreProducts().then((_) {
+            if (mounted) setState(() {});
+          });
+        }
+        return false;
+      },
+      child: SingleChildScrollView(
+       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           _buildAppBarSection(),
@@ -299,6 +310,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 _logic!.categoryMap,
               ),
             ),
+          if (_logic!.loadingMore)
+            const Padding(
+              padding: EdgeInsets.all(20),
+              child: Center(child: CircularProgressIndicator()),
+            ),
           if (_searchController.text.trim().isEmpty) ...[
             _buildBestDealsSection(),
             _buildPromoBannerStrip(),
@@ -310,6 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const NewsletterSection(),
           const SizedBox(height: 24),
         ],
+      ),
       ),
     );
   }

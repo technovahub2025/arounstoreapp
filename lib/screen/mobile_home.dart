@@ -19,6 +19,9 @@ class MobileHomeScreen extends StatefulWidget {
   final Map<String, List<Product>> categoryMap;
   final List<Product> allProducts;
   final bool loading;
+  final bool loadingMore;
+  final bool hasMore;
+  final VoidCallback? onLoadMore;
   final String? error;
   final void Function(String categoryName)? onCategoryTap;
   final void Function(Product product)? onDealProductTap;
@@ -30,6 +33,9 @@ class MobileHomeScreen extends StatefulWidget {
     required this.categoryMap,
     required this.allProducts,
     required this.loading,
+    this.loadingMore = false,
+    this.hasMore = false,
+    this.onLoadMore,
     this.error,
     this.onCategoryTap,
     this.onDealProductTap,
@@ -93,8 +99,17 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         onRefresh: () async {
           // refresh handled by parent
         },
-        child: SingleChildScrollView(
-          child: Column(
+        child: NotificationListener<ScrollNotification>(
+          onNotification: (notification) {
+            if (notification.metrics.extentAfter < 700 &&
+                widget.hasMore &&
+                !widget.loadingMore) {
+              widget.onLoadMore?.call();
+            }
+            return false;
+          },
+          child: SingleChildScrollView(
+           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _buildAppBar(),
@@ -115,7 +130,13 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               ],
               const ServiceFeatureBar(),
               const SizedBox(height: 24),
+              if (widget.loadingMore)
+                const Padding(
+                  padding: EdgeInsets.all(20),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
             ],
+          ),
           ),
         ),
       ),
