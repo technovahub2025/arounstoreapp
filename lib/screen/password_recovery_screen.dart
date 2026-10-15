@@ -35,7 +35,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       } else {
         setState(() {
           _success = false;
-          _message = _serverMessage(response.body) ?? 'We couldn’t send the reset link. Please try again.';
+          _message = 'We couldn’t send the reset link. Please try again.';
         });
       }
     } catch (_) {
@@ -117,7 +117,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   String? _message;
 
   Future<void> _submit() async {
-    if (!widget.token.trim().isNotEmpty) {
+    if (widget.token.trim().isEmpty) {
       setState(() => _message = 'This reset link is missing its token. Request a new link.');
       return;
     }
