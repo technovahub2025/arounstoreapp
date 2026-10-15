@@ -14,6 +14,7 @@ import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:arunstore/authmanager.dart';
+import 'package:arunstore/screen/password_recovery_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -110,6 +111,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       darkTheme: AppTheme.darkTheme,
       themeMode: preferences.isDark ? ThemeMode.dark : ThemeMode.light,
       home: const SplashScreen(),
+      onGenerateRoute: (settings) {
+        final uri = Uri.tryParse(settings.name ?? '');
+        if (uri?.path == '/reset-password') {
+          return MaterialPageRoute<void>(
+            settings: settings,
+            builder: (_) => ResetPasswordScreen(token: uri?.queryParameters['token'] ?? ''),
+          );
+        }
+        return null;
+      },
       debugShowCheckedModeBanner: false,
     );
   }

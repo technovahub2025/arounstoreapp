@@ -6,6 +6,7 @@ import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/model/rolechoose.dart';
 import 'package:arunstore/screen/app_home.dart';
 import 'package:arunstore/screen/registerscreen.dart';
+import 'package:arunstore/screen/password_recovery_screen.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -632,6 +633,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
                             return null;
                           },
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: () => Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                            ),
+                            child: const Text('Forgot password?'),
+                          ),
                         ),
 
                         const SizedBox(height: 12),
