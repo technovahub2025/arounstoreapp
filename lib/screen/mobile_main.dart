@@ -95,6 +95,15 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
     }
   }
 
+  Future<void> _logout() async {
+    await AuthManager().logout();
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
   void _onNavTap(int index) {
     setState(() {
       _currentIndex = index;
@@ -192,8 +201,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
                 ),
       MobileAccountScreen(
         onLogoutTap: () async {
-          await authManager.logout();
-          if (mounted) setState(() {});
+          await _logout();
         },
       ),
     ];

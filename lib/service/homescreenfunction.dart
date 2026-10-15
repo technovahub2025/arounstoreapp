@@ -83,9 +83,10 @@ class HomeScreenLogic {
 
   Future<void> logoutUser(BuildContext context) async {
     await authManager.logout();
-    Navigator.pushReplacement(
+    Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(builder: (context) => LoginScreen()),
+      (route) => false,
     );
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: AppText('Logged out successfully')),

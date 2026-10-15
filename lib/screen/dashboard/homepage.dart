@@ -750,7 +750,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   MaterialPageRoute(
                     builder: (_) => MobileAccountScreen(
                       onLogoutTap: () async {
-                        await _logic!.authManager.logout();
+                        await _logic!.logoutUser(context);
                       },
                     ),
                   ),
