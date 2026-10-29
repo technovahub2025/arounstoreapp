@@ -1,6 +1,7 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'dart:async';
+import 'dart:convert';
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/config/app_env.dart';
 import 'package:arunstore/model/cartmanager.dart';
@@ -55,6 +56,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   bool _isProcessing = false;
   bool _isPreparingOrder = false;
+  bool _hasSavedShippingDetails = false;
+  bool _editingShippingDetails = false;
   String? _errorMessage;
   RazorpayPaymentVerification? _verification;
   RazorpayOrderResult? _preparedOrder;
@@ -74,6 +77,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     }
     _cart.addListener(_schedulePreparation);
     _loadAuthToken();
+    _loadSavedShippingDetails();
     _schedulePreparation();
   }
 
@@ -174,6 +178,66 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _schedulePreparation();
   }
 
+  String? get _shippingStorageKey {
+    final user = AuthManager().currentUser;
+    final identity = user?.id.isNotEmpty == true ? user!.id : user?.phone;
+    if (identity == null || identity.trim().isEmpty) return null;
+    return 'checkout_shipping_${identity.trim()}';
+  }
+
+  Future<void> _loadSavedShippingDetails() async {
+    final key = _shippingStorageKey;
+    final user = AuthManager().currentUser;
+    if (key == null || user == null) return;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString(key);
+      if (raw == null) {
+        _fullNameController.text = user.name;
+        _phoneController.text = user.phone ?? '';
+        return;
+      }
+      final details = Map<String, dynamic>.from(jsonDecode(raw) as Map);
+      if (!mounted) return;
+      _fullNameController.text = details['fullName']?.toString() ?? user.name;
+      _phoneController.text = details['phone']?.toString() ?? user.phone ?? '';
+      _address1Controller.text = details['addressLine1']?.toString() ?? '';
+      _address2Controller.text = details['addressLine2']?.toString() ?? '';
+      _cityController.text = details['city']?.toString() ?? '';
+      _stateController.text = details['state']?.toString() ?? '';
+      _pincodeController.text = details['pincode']?.toString() ?? '';
+      _countryController.text = details['country']?.toString() ?? 'India';
+      setState(() {
+        _hasSavedShippingDetails = _hasRequiredCheckoutDetails;
+        _editingShippingDetails = !_hasSavedShippingDetails;
+      });
+      _schedulePreparation();
+    } catch (error) {
+      if (kDebugMode) print('Checkout: Could not load saved shipping details: $error');
+    }
+  }
+
+  Future<void> _saveShippingDetails() async {
+    final key = _shippingStorageKey;
+    if (key == null) return;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(key, jsonEncode({
+      'fullName': _fullNameController.text.trim(),
+      'phone': _phoneController.text.trim(),
+      'addressLine1': _address1Controller.text.trim(),
+      'addressLine2': _address2Controller.text.trim(),
+      'city': _cityController.text.trim(),
+      'state': _stateController.text.trim(),
+      'pincode': _pincodeController.text.trim(),
+      'country': _countryController.text.trim(),
+    }));
+    if (!mounted) return;
+    setState(() {
+      _hasSavedShippingDetails = true;
+      _editingShippingDetails = false;
+    });
+  }
+
   bool _readyToPrepare() {
     return _canAttemptPayment;
   }
@@ -267,7 +331,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       _verification = null;
     });
 
-    if (!_formKey.currentState!.validate()) {
+    if ((!_hasSavedShippingDetails || _editingShippingDetails) &&
+        !_formKey.currentState!.validate()) {
       setState(() => _errorMessage = 'Please fix the highlighted fields.');
       return;
     }
@@ -368,6 +433,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       });
 
       if (!verification.success) return;
+
+      Future.delayed(const Duration(seconds: 4), () {
+        if (!mounted) return;
+        setState(() => _verification = null);
+      });
+
+      try {
+        await _saveShippingDetails();
+      } catch (error) {
+        if (kDebugMode) print('Checkout: Could not save shipping details: $error');
+      }
 
       OrderHistoryService.instance.addOrder(
         CompletedOrder(
@@ -538,8 +614,34 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _shippingCard() {
     return CheckoutSectionCard(
       title: 'Shipping details',
-      subtitle: 'Enter the address where we should deliver your order.',
-      child: CheckoutShippingForm(
+      subtitle: _hasSavedShippingDetails && !_editingShippingDetails
+          ? 'Using your saved delivery address.'
+          : 'Enter the address where we should deliver your order.',
+      child: _hasSavedShippingDetails && !_editingShippingDetails
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('${_fullNameController.text}  •  ${_phoneController.text}'),
+                const SizedBox(height: 6),
+                Text([
+                  _address1Controller.text,
+                  _address2Controller.text,
+                  _cityController.text,
+                  _stateController.text,
+                  _pincodeController.text,
+                  _countryController.text,
+                ].where((part) => part.trim().isNotEmpty).join(', ')),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: TextButton(
+                    onPressed: () => setState(() => _editingShippingDetails = true),
+                    child: const AppText('Change address'),
+                  ),
+                ),
+                _paymentButton(),
+              ],
+            )
+          : CheckoutShippingForm(
         formKey: _formKey,
         fullNameController: _fullNameController,
         phoneController: _phoneController,
@@ -566,6 +668,26 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       ),
     );
   }
+
+  Widget _paymentButton() => SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: (_isProcessing || _isPreparingOrder || !_canAttemptPayment)
+              ? null
+              : _startPayment,
+          child: AppText(_isProcessing
+              ? 'Processing payment...'
+              : _isPreparingOrder
+                  ? 'Preparing payment...'
+                  : !_hasAuthToken
+                      ? 'Log in to continue'
+                      : !_hasRazorpayKey
+                          ? 'Payments unavailable'
+                          : _preparedOrder == null
+                              ? 'Prepare payment'
+                              : 'Pay now - ${_formatMoney(_total)}'),
+        ),
+      );
 
   Widget _summaryCard() {
     return CheckoutSectionCard(
