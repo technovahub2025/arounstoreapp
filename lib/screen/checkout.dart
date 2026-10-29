@@ -58,6 +58,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   bool _isPreparingOrder = false;
   bool _hasSavedShippingDetails = false;
   bool _editingShippingDetails = false;
+  bool _showOrderConfirmation = false;
   String? _errorMessage;
   RazorpayPaymentVerification? _verification;
   RazorpayOrderResult? _preparedOrder;
@@ -434,11 +435,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
       if (!verification.success) return;
 
-      Future.delayed(const Duration(seconds: 4), () {
-        if (!mounted) return;
-        setState(() => _verification = null);
-      });
-
       try {
         await _saveShippingDetails();
       } catch (error) {
@@ -461,6 +457,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         ),
       );
 
+      setState(() => _showOrderConfirmation = true);
+
       if (widget.clearCartOnSuccess) {
         _cart.clearCart();
       }
@@ -471,7 +469,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         Navigator.of(context).pushReplacementNamed(widget.successRedirectTo);
       } else if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: AppText('Payment verified successfully.')),
+                          const SnackBar(content: AppText('Order placed successfully.')),
         );
       }
     } catch (_) {
@@ -566,10 +564,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                        
-                        if (_verification != null && _verification!.success) ...[
+                        if (_showOrderConfirmation) ...[
                           const SizedBox(height: 16),
                           CheckoutNoticeBanner(
-            message: 'Payment confirmed. Thank you for your order.',
+                            message: 'Order placed successfully. Thank you!',
                             color: const Color(0xFFDCFCE7),
                             textColor: const Color(0xFF166534),
                             borderColor: const Color(0xFF86EFAC),
