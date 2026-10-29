@@ -13,6 +13,7 @@ class CompletedOrder {
   final DateTime createdAt;
   final bool paymentSuccessful;
   final String paymentStatus;
+  final String orderStatus;
 
   const CompletedOrder({
     required this.orderId,
@@ -26,6 +27,7 @@ class CompletedOrder {
     required this.createdAt,
     this.paymentSuccessful = true,
     this.paymentStatus = 'Successful',
+    this.orderStatus = 'Placed',
   });
 }
 
@@ -42,6 +44,27 @@ class OrderHistoryService extends ChangeNotifier {
 
   void addOrder(CompletedOrder order) {
     _orders.insert(0, order);
+    notifyListeners();
+  }
+
+  void markOrderCancelled(String orderId) {
+    final index = _orders.indexWhere((order) => order.orderId == orderId);
+    if (index == -1) return;
+    final order = _orders[index];
+    _orders[index] = CompletedOrder(
+      orderId: order.orderId,
+      paymentId: order.paymentId,
+      signature: order.signature,
+      customerName: order.customerName,
+      items: order.items,
+      subtotal: order.subtotal,
+      shipping: order.shipping,
+      total: order.total,
+      createdAt: order.createdAt,
+      paymentSuccessful: order.paymentSuccessful,
+      paymentStatus: order.paymentStatus,
+      orderStatus: 'Cancelled',
+    );
     notifyListeners();
   }
 

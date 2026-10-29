@@ -19,4 +19,9 @@ class AppEnv {
     defaultValue:
         'https://aroun-shopping-website-ysi0.onrender.com/api/payment',
   );
+
+  static const String ordersBaseUrl = String.fromEnvironment(
+    'ORDERS_BASE_URL',
+    defaultValue: 'https://aroun-shopping-website-ysi0.onrender.com/api/orders',
+  );
 }

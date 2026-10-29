@@ -1,7 +1,9 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/order.dart';
+import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/cartmanager.dart';
+import 'package:arunstore/service/order_api_service.dart';
 import 'package:arunstore/service/order_history_service.dart';
 import 'package:flutter/material.dart';
 
@@ -15,6 +17,64 @@ class Allorder extends StatefulWidget {
 class _AllorderState extends State<Allorder> {
   final cart = CartManager.instance;
   final orderHistory = OrderHistoryService.instance;
+  final Set<String> _cancelingOrderIds = {};
+
+  Future<void> _cancelOrder(CompletedOrder order) async {
+    final reasonController = TextEditingController(text: 'Ordered by mistake');
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const AppText('Cancel order?'),
+        content: TextField(
+          controller: reasonController,
+          autofocus: true,
+          maxLines: 2,
+          decoration: const InputDecoration(labelText: 'Reason'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const AppText('Keep order'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, reasonController.text.trim()),
+            child: const AppText('Cancel order'),
+          ),
+        ],
+      ),
+    );
+    reasonController.dispose();
+    if (reason == null || reason.isEmpty || !mounted) return;
+
+    final token = AuthManager().token;
+    if (token == null || token.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: AppText('Please log in again to cancel your order.')),
+      );
+      return;
+    }
+
+    setState(() => _cancelingOrderIds.add(order.orderId));
+    try {
+      await OrderApiService.cancelOrder(
+        orderId: order.orderId,
+        reason: reason,
+        authToken: token,
+      );
+      orderHistory.markOrderCancelled(order.orderId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: AppText('Order cancelled successfully.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: AppText(error.toString().replaceFirst('Exception: ', ''))),
+      );
+    } finally {
+      if (mounted) setState(() => _cancelingOrderIds.remove(order.orderId));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +124,7 @@ class _AllorderState extends State<Allorder> {
               ),
               const SizedBox(height: 8),
               AppText('Order ID: ${order.orderId}'),
+              AppText('Order status: ${order.orderStatus}'),
               if (order.paymentSuccessful) AppText('Payment ID: ${order.paymentId}'),
               AppText('Placed on: ${order.createdAt}'),
               const SizedBox(height: 12),
@@ -83,6 +144,27 @@ class _AllorderState extends State<Allorder> {
                   quantity: item.quantity,
                 ),
               ),
+              if (order.paymentSuccessful && order.orderStatus.toLowerCase() != 'cancelled') ...[
+                const SizedBox(height: 12),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: OutlinedButton.icon(
+                    onPressed: _cancelingOrderIds.contains(order.orderId)
+                        ? null
+                        : () => _cancelOrder(order),
+                    icon: _cancelingOrderIds.contains(order.orderId)
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.cancel_outlined),
+                    label: AppText(_cancelingOrderIds.contains(order.orderId)
+                        ? 'Cancelling...'
+                        : 'Cancel order'),
+                  ),
+                ),
+              ],
             ],
           ),
         );
