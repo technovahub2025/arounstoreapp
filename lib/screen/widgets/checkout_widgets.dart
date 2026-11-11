@@ -1,6 +1,7 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:arunstore/widgets/product_image.dart';
 
 class CheckoutSectionCard extends StatelessWidget {
   const CheckoutSectionCard({
@@ -207,12 +208,12 @@ class CheckoutCartItemTile extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: Image.network(
-              imageUrl ?? '',
+            child: ProductImage(
+              imageUrl: imageUrl,
               width: 72,
               height: 72,
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
+              errorWidget: Container(
                 width: 72,
                 height: 72,
                 color: context.appSurface(const Color(0xFFE2E8F0)),

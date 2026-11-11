@@ -3,17 +3,19 @@ import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/filter.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 
 class CategoryCarousel extends StatelessWidget {
   final Map<String, List<Product>> categories;
   final Function(String)? onCategoryTap;
+  final Map<String, int> productCounts;
 
   const CategoryCarousel({
     super.key,
     required this.categories,
     this.onCategoryTap,
+    this.productCounts = const {},
   });
 
   List<MapEntry<String, List<Product>>> _getCategoryList(BuildContext context) {
@@ -54,7 +56,7 @@ class CategoryCarousel extends StatelessWidget {
           return CategoryCard(
             name: categoryName,
             imageUrl: imageUrl,
-            productCount: products.length,
+            productCount: productCounts[categoryName] ?? products.length,
             onTap: () {
               if (onCategoryTap != null) {
                 onCategoryTap!(categoryName);
@@ -131,18 +133,10 @@ class CategoryCard extends StatelessWidget {
               ),
               child: ClipOval(
                 child: imageUrl != null && imageUrl!.isNotEmpty
-                    ? CachedNetworkImage(
-                        imageUrl: imageUrl!,
+                    ? ProductImage(
+                        imageUrl: imageUrl,
                         fit: BoxFit.contain,
-                        placeholder: (context, url) => Container(
-                          color: context.appSurface(AppColors.grey100),
-                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                        ),
-                        errorWidget: (context, url, error) => Icon(
-                          Icons.category,
-                          size: 40,
-                          color: context.appForeground(AppColors.grey400),
-                        ),
+                        errorWidget: Icon(Icons.category, size: 40, color: context.appForeground(AppColors.grey400)),
                       )
                     : Icon(
                         Icons.category,

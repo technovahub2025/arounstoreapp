@@ -220,9 +220,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onSearchChanged(String query) {
-    if (mounted) {
-      setState(() {});
-    }
+    setState(() {});
+    _logic?.searchProductsFromServer(query, () {
+      if (mounted) setState(() {});
+    });
   }
 
   @override
@@ -299,7 +300,9 @@ class _HomeScreenState extends State<HomeScreen> {
             HeroBanner(categoryMap: _logic!.categoryMap),
             _buildCategorySection(),
           ],
-          if (!_logic!.loading && _logic!.error == null)
+          if (!_logic!.loading && _logic!.error != null)
+            _buildErrorState()
+          else if (!_logic!.loading)
             HomeProductSections(
               categories: _logic!.categoryMap,
               allProducts: _logic!.allProducts,
@@ -402,6 +405,7 @@ class _HomeScreenState extends State<HomeScreen> {
         else
           CategoryCarousel(
             categories: _logic!.categoryMap,
+            productCounts: _logic!.categoryCounts,
             onCategoryTap: (categoryName) {
               _logic!.onCategoryImageTap(
                 context,
@@ -661,12 +665,9 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () {
-              if (mounted && _logic != null) {
-                setState(() {
-                  _logic!.loading = true;
-                });
-              }
-              _logic?.loadCategories().then((_) {
+              final future = _logic?.reloadProducts();
+              if (mounted) setState(() {});
+              future?.then((_) {
                 if (mounted) {
                   setState(() {});
                 }

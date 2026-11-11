@@ -2,9 +2,12 @@ import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/widgets/product_image.dart';
+import 'package:arunstore/service/categoryservice.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'dart:async';
 
 class CategoryDetailsPage extends StatefulWidget {
   final String categoryName;
@@ -28,6 +31,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
   late List<Product> _selectedProducts;
   late List<Product> _filteredProducts;
   late Map<String, List<Product>> _categories;
+  final ProductController _productController = ProductController();
+  late final ProductCatalogSession _catalog = ProductCatalogSession(_productController);
+  final ScrollController _productsScrollController = ScrollController();
+  Timer? _searchTimer;
+  Map<String, int> _categoryCounts = {};
+  bool _loadingProducts = true;
   final rupeeFormat = NumberFormat.currency(
     locale: 'en_IN',
     symbol: '₹',
@@ -47,19 +56,72 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     }
 
     _filteredProducts = _selectedProducts;
+    _productsScrollController.addListener(_onProductsScroll);
+    _loadCategoryCounts();
+    _reloadSelectedCategory();
+  }
+
+  Future<void> _loadCategoryCounts() async {
+    try {
+      final counts = await _productController.fetchCategoryCounts();
+      if (!mounted) return;
+      setState(() {
+        _categoryCounts = counts;
+        for (final name in counts.keys) {
+          _categories.putIfAbsent(name, () => []);
+        }
+      });
+    } catch (error) {
+      debugPrint('Could not load category counts: $error');
+    }
+  }
+
+  Future<void> _reloadSelectedCategory({String? search}) async {
+    setState(() => _loadingProducts = true);
+    await _catalog.loadFirst(
+      search: search ?? _searchController.text,
+      categories: [_selectedCategory],
+    );
+    if (!mounted) return;
+    setState(() {
+      _selectedProducts = _catalog.products;
+      _filteredProducts = List.of(_selectedProducts);
+      _loadingProducts = false;
+    });
+  }
+
+  void _onProductsScroll() {
+    if (_productsScrollController.position.extentAfter < 500 && _catalog.hasMore && !_catalog.loadingMore) {
+      _catalog.loadMore().then((_) {
+        if (mounted) {
+          setState(() {
+            _selectedProducts = _catalog.products;
+            _filteredProducts = List.of(_selectedProducts);
+          });
+        }
+      });
+    }
+  }
+
+  String get _productCountLabel {
+    if (_searchController.text.trim().isNotEmpty) {
+      return _catalog.hasMore
+          ? 'Showing ${_filteredProducts.length} products'
+          : '${_filteredProducts.length} products found';
+    }
+    final count = _categoryCounts[_selectedCategory];
+    return count == null ? 'Loading product count...' : '$count products';
   }
 
   void _filterProducts(String query) {
-    final lowerQuery = query.toLowerCase();
+    _searchTimer?.cancel();
+    _catalog.invalidatePending();
     setState(() {
-      _filteredProducts = _selectedProducts.where((product) {
-        final name = product.name?.toLowerCase() ?? '';
-        final description = product.description?.toLowerCase() ?? '';
-        final category = product.category?.toLowerCase() ?? '';
-        return name.contains(lowerQuery) ||
-            description.contains(lowerQuery) ||
-            category.contains(lowerQuery);
-      }).toList();
+      _loadingProducts = true;
+      _filteredProducts = [];
+    });
+    _searchTimer = Timer(const Duration(milliseconds: 300), () {
+      _reloadSelectedCategory(search: query);
     });
   }
 
@@ -70,11 +132,15 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       _filteredProducts = products;
       _searchController.clear();
     });
+    _searchTimer?.cancel();
+    _reloadSelectedCategory(search: '');
   }
 
   @override
   void dispose() {
     _searchController.dispose();
+    _searchTimer?.cancel();
+    _productsScrollController.dispose();
     super.dispose();
   }
 
@@ -188,7 +254,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
 
                 return _buildCategoryItem(
                   categoryName: categoryName,
-                  productCount: products.length,
+                  productCount: _categoryCounts[categoryName] ?? products.length,
                   isSelected: isSelected,
                   onTap: () {
                     _selectCategory(categoryName, products);
@@ -242,24 +308,12 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: imageUrl != null && imageUrl.isNotEmpty
-                      ? Image.network(
-                          imageUrl,
+                      ? ProductImage(
+                          imageUrl: imageUrl,
                           fit: BoxFit.contain,
                           width: 36,
                           height: 36,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return const Center(
-                              child: SizedBox(
-                                width: 16,
-                                height: 16,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2,
-                                ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (_, _, _) =>  Center(
+                          errorWidget: Center(
                             child: Icon(
                               Icons.category,
                               size: 20,
@@ -371,7 +425,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
           child: AppText(
-            '${_filteredProducts.length} products found',
+            _productCountLabel,
             style: TextStyle(
               fontSize: 13,
               color: context.appForeground(AppColors.grey600),
@@ -393,6 +447,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     final columnWidth = (availableWidth - (crossAxisCount - 1) * 12) / crossAxisCount;
     final aspectRatio = (columnWidth / 280).clamp(0.55, 0.85);
 
+    if (_loadingProducts && _filteredProducts.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     if (_selectedProducts.isEmpty) {
       return _buildEmptyCategory();
     }
@@ -402,6 +460,7 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
     }
 
     return GridView.builder(
+      controller: _productsScrollController,
       padding: const EdgeInsets.all(16),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: crossAxisCount,
@@ -409,8 +468,11 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
         mainAxisSpacing: 12,
         childAspectRatio: aspectRatio,
       ),
-      itemCount: _filteredProducts.length,
+      itemCount: _filteredProducts.length + (_catalog.loadingMore ? 2 : 0),
       itemBuilder: (context, index) {
+        if (index >= _filteredProducts.length) {
+          return const Center(child: CircularProgressIndicator());
+        }
         final product = _filteredProducts[index];
         return _buildProductCard(context, product);
       },
@@ -547,36 +609,10 @@ class _CategoryDetailsPageState extends State<CategoryDetailsPage> {
       );
     }
 
-    return Image.network(
-      product.images[0],
+    return ProductImage(
+      imageUrl: product.images[0],
       fit: BoxFit.contain,
       width: double.infinity,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-              strokeWidth: 2,
-              color: context.appForeground(AppColors.primary),
-            ),
-          ),
-        );
-      },
-      errorBuilder: (_, _, _) {
-        return  Center(
-          child: Icon(
-            Icons.broken_image,
-            size: 40,
-            color: context.appForeground(AppColors.grey400),
-          ),
-        );
-      },
     );
   }
 
@@ -761,10 +797,10 @@ class CategoryProductSearchDelegate extends SearchDelegate<Product?> {
             child: product.images.isNotEmpty
                 ? ClipRRect(
                     borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      product.images[0],
+                    child: ProductImage(
+                      imageUrl: product.images[0],
                       fit: BoxFit.contain,
-                      errorBuilder: (_, _, _) =>  Icon(
+                      errorWidget: Icon(
                         Icons.broken_image,
                         size: 40,
                         color: context.appForeground(AppColors.grey400),

@@ -5,7 +5,7 @@ import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:arunstore/widgets/product_image.dart';
 
 class CategoryImagesHorizontal extends StatelessWidget {
   final Map<String, List<Product>> categories;
@@ -50,7 +50,7 @@ class CategoryImagesHorizontal extends StatelessWidget {
         // Get ALL images from ALL products in this category
         List<String> allImages = [];
         for (var product in products) {
-          allImages.addAll(product.images);
+          allImages.addAll(product.images.map(resolveProductImageUrl));
         }
         
         if (kDebugMode && allImages.isNotEmpty) {
@@ -166,49 +166,16 @@ class CategoryImagesHorizontal extends StatelessWidget {
       print('Loading image $imageNumber: $imageUrl');
     }
     
-    return CachedNetworkImage(
+    return ProductImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
       width: 120,
       height: 120,
-      // IMPORTANT: For Cloudinary AVIF/WebP images
-      httpHeaders: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-      },
-      placeholder: (context, url) => _buildLoadingWidget(context, imageNumber),
-      
-      errorWidget: (context, url, error) {
-        if (kDebugMode) {
-          print('Failed to load image $imageNumber: $url');
-          print('Error: $error');
-        }
-        
-        // Try fallback for Cloudinary URLs
-        if (url.contains('res.cloudinary.com')) {
-          final fallbackUrl = _getCloudinaryFallbackUrl(url);
-          if (fallbackUrl != url) {
-            return CachedNetworkImage(
-              imageUrl: fallbackUrl,
-              fit: BoxFit.cover,
-              placeholder: (context, url) => _buildLoadingWidget(context, imageNumber),
-              errorWidget: (context, url2, error2) => 
-                  _buildErrorWidget(context, 'Fallback failed', imageNumber),
-            );
-          }
-        }
-        
-        return _buildErrorWidget(context, 'Load failed', imageNumber);
-      },
-      
-      // Cache settings
-      cacheKey: imageUrl,
-      maxWidthDiskCache: 240,
-      maxHeightDiskCache: 240,
-      
-      // Smooth fade-in animation
-      fadeInDuration: const Duration(milliseconds: 300),
-      fadeInCurve: Curves.easeIn,
+      placeholder: _buildLoadingWidget(context, imageNumber),
+      fallbackImageUrl: imageUrl.contains('res.cloudinary.com')
+          ? _getCloudinaryFallbackUrl(imageUrl)
+          : null,
+      errorWidget: _buildErrorWidget(context, 'Load failed', imageNumber),
     );
   }
 

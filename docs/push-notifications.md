@@ -3,7 +3,7 @@
 Android receiving code is in `lib/service/push_notification_service.dart`.
 Firebase is initialized in `main.dart`; registration follows login, token refresh,
 and app resume, with periodic retries. The authenticated endpoint defaults to
-`https://aroun-shopping-website-ysi0.onrender.com/api/push`; override with
+`https://aroun-shopping-website-5nnj.onrender.com/api/push`; override with
 `--dart-define=PUSH_BASE_URL=https://your-server/api/push` for staging.
 
 The separate Node.js repository is checked out at `.work/backend` (ignored by this

@@ -3,6 +3,8 @@ import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/service/categoryservice.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -23,10 +25,26 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   int _quantity = 1;
   int _selectedImageIndex = 0;
   final PageController _pageController = PageController();
+  Product? _loadedProduct;
+  bool _loadingDetails = false;
+  Product get _product => _loadedProduct ?? widget.product;
   
   @override
   void initState() {
     super.initState();
+    _loadFullProduct();
+  }
+
+  Future<void> _loadFullProduct() async {
+    final id = widget.product.id;
+    if (id == null || id.isEmpty) return;
+    setState(() => _loadingDetails = true);
+    final product = await ProductController().getProductById(id);
+    if (!mounted) return;
+    setState(() {
+      _loadedProduct = product;
+      _loadingDetails = false;
+    });
   }
   
   @override
@@ -39,13 +57,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final rupeeFormat = NumberFormat.currency(
       locale: 'en_IN',
-      symbol: '₹',
+      symbol: 'â‚¹',
       decimalDigits: 2,
     );
 
     return Scaffold(
       appBar: AppBar(
-        title: AppDataText(widget.product.name, fallback: 'Product Details'),
+        title: AppDataText(_product.name, fallback: 'Product Details'),
         actions: [
          
           Consumer<CartManager>(
@@ -85,6 +103,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         children: [
           // Product Images Carousel with Preview
           _buildImageCarousel(),
+          if (_loadingDetails) const LinearProgressIndicator(minHeight: 2),
           
           // Product Details
           Padding(
@@ -94,7 +113,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               children: [
                 // Product Name
                 AppDataText(
-                  widget.product.name, fallback: 'Unnamed Product',
+                  _product.name, fallback: 'Unnamed Product',
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.bold,
@@ -116,7 +135,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: AppText(
-                        widget.product.category ?? 'Uncategorized',
+                        _product.category ?? 'Uncategorized',
                         style:  TextStyle(
                           color: context.appForeground(Colors.blue),
                           fontSize: 12,
@@ -124,7 +143,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                       ),
                     ),
                     const SizedBox(width: 16),
-                    if (widget.product.rating != null)
+                    if (_product.rating != null)
                       Row(
                         children: [
                           Icon(
@@ -134,7 +153,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                           ),
                           const SizedBox(width: 4),
                           AppText(
-                            widget.product.rating!.toStringAsFixed(1),
+                            _product.rating!.toStringAsFixed(1),
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -149,7 +168,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 
                 // Price
                 AppText(
-                  rupeeFormat.format(widget.product.price ?? 0),
+                  rupeeFormat.format(_product.price ?? 0),
                   style:  TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.bold,
@@ -163,21 +182,21 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 Row(
                   children: [
                     Icon(
-                      widget.product.stock != null && widget.product.stock! > 0
+                      _product.stock != null && _product.stock! > 0
                           ? Icons.check_circle
                           : Icons.error,
-                      color: context.appForeground(widget.product.stock != null && widget.product.stock! > 0
+                      color: context.appForeground(_product.stock != null && _product.stock! > 0
                           ? Colors.green
                           : Colors.red),
                     ),
                     const SizedBox(width: 8),
                     Expanded(child: AppText(
-                      widget.product.stock != null && widget.product.stock! > 0
-                          ? '${widget.product.stock} items available'
+                      _product.stock != null && _product.stock! > 0
+                          ? '${_product.stock} items available'
                           : 'Out of stock',
                       style: TextStyle(
                         fontSize: 16,
-                        color: context.appForeground(widget.product.stock != null && widget.product.stock! > 0
+                        color: context.appForeground(_product.stock != null && _product.stock! > 0
                             ? Colors.green
                             : Colors.red),
                       ),
@@ -197,7 +216,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                 ),
                 const SizedBox(height: 8),
                 AppDataText(
-                  widget.product.description, fallback: 'No description available',
+                  _product.description, fallback: 'No description available',
                   style: TextStyle(
                     fontSize: 16,
                     color: context.appForeground(Colors.grey[700]),
@@ -275,7 +294,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             // Add to Cart Button
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: widget.product.stock != null && widget.product.stock! > 0
+                onPressed: _product.stock != null && _product.stock! > 0
                     ? () => _addToCart(_quantity)
                     : null,
                 icon: const Icon(Icons.shopping_cart),
@@ -292,7 +311,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
             
             Expanded(
               child: ElevatedButton(
-                onPressed: widget.product.stock != null && widget.product.stock! > 0
+                onPressed: _product.stock != null && _product.stock! > 0
                     ? _buyNow
                     : null,
                 child:  AppText('Buy Now', style: TextStyle(color: context.appForeground(Colors.white))),
@@ -309,13 +328,13 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
 Widget _buildImageCarousel() {
-  final images = widget.product.images;
+  final images = _product.images;
 
   return Column(
     children: [
       // Main Image Carousel (Square)
       AspectRatio(
-        aspectRatio: 1, // 👈 equal height & width
+        aspectRatio: 1, // ðŸ‘ˆ equal height & width
         child: Stack(
           children: [
             PageView.builder(
@@ -329,34 +348,11 @@ Widget _buildImageCarousel() {
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () => _showFullScreenImage(index),
-                  child: Image.network(
-                    images[index],
+                  child: ProductImage(
+                    imageUrl: images[index],
                     width: double.infinity,
                     height: double.infinity,
                     fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Center(
-                        child: CircularProgressIndicator(
-                          value: loadingProgress.expectedTotalBytes != null
-                              ? loadingProgress.cumulativeBytesLoaded /
-                                  loadingProgress.expectedTotalBytes!
-                              : null,
-                        ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        color: context.appSurface(Colors.grey[200]),
-                        child:  Center(
-                          child: Icon(
-                            Icons.broken_image,
-                            size: 60,
-                            color: context.appForeground(Colors.grey),
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 );
               },
@@ -445,20 +441,11 @@ Widget _buildImageCarousel() {
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(6),
-                    child: Image.network(
-                      images[index],
+                    child: ProductImage(
+                      imageUrl: images[index],
                       width: 70,
                       height: 70,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: context.appSurface(Colors.grey[200]),
-                          child:  Icon(
-                            Icons.broken_image,
-                            color: context.appForeground(Colors.grey),
-                          ),
-                        );
-                      },
                     ),
                   ),
                 ),
@@ -485,39 +472,16 @@ Widget _buildImageCarousel() {
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 child: PageView.builder(
-                  itemCount: widget.product.images.length,
+                  itemCount: _product.images.length,
                   controller: PageController(initialPage: initialIndex),
                   itemBuilder: (context, index) {
                     return InteractiveViewer(
                       panEnabled: true,
                       minScale: 0.5,
                       maxScale: 3.0,
-                      child: Image.network(
-                        widget.product.images[index],
+                      child: ProductImage(
+                        imageUrl: _product.images[index],
                         fit: BoxFit.contain,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) return child;
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            color: context.appSurface(Colors.black),
-                            child:  Center(
-                              child: Icon(
-                                Icons.broken_image,
-                                size: 60,
-                                color: context.appForeground(Colors.grey),
-                              ),
-                            ),
-                          );
-                        },
                       ),
                     );
                   },
@@ -561,7 +525,7 @@ Widget _buildImageCarousel() {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: AppText(
-                      '${initialIndex + 1}/${widget.product.images.length}',
+                      '${initialIndex + 1}/${_product.images.length}',
                       style:  TextStyle(
                         color: context.appForeground(Colors.white),
                         fontSize: 16,
@@ -580,9 +544,9 @@ Widget _buildImageCarousel() {
 
   void _addToCart(int quantity) {
     // Check if product is in stock
-    if (widget.product.stock != null && widget.product.stock! > 0) {
+    if (_product.stock != null && _product.stock! > 0) {
       // Check if product is already in cart
-      if (CartManager.instance.isProductInCart(widget.product)) {
+      if (CartManager.instance.isProductInCart(_product)) {
         // Show message that product is already in cart
         ScaffoldMessenger.of(context).showSnackBar(
            SnackBar(
@@ -593,7 +557,7 @@ Widget _buildImageCarousel() {
         );
       } else {
         // Add the product to cart with the specified quantity (only once)
-        CartManager.instance.addProductWithQuantity(widget.product, quantity);
+        CartManager.instance.addProductWithQuantity(_product, quantity);
         
        
         // Update UI immediately
@@ -614,7 +578,7 @@ Widget _buildImageCarousel() {
   }
 
   void _buyNow() {
-    if (widget.product.stock != null && widget.product.stock! > 0) {
+    if (_product.stock != null && _product.stock! > 0) {
        _addToCart(_quantity);
       
       // Show checkout message (you can implement actual checkout navigation here)

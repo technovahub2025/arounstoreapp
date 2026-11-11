@@ -1,232 +1,301 @@
 import 'dart:convert';
+
 import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-
 class ProductController {
-  static const String apiUrl = 'https://aroun-shopping-website-ysi0.onrender.com/api/products';
-  static const Duration _productCacheTtl = Duration(minutes: 2);
+  static const String apiUrl =
+      'https://aroun-shopping-website-5nnj.onrender.com/api/products';
   static const int pageSize = 20;
-  static final Map<int, Future<ProductPage>> _productRequests = {};
-  
-  // Add AuthManager reference
-  AuthManager? _authManager;
-  
-  // Constructor that accepts AuthManager
-  ProductController({AuthManager? authManager}) {
-    _authManager = authManager;
-  }
-  
-  // Helper method to get token
-  String? _getToken() {
-    // If AuthManager was provided, use it
-    if (_authManager != null) {
-      return _authManager!.token;
-    }
-    // Otherwise, use the singleton instance
-    return AuthManager().token;
-  }
-  
-  // Helper method to get headers with authentication
-  Map<String, String> _getHeaders() {
-    final headers = {
-      'Content-Type': 'application/json',
+  static const Duration _cacheTtl = Duration(minutes: 2);
+  static final Map<String, Future<ProductPage>> _requests = {};
+
+  final AuthManager? _authManager;
+  ProductController({AuthManager? authManager}) : _authManager = authManager;
+
+  Map<String, String> _headers() {
+    final token = _authManager?.token ?? AuthManager().token;
+    return {
       'Accept': 'application/json',
+      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
     };
-    
-    final token = _getToken();
-    if (token != null && token.isNotEmpty) {
-      headers['Authorization'] = 'Bearer $token';
-      
-      if (kDebugMode) {
-        print('Adding token to request headers');
-        print('Token length: ${token.length}');
-      }
-    } else {
-      if (kDebugMode) {
-        print('No token available for request');
-      }
-    }
-    
-    return headers;
   }
 
-  Future<ProductPage> fetchProductPage({int page = 1}) async {
-    final cached = await _readCachedPage(page);
-    if (cached != null && cached.isFresh) return cached.page;
-    final existingRequest = _productRequests[page];
-    if (existingRequest != null) return existingRequest;
-    final request = _fetchPageFromApi(page, cached?.page);
-    _productRequests[page] = request;
+  Future<ProductPage> fetchProductPage({
+    String? cursor,
+    String search = '',
+    String? category,
+    List<String>? categories,
+    int limit = pageSize,
+    bool forceRefresh = false,
+  }) async {
+    final normalizedSearch = search.trim();
+    final params = <String, String>{'limit': '$limit'};
+    if (normalizedSearch.isNotEmpty) params['search'] = normalizedSearch;
+    final categoryFilters = (categories ?? [if (category != null) category])
+        .map((value) => value.trim())
+        .where((value) => value.isNotEmpty)
+        .toList();
+    if (categoryFilters.isNotEmpty) {
+      params['categories'] = jsonEncode(categoryFilters);
+    }
+    if (cursor != null && cursor.isNotEmpty) params['cursor'] = cursor;
+
+    // The full query and cursor identify both persistent cache entries and
+    // in-flight requests, so different searches can never share a page.
+    final cacheIdentity = jsonEncode(params);
+    final cacheKey = 'catalog_page_${base64Url.encode(utf8.encode(cacheIdentity))}';
+    if (!forceRefresh) {
+      final cached = await _readCachedPage(cacheKey);
+      if (cached != null && cached.isFresh) return cached.page;
+    }
+    final requestKey = '$apiUrl/catalog?$cacheIdentity';
+    final existing = _requests[requestKey];
+    if (existing != null) return existing;
+
+    final request = _fetchPage(params, cacheKey);
+    _requests[requestKey] = request;
     try {
       return await request;
     } finally {
-      if (identical(_productRequests[page], request)) _productRequests.remove(page);
+      if (identical(_requests[requestKey], request)) _requests.remove(requestKey);
     }
   }
 
-  Future<ProductPage> _fetchPageFromApi(int page, ProductPage? stalePage) async {
+  Future<ProductPage> _fetchPage(
+    Map<String, String> params,
+    String cacheKey,
+  ) async {
     try {
-      final response = await http.get(
-        Uri.parse(apiUrl).replace(queryParameters: {'page': '$page', 'limit': '$pageSize'}),
-        headers: _getHeaders(), // Use headers with auth
-      );
-      
-      if (kDebugMode) {
-        print('Products API Status: ${response.statusCode}');
-        if (response.statusCode != 200) {
-          print('Error response: ${response.body}');
-        }
+      final uri = Uri.parse('$apiUrl/catalog').replace(queryParameters: params);
+      final response = await http.get(uri, headers: _headers());
+      if (response.statusCode != 200) {
+        throw ProductApiException(response.statusCode, response.body);
       }
+      final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+      final rawItems = decoded['items'];
+      if (rawItems is! List) throw const FormatException('Missing catalogue items');
+      final products = rawItems
+          .whereType<Map<String, dynamic>>()
+          .map(Product.fromJson)
+          .toList(growable: false);
+      final hasMore = decoded['hasMore'] == true;
+      final nextCursor = decoded['nextCursor']?.toString();
+      if (hasMore && (nextCursor == null || nextCursor.isEmpty)) {
+        throw const FormatException('Catalogue did not return its next cursor');
+      }
+      final page = ProductPage(
+        products: products,
+        hasMore: hasMore,
+        nextCursor: nextCursor,
+        total: decoded['total'] is num ? (decoded['total'] as num).toInt() : null,
+      );
+      await _writeCachedPage(cacheKey, page);
+      return page;
+    } catch (error) {
+      debugPrint('Catalogue request failed: $error');
+      // Offline fallback is limited to the same exact query/cursor cache.
+      final stale = await _readCachedPage(cacheKey);
+      if (stale != null) return stale.page;
+      rethrow;
+    }
+  }
 
+  Future<Map<String, int>> fetchCategoryCounts() async {
+    final response = await http.get(
+      Uri.parse('$apiUrl/catalog-facets'),
+      headers: _headers(),
+    );
+    if (response.statusCode != 200) {
+      throw ProductApiException(response.statusCode, response.body);
+    }
+    final decoded = jsonDecode(response.body) as Map<String, dynamic>;
+    final rows = decoded['categories'];
+    if (rows is! List) return const {};
+    return {
+      for (final row in rows.whereType<Map<String, dynamic>>())
+        (row['name']?.toString().trim().isNotEmpty == true
+                ? row['name'].toString()
+                : 'Uncategorized'):
+            (row['count'] as num?)?.toInt() ?? 0,
+    };
+  }
+
+  Future<Product?> getProductById(String id) async {
+    try {
+      final response = await http.get(Uri.parse('$apiUrl/$id'), headers: _headers());
       if (response.statusCode == 200) {
-        final decoded = json.decode(response.body);
-        final List<dynamic> rawProducts = decoded is List
-            ? decoded
-            : (decoded['products'] ?? decoded['data'] ?? decoded['items']) as List<dynamic>;
-        final allProducts = rawProducts
-            .map((item) => Product.fromJson(item as Map<String, dynamic>))
-            .toList();
-        final start = (page - 1) * pageSize;
-        final products = decoded is List && allProducts.length > pageSize
-            ? allProducts.skip(start).take(pageSize).toList()
-            : allProducts;
-        final hasMore = decoded is Map<String, dynamic>
-            ? (decoded['hasMore'] as bool? ??
-                (decoded['totalPages'] is num
-                    ? page < (decoded['totalPages'] as num).toInt()
-                    : products.length == pageSize))
-            : decoded is List && allProducts.length > pageSize
-                ? start + products.length < allProducts.length
-                : products.length == pageSize;
-        if (kDebugMode) {
-          print('Products fetched for page $page: ${products.length}');
-        }
-        final result = ProductPage(products: products, hasMore: hasMore);
-        await _writeCachedPage(page, result);
-        return result;
-      } else if (response.statusCode == 401) {
-        // Token expired or invalid
-        if (kDebugMode) {
-          print('Authentication failed for products API');
-        }
-        
-        // You can trigger logout if needed
-        // _authManager?.logout();
-        
-        return stalePage ?? const ProductPage(products: [], hasMore: false);
-      } else {
-        debugPrint('API Error: ${response.statusCode} - ${response.body}');
-        return stalePage ?? const ProductPage(products: [], hasMore: false);
+        return Product.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
       }
-    } catch (e) {
-      debugPrint('Network error: $e');
-      return stalePage ?? const ProductPage(products: [], hasMore: false);
-    }
-  }
-
-  Future<_CachedPage?> _readCachedPage(int page) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final body = prefs.getString('products_page_$page');
-      final cachedAt = prefs.getInt('products_page_time_$page');
-      if (body == null || cachedAt == null) return null;
-      final decoded = json.decode(body) as Map<String, dynamic>;
-      final products = (decoded['products'] as List<dynamic>)
-          .map((item) => Product.fromJson(item as Map<String, dynamic>))
-          .toList();
-      final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
-      return _CachedPage(
-        ProductPage(products: products, hasMore: decoded['hasMore'] as bool),
-        age >= 0 && age < _productCacheTtl.inMilliseconds,
-      );
-    } catch (e) {
-      debugPrint('Could not read product cache: $e');
+      debugPrint('Product detail request failed: ${response.statusCode}');
+      return null;
+    } catch (error) {
+      debugPrint('Product detail request failed: $error');
       return null;
     }
   }
 
-  Future<void> _writeCachedPage(int page, ProductPage result) async {
+  Future<_CachedPage?> _readCachedPage(String key) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('products_page_$page', json.encode({
-        'products': result.products.map((product) => product.toJson()).toList(),
-        'hasMore': result.hasMore,
-      }));
-      await prefs.setInt(
-        'products_page_time_$page',
-        DateTime.now().millisecondsSinceEpoch,
+      final raw = prefs.getString(key);
+      if (raw == null) return null;
+      final decoded = jsonDecode(raw) as Map<String, dynamic>;
+      final products = (decoded['products'] as List<dynamic>)
+          .whereType<Map<String, dynamic>>()
+          .map(Product.fromJson)
+          .toList(growable: false);
+      final cachedAt = decoded['cachedAt'] as int? ?? 0;
+      final page = ProductPage(
+        products: products,
+        hasMore: decoded['hasMore'] == true,
+        nextCursor: decoded['nextCursor']?.toString(),
+        total: decoded['total'] as int?,
       );
-    } catch (e) {
-      debugPrint('Could not save product cache: $e');
+      final age = DateTime.now().millisecondsSinceEpoch - cachedAt;
+      return _CachedPage(page, age >= 0 && age < _cacheTtl.inMilliseconds);
+    } catch (error) {
+      debugPrint('Could not read catalogue cache: $error');
+      return null;
+    }
+  }
+
+  Future<void> _writeCachedPage(String key, ProductPage page) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(key, jsonEncode({
+        'products': page.products.map((product) => product.toJson()).toList(),
+        'hasMore': page.hasMore,
+        'nextCursor': page.nextCursor,
+        'total': page.total,
+        'cachedAt': DateTime.now().millisecondsSinceEpoch,
+      }));
+    } catch (error) {
+      debugPrint('Could not save catalogue cache: $error');
     }
   }
 
   Future<List<Product>> fetchProducts() async =>
       (await fetchProductPage()).products;
 
-  // Group products by category
   Future<Map<String, List<Product>>> fetchProductsByCategory() async {
+    final products = await fetchProducts();
+    final groups = <String, List<Product>>{};
+    for (final product in products) {
+      final name = product.category?.trim();
+      groups.putIfAbsent(name == null || name.isEmpty ? 'Uncategorized' : name, () => [])
+          .add(product);
+    }
+    return groups;
+  }
+}
+
+/// Shared cursor state for the mobile and dashboard home screens.
+class ProductCatalogSession {
+  ProductCatalogSession(this.controller);
+  final ProductController controller;
+  final List<Product> products = [];
+  final Map<String, List<Product>> categories = {};
+  bool loading = false;
+  bool loadingMore = false;
+  bool hasMore = false;
+  String? error;
+  String? _cursor;
+  String _search = '';
+  List<String> _categories = const [];
+  int _generation = 0;
+  String get searchQuery => _search;
+
+  void invalidatePending() {
+    _generation++;
+  }
+
+  Future<void> reloadFirst() => loadFirst(search: _search, categories: _categories);
+
+  Future<void> loadFirst({String search = '', List<String> categories = const []}) async {
+    final generation = ++_generation;
+    _search = search.trim();
+    _categories = List.unmodifiable(categories);
+    _cursor = null;
+    products.clear();
+    this.categories.clear();
+    loading = true;
+    loadingMore = false;
+    hasMore = false;
+    error = null;
     try {
-      List<Product> products = await fetchProducts();
-      
-      Map<String, List<Product>> categoryMap = {};
-
-      for (var product in products) {
-        String category = product.category?.trim() ?? 'Uncategorized';
-        
-        if (category.isEmpty) {
-          category = 'Uncategorized';
-        }
-        
-        categoryMap.putIfAbsent(category, () => []).add(product);
-      }
-
-      if (kDebugMode) {
-        print('Categories found: ${categoryMap.length}');
-      }
-
-      return categoryMap;
+      final page = await controller.fetchProductPage(search: _search, categories: _categories);
+      if (generation != _generation) return;
+      _append(page.products);
+      _cursor = page.nextCursor;
+      hasMore = page.hasMore;
     } catch (e) {
-      debugPrint('Error categorizing products: $e');
-      return {};
+      if (generation == _generation) error = 'Failed to load products. Please try again.';
+    } finally {
+      if (generation == _generation) loading = false;
     }
   }
-  
-  // Add other product operations that need authentication
-  Future<Product?> getProductById(String id) async {
+
+  Future<void> loadMore() async {
+    if (loading || loadingMore || !hasMore || _cursor == null) return;
+    final generation = _generation;
+    loadingMore = true;
+    error = null;
     try {
-      final response = await http.get(
-        Uri.parse('$apiUrl/$id'),
-        headers: _getHeaders(),
+      final page = await controller.fetchProductPage(
+        cursor: _cursor,
+        search: _search,
+        categories: _categories,
       );
-      
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        return Product.fromJson(jsonData);
-      }
-      return null;
+      if (generation != _generation) return;
+      _append(page.products);
+      _cursor = page.nextCursor;
+      hasMore = page.hasMore;
     } catch (e) {
-      debugPrint('Error fetching product: $e');
-      return null;
+      if (generation == _generation) error = 'Could not load more products. Please retry.';
+    } finally {
+      if (generation == _generation) loadingMore = false;
     }
   }
-  
+
+  void _append(Iterable<Product> incoming) {
+    final ids = products.map((product) => product.id).whereType<String>().toSet();
+    for (final product in incoming) {
+      if (product.id != null && !ids.add(product.id!)) continue;
+      products.add(product);
+      final name = product.category?.trim();
+      categories.putIfAbsent(name == null || name.isEmpty ? 'Uncategorized' : name, () => [])
+          .add(product);
+    }
+  }
 }
 
 class ProductPage {
   final List<Product> products;
   final bool hasMore;
+  final String? nextCursor;
+  final int? total;
+  const ProductPage({
+    required this.products,
+    required this.hasMore,
+    this.nextCursor,
+    this.total,
+  });
+}
 
-  const ProductPage({required this.products, required this.hasMore});
+class ProductApiException implements Exception {
+  final int statusCode;
+  final String body;
+  const ProductApiException(this.statusCode, this.body);
+  @override
+  String toString() => 'Product API returned $statusCode';
 }
 
 class _CachedPage {
   final ProductPage page;
   final bool isFresh;
-
   const _CachedPage(this.page, this.isFresh);
 }

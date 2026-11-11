@@ -1,6 +1,7 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 
 class orderscreen extends StatelessWidget {
@@ -36,13 +37,11 @@ class orderscreen extends StatelessWidget {
           /// Image
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Image.network(
-              product.imageUrl ?? '',
+            child: ProductImage(
+              imageUrl: product.imageUrl,
               width: 145,
               height: 145,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) =>
-                  const Icon(Icons.image, size: 45),
             ),
           ),
 

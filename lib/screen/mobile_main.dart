@@ -1,7 +1,6 @@
 import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/authmanager.dart';
-import 'package:arunstore/authmanager.dart';
 import 'package:arunstore/cart/allorder.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/categories/filter.dart';
@@ -14,6 +13,7 @@ import 'package:arunstore/service/categoryservice.dart';
 import 'package:arunstore/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 
 class MobileMainScreen extends StatefulWidget {
   const MobileMainScreen({super.key});
@@ -26,13 +26,22 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int _currentIndex = 0;
   final ProductController _productController = ProductController();
-  Map<String, List<Product>> _categoryMap = {};
-  List<Product> _allProducts = [];
-  bool _loading = true;
-  bool _loadingMore = false;
-  bool _hasMore = true;
-  int _productPage = 1;
-  String? _error;
+  late final ProductCatalogSession _catalog = ProductCatalogSession(_productController);
+  Timer? _searchTimer;
+  Map<String, int> _categoryCounts = {};
+  String _activeSearch = '';
+  Map<String, List<Product>> get _categoryMap => _catalog.categories;
+  List<Product> get _allProducts => _catalog.products;
+  bool get _loading => _catalog.loading;
+  bool get _loadingMore => _catalog.loadingMore;
+  bool get _hasMore => _catalog.hasMore;
+  String? get _error => _catalog.error;
+
+  @override
+  void dispose() {
+    _searchTimer?.cancel();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -41,58 +50,46 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
   }
 
   Future<void> _loadData() async {
+    await _catalog.loadFirst();
     try {
-      final page = await _productController.fetchProductPage();
-      final data = <String, List<Product>>{};
-      for (final product in page.products) {
-        final name = product.category?.trim();
-        data.putIfAbsent(
-          name == null || name.isEmpty ? 'Uncategorized' : name,
-          () => [],
-        ).add(product);
-      }
-      if (mounted) {
-        setState(() {
-          _categoryMap = data;
-          _allProducts = page.products;
-          _hasMore = page.hasMore;
-          _loading = false;
-        });
+      _categoryCounts = await _productController.fetchCategoryCounts();
+      for (final category in _categoryCounts.keys) {
+        _categoryMap.putIfAbsent(category, () => []);
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _categoryMap = {};
-          _allProducts = [];
-          _error = 'Failed to load products';
-          _loading = false;
-        });
-      }
+      debugPrint('Could not load category counts: $e');
     }
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadMoreProducts() async {
-    if (_loadingMore || !_hasMore) return;
-    setState(() => _loadingMore = true);
-    try {
-      final nextPage = _productPage + 1;
-      final page = await _productController.fetchProductPage(page: nextPage);
-      if (!mounted) return;
-      setState(() {
-        _productPage = nextPage;
-        _hasMore = page.hasMore;
-        _allProducts.addAll(page.products);
-        for (final product in page.products) {
-          final name = product.category?.trim();
-          _categoryMap.putIfAbsent(
-            name == null || name.isEmpty ? 'Uncategorized' : name,
-            () => [],
-          ).add(product);
+    await _catalog.loadMore();
+    if (mounted) setState(() {});
+  }
+
+  void _onSearchChanged(String query) {
+    _searchTimer?.cancel();
+    _activeSearch = query.trim();
+    _catalog.invalidatePending();
+    _searchTimer = Timer(const Duration(milliseconds: 300), () async {
+      await _catalog.loadFirst(search: query);
+      if (query.trim().isEmpty) {
+        for (final category in _categoryCounts.keys) {
+          _categoryMap.putIfAbsent(category, () => []);
         }
-      });
-    } finally {
-      if (mounted) setState(() => _loadingMore = false);
+      }
+      if (mounted) setState(() {});
+    });
+  }
+
+  Future<void> _retryCatalog() async {
+    await _catalog.loadFirst(search: _activeSearch);
+    if (_activeSearch.isEmpty) {
+      for (final category in _categoryCounts.keys) {
+        _categoryMap.putIfAbsent(category, () => []);
+      }
     }
+    if (mounted) setState(() {});
   }
 
   Future<void> _logout() async {
@@ -145,7 +142,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
     );
   }
 
-  void _navigateToSearchResults(List<Product> results) {
+  void _navigateToSearchResults(List<Product> results, String query) {
     final map = <String, List<Product>>{};
     if (results.isNotEmpty) {
       map['Search Results'] = results;
@@ -155,6 +152,7 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
       MaterialPageRoute(
         builder: (_) => CategoryFilterPage(
           categories: map,
+          searchQuery: query,
           onProfileTap: () {
             Navigator.pop(context);
             _onNavTap(2);
@@ -166,12 +164,11 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authManager = Provider.of<AuthManager>(context);
-
     final screens = [
       MobileHomeScreen(
         categoryMap: _categoryMap,
         allProducts: _allProducts,
+        categoryCounts: _categoryCounts,
         loading: _loading,
         loadingMore: _loadingMore,
         hasMore: _hasMore,
@@ -182,14 +179,10 @@ class _MobileMainScreenState extends State<MobileMainScreen> {
           _navigateToCategoryFilter(_categoryMap, initialCategory: categoryName);
         },
         onSearchSubmitted: (query) {
-          final results = _allProducts.where((p) {
-            final lower = query.toLowerCase();
-            return (p.name?.toLowerCase().contains(lower) ?? false) ||
-                (p.category?.toLowerCase().contains(lower) ?? false) ||
-                (p.description?.toLowerCase().contains(lower) ?? false);
-          }).toList();
-          _navigateToSearchResults(results);
+          _navigateToSearchResults(_allProducts, query);
         },
+        onSearchChanged: _onSearchChanged,
+        onRetry: _retryCatalog,
       ),
       _loading
           ?  Center(child: CircularProgressIndicator(color: context.appForeground(AppColors.primary)))

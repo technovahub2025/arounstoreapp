@@ -7,7 +7,7 @@ class Product {
   final List<String> images;
   final String? category;
   final double? rating;
-  final int? stock;
+  final double? stock;
   final double? mrp;
 
   Product({
@@ -90,15 +90,10 @@ class Product {
     return null;
   }
 
-  static int? _parseStock(dynamic stock) {
+  static double? _parseStock(dynamic stock) {
     if (stock == null) return null;
-    
-    if (stock is int) {
-      return stock;
-    } else if (stock is String) {
-      return int.tryParse(stock);
-    }
-    
+    if (stock is num) return stock.toDouble();
+    if (stock is String) return double.tryParse(stock);
     return null;
   }
 

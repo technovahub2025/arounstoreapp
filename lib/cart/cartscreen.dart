@@ -2,6 +2,7 @@ import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/widgets/product_image.dart';
 
 class Cartscreen extends StatelessWidget {
   final Product product;
@@ -46,12 +47,11 @@ class Cartscreen extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(6),
-            child: Image.network(
-              product.imageUrl ?? '',
+            child: ProductImage(
+              imageUrl: product.imageUrl,
               width: 45,
               height: 45,
               fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => const Icon(Icons.image, size: 45),
             ),
           ),
           const SizedBox(width: 8),

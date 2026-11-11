@@ -12,19 +12,23 @@ import 'package:arunstore/screen/registerscreen.dart';
 import 'package:arunstore/service/categoryservice.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 
 
 class HomeScreenLogic {
   final ProductController controller = ProductController();
+  late final ProductCatalogSession _catalog = ProductCatalogSession(controller);
+  Timer? _searchTimer;
   final AuthManager authManager = AuthManager();
-  
-  Map<String, List<Product>> categoryMap = {};
-  List<Product> allProducts = [];
-  bool loading = true;
-  bool loadingMore = false;
-  bool hasMoreProducts = true;
-  int _productPage = 1;
-  String? error;
+
+  Map<String, List<Product>> get categoryMap => _catalog.categories;
+  Map<String, int> categoryCounts = {};
+  List<Product> get allProducts => _catalog.products;
+  bool get loading => _catalog.loading;
+  bool get loadingMore => _catalog.loadingMore;
+  bool get hasMoreProducts => _catalog.hasMore;
+  String? _screenError;
+  String? get error => _catalog.error ?? _screenError;
   bool authLoading = true;
   bool isAdmin = false;
   bool isLoggedIn = false;
@@ -244,7 +248,7 @@ class HomeScreenLogic {
       if (kDebugMode) {
         print('❌ Error in _initializeAuthAndData: $e');
       }
-      error = 'Failed to initialize app';
+      _screenError = 'Failed to initialize app';
       authLoading = false;
     }
   }
@@ -255,48 +259,53 @@ class HomeScreenLogic {
     }
     
     try {
-      loading = true;
-      error = null;
+      _screenError = null;
       
-       final page = await controller.fetchProductPage();
-       _addProducts(page.products);
-       hasMoreProducts = page.hasMore;
-       loading = false;
-      
+       await _catalog.loadFirst();
+       try {
+         categoryCounts = await controller.fetchCategoryCounts();
+         for (final category in categoryCounts.keys) {
+           categoryMap.putIfAbsent(category, () => []);
+         }
+       } catch (e) {
+         debugPrint('Could not load category counts: $e');
+       }
     } catch (e, stackTrace) {
       if (kDebugMode) {
         print('Error loading categories: $e');
         print('Stack trace: $stackTrace');
       }
       
-      categoryMap = {};
-      allProducts = [];
-      loading = false;
-      error = 'Failed to load categories. Please check your internet connection.';
+      _screenError = 'Failed to load categories. Please check your internet connection.';
     }
   }
 
   Future<void> loadMoreProducts() async {
-    if (loadingMore || !hasMoreProducts) return;
-    loadingMore = true;
-    try {
-      final nextPage = _productPage + 1;
-      final page = await controller.fetchProductPage(page: nextPage);
-      _addProducts(page.products);
-      _productPage = nextPage;
-      hasMoreProducts = page.hasMore;
-    } finally {
-      loadingMore = false;
+    await _catalog.loadMore();
+  }
+
+  Future<void> reloadProducts() async {
+    _screenError = null;
+    await _catalog.reloadFirst();
+    if (_catalog.searchQuery.isEmpty) {
+      for (final category in categoryCounts.keys) {
+        categoryMap.putIfAbsent(category, () => []);
+      }
     }
   }
 
-  void _addProducts(List<Product> products) {
-    for (final product in products) {
-      allProducts.add(product);
-      final category = product.category?.trim();
-      final key = category == null || category.isEmpty ? 'Uncategorized' : category;
-      categoryMap.putIfAbsent(key, () => []).add(product);
-    }
+  void searchProductsFromServer(String query, VoidCallback onChanged) {
+    _searchTimer?.cancel();
+    _catalog.invalidatePending();
+    _searchTimer = Timer(const Duration(milliseconds: 300), () async {
+      await _catalog.loadFirst(search: query);
+      if (query.trim().isEmpty) {
+        for (final category in categoryCounts.keys) {
+          categoryMap.putIfAbsent(category, () => []);
+        }
+      }
+      onChanged();
+    });
   }
 
   void setupAuthListener(VoidCallback onStateChanged) {
@@ -321,16 +330,7 @@ class HomeScreenLogic {
   
 
   List<Product> searchProducts(String query) {
-    if (query.isEmpty) return allProducts;
-    final lowerQuery = query.toLowerCase();
-    return allProducts.where((product) {
-      final name = product.name?.toLowerCase() ?? '';
-      final category = product.category?.toLowerCase() ?? '';
-      final description = product.description?.toLowerCase() ?? '';
-      return name.contains(lowerQuery) ||
-          category.contains(lowerQuery) ||
-          description.contains(lowerQuery);
-    }).toList();
+    return allProducts;
   }
 
   void navigateToSearchResults(BuildContext context, String query) {
@@ -344,6 +344,7 @@ class HomeScreenLogic {
       MaterialPageRoute(
         builder: (context) => CategoryFilterPage(
           categories: categoryMap,
+          searchQuery: query,
         ),
       ),
     );
@@ -351,6 +352,7 @@ class HomeScreenLogic {
 
   // Cleanup
   void dispose() {
+    _searchTimer?.cancel();
     scrollController.dispose();
   }
 }

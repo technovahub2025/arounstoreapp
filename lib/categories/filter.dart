@@ -2,6 +2,8 @@ import 'package:arunstore/theme/theme_colors.dart';
 import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/service/categoryservice.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -14,12 +16,14 @@ enum PriceSortType {
 class CategoryFilterPage extends StatefulWidget {
   final Map<String, List<Product>> categories;
   final String? initialSelectedCategory;
+  final String? searchQuery;
   final VoidCallback? onProfileTap;
 
   const CategoryFilterPage({
     Key? key,
     required this.categories,
     this.initialSelectedCategory,
+    this.searchQuery,
     this.onProfileTap,
   }) : super(key: key);
 
@@ -30,6 +34,11 @@ class CategoryFilterPage extends StatefulWidget {
 class _CategoryFilterPageState extends State<CategoryFilterPage> {
   List<String> _selectedCategories = [];
   List<Product> _filteredProducts = [];
+  final ProductController _productController = ProductController();
+  late final ProductCatalogSession _catalog = ProductCatalogSession(_productController);
+  final ScrollController _productsScrollController = ScrollController();
+  Map<String, int> _categoryCounts = {};
+  bool _countsLoaded = false;
 
   PriceSortType _priceSortType = PriceSortType.none;
 
@@ -52,16 +61,60 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
       _selectedCategories = categoryNames;
     }
 
-    _updateFilteredProducts();
+    _filteredProducts = [];
+    _loadCountsAndProducts();
+    _productsScrollController.addListener(_onProductsScroll);
+  }
+
+  Future<void> _loadCountsAndProducts() async {
+    try {
+      final counts = await _productController.fetchCategoryCounts();
+      if (!mounted) return;
+      setState(() {
+        _categoryCounts = counts;
+        _countsLoaded = true;
+        if (widget.searchQuery == null && widget.initialSelectedCategory == null) {
+          _selectedCategories = counts.keys.toList();
+        }
+      });
+      await _reloadProducts();
+    } catch (_) {
+      if (mounted) {
+        setState(() => _countsLoaded = true);
+        await _reloadProducts();
+      }
+    }
+  }
+
+  Future<void> _reloadProducts() async {
+    if (_selectedCategories.isEmpty && (widget.searchQuery == null || widget.searchQuery!.isEmpty)) {
+      _filteredProducts = [];
+      if (mounted) setState(() {});
+      return;
+    }
+    final request = _catalog.loadFirst(
+      search: widget.searchQuery ?? '',
+      categories: _selectedCategories.where((name) => name != 'Search Results').toList(),
+    );
+    _filteredProducts = [];
+    if (mounted) setState(() {});
+    await request;
+    if (mounted) _updateFilteredProducts();
+  }
+
+  void _onProductsScroll() {
+    if (_productsScrollController.position.extentAfter < 500 && _catalog.hasMore && !_catalog.loadingMore) {
+      _loadMore();
+    }
+  }
+
+  Future<void> _loadMore() async {
+    await _catalog.loadMore();
+    if (mounted) _updateFilteredProducts();
   }
 
   void _updateFilteredProducts() {
-    _filteredProducts = [];
-
-    for (var category in _selectedCategories) {
-      final products = widget.categories[category] ?? [];
-      _filteredProducts.addAll(products);
-    }
+    _filteredProducts = List.of(_catalog.products);
 
     if (_priceSortType == PriceSortType.lowToHigh) {
       _filteredProducts.sort(
@@ -89,23 +142,30 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
       }
     });
 
-    _updateFilteredProducts();
+    _reloadProducts();
   }
 
   void _selectAllCategories() {
     setState(() {
-      _selectedCategories = widget.categories.keys.toList();
+      _selectedCategories = _countsLoaded ? _categoryCounts.keys.toList() : widget.categories.keys.toList();
     });
 
-    _updateFilteredProducts();
+    _reloadProducts();
   }
 
   void _clearAllCategories() {
     setState(() {
       _selectedCategories.clear();
+      _filteredProducts.clear();
     });
 
-    _updateFilteredProducts();
+    _reloadProducts();
+  }
+
+  @override
+  void dispose() {
+    _productsScrollController.dispose();
+    super.dispose();
   }
 
   void _viewProductDetails(Product product) {
@@ -115,6 +175,20 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
         builder: (context) => ProductDetailScreen(product: product),
       ),
     );
+  }
+
+  String get _resultCountLabel {
+    if ((widget.searchQuery ?? '').trim().isNotEmpty) {
+      return _catalog.hasMore
+          ? 'Showing ${_filteredProducts.length} products'
+          : '${_filteredProducts.length} products found';
+    }
+    final total = _selectedCategories.fold<int>(
+      0,
+      (sum, category) => sum + (_categoryCounts[category] ?? 0),
+    );
+    if (_countsLoaded) return '$total products found';
+    return 'Loading product count...';
   }
 
   void _showSortBottomSheet() {
@@ -268,7 +342,9 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
 
   @override
   Widget build(BuildContext context) {
-    final categoryNames = widget.categories.keys.toList();
+    final categoryNames = _countsLoaded
+        ? _categoryCounts.keys.toList()
+        : widget.categories.keys.toList();
 
     return Scaffold(
       backgroundColor: context.appBackground(const Color(0xFFF7F7F7)),
@@ -544,7 +620,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                               _selectedCategories.contains(category);
 
                           final int productCount =
-                              widget.categories[category]?.length ?? 0;
+                              _categoryCounts[category] ?? widget.categories[category]?.length ?? 0;
 
                           return Padding(
                             padding: const EdgeInsets.only(
@@ -753,7 +829,7 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       const SizedBox(height: 3),
 
                       AppText(
-                        '${_filteredProducts.length} products found',
+                        _resultCountLabel,
                         style: TextStyle(
                           fontSize: 12,
                           color: context.appForeground(Colors.grey.shade600),
@@ -805,9 +881,22 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
           // PRODUCT LIST / EMPTY STATE
           // ==========================================================
           Expanded(
-            child: _filteredProducts.isEmpty
-                ? _buildEmptyState()
+            child: _filteredProducts.isEmpty && _catalog.loading
+                ? const Center(child: CircularProgressIndicator())
+                : _filteredProducts.isEmpty && _catalog.error != null
+                    ? Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const AppText('Could not load products.'),
+                            TextButton(onPressed: _reloadProducts, child: const AppText('Retry')),
+                          ],
+                        ),
+                      )
+                : _filteredProducts.isEmpty
+                    ? _buildEmptyState()
                 : GridView.builder(
+                    controller: _productsScrollController,
                     padding: const EdgeInsets.all(14),
                     physics: const BouncingScrollPhysics(),
                     gridDelegate:
@@ -817,8 +906,11 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                       mainAxisSpacing: 12,
                       childAspectRatio: 0.58,
                     ),
-                    itemCount: _filteredProducts.length,
+                    itemCount: _filteredProducts.length + (_catalog.loadingMore ? 2 : 0),
                     itemBuilder: (context, index) {
+                      if (index >= _filteredProducts.length) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
                       final product = _filteredProducts[index];
 
                       return _buildProductCard(product);
@@ -946,8 +1038,8 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                 child: product.images.isNotEmpty
                     ? Padding(
                         padding: const EdgeInsets.all(8),
-                        child: Image.network(
-                          product.images.first,
+                        child: ProductImage(
+                          imageUrl: product.images.first,
                           width: double.infinity,
                           height: double.infinity,
 
@@ -956,38 +1048,13 @@ class _CategoryFilterPageState extends State<CategoryFilterPage> {
                           // being unnecessarily cropped.
                           fit: BoxFit.contain,
 
-                          errorBuilder:
-                              (context, error, stackTrace) {
-                            return Center(
+                          errorWidget: Center(
                               child: Icon(
                                 Icons.image_not_supported_outlined,
                                 size: 40,
                                 color: context.appForeground(Colors.grey.shade400),
                               ),
-                            );
-                          },
-
-                          loadingBuilder:
-                              (context, child, loadingProgress) {
-                            if (loadingProgress == null) {
-                              return child;
-                            }
-
-                            return Center(
-                              child:
-                                  CircularProgressIndicator(
-                                strokeWidth: 2,
-                                value: loadingProgress
-                                            .expectedTotalBytes !=
-                                        null
-                                    ? loadingProgress
-                                            .cumulativeBytesLoaded /
-                                        loadingProgress
-                                            .expectedTotalBytes!
-                                    : null,
-                              ),
-                            );
-                          },
+                            ),
                         ),
                       )
                     : Center(

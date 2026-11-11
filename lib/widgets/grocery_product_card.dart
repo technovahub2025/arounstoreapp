@@ -5,7 +5,7 @@ import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/theme/app_theme.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -338,30 +338,6 @@ class GroceryProductCard extends StatelessWidget {
       );
     }
 
-    return CachedNetworkImage(
-      imageUrl: product.images[0],
-      fit: BoxFit.contain,
-      width: double.infinity,
-      placeholder: (context, url) => const Center(
-        child: SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(strokeWidth: 2),
-        ),
-      ),
-      errorWidget: (context, url, error) =>  Center(
-        child: Icon(
-          Icons.broken_image,
-          size: 30,
-          color: context.appForeground(AppColors.grey400),
-        ),
-      ),
-      maxWidthDiskCache: 400,
-      maxHeightDiskCache: 400,
-      httpHeaders: const {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
-      },
-    );
+    return ProductImage(imageUrl: product.images[0], width: double.infinity);
   }
 }

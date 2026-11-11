@@ -3,6 +3,7 @@ import 'package:arunstore/l10n/app_localization.dart';
 import 'package:arunstore/cart/cartservice.dart';
 import 'package:arunstore/model/cartmanager.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -128,51 +129,9 @@ class ProductCard extends StatelessWidget {
                             panEnabled: true,
                             minScale: 0.5,
                             maxScale: 4.0,
-                            child: Image.network(
-                              product.images[0],
+                            child: ProductImage(
+                              imageUrl: product.images[0],
                               fit: BoxFit.contain,
-                              loadingBuilder: (context, child, loadingProgress) {
-                                if (loadingProgress == null) {
-                                  print('Image loaded successfully'); // Debug print
-                                  return child;
-                                }
-                                print('Image loading: ${loadingProgress.cumulativeBytesLoaded} / ${loadingProgress.expectedTotalBytes}'); // Debug print
-                                return Center(
-                                  child: CircularProgressIndicator(
-                                    value: loadingProgress.expectedTotalBytes != null
-                                        ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                        : null,
-                                    color: context.appForeground(Colors.white),
-                                  ),
-                                );
-                              },
-                              errorBuilder: (context, error, stackTrace) {
-                                print('Image error: $error'); // Debug print
-                                return Container(
-                                  color: context.appSurface(Colors.grey[800]),
-                                  child:  Center(
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.broken_image,
-                                          size: 60,
-                                          color: context.appForeground(Colors.grey),
-                                        ),
-                                        SizedBox(height: 10),
-                                        AppText(
-                                          'Failed to load image',
-                                          style: TextStyle(
-                                            color: context.appForeground(Colors.white),
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                );
-                              },
                             ),
                           ),
                         ),
@@ -480,42 +439,12 @@ class ProductCard extends StatelessWidget {
       );
     }
     
-    return Image.network(
-      product.images[0],
+    return ProductImage(
+      imageUrl: product.images[0],
       fit: BoxFit.cover,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return Center(
-          child: CircularProgressIndicator(
-            value: loadingProgress.expectedTotalBytes != null
-                ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
-                : null,
-          ),
-        );
-      },
-      errorBuilder: (context, error, stackTrace) {
-        return  Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.broken_image,
-                size: 50,
-                color: context.appForeground(Colors.grey),
-              ),
-              SizedBox(height: 4),
-              AppText(
-                'Image failed to load',
-                style: TextStyle(
-                  fontSize: 10,
-                  color: context.appForeground(Colors.grey),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
+      errorWidget: Center(
+        child: Icon(Icons.broken_image, size: 50, color: context.appForeground(Colors.grey)),
+      ),
     );
   }
 }

@@ -18,6 +18,7 @@ import 'package:provider/provider.dart';
 class MobileHomeScreen extends StatefulWidget {
   final Map<String, List<Product>> categoryMap;
   final List<Product> allProducts;
+  final Map<String, int> categoryCounts;
   final bool loading;
   final bool loadingMore;
   final bool hasMore;
@@ -26,12 +27,15 @@ class MobileHomeScreen extends StatefulWidget {
   final void Function(String categoryName)? onCategoryTap;
   final void Function(Product product)? onDealProductTap;
   final void Function(String query)? onSearchSubmitted;
+  final void Function(String query)? onSearchChanged;
+  final VoidCallback? onRetry;
   final VoidCallback? onMenuTap;
 
   const MobileHomeScreen({
     super.key,
     required this.categoryMap,
     required this.allProducts,
+    this.categoryCounts = const {},
     required this.loading,
     this.loadingMore = false,
     this.hasMore = false,
@@ -40,6 +44,8 @@ class MobileHomeScreen extends StatefulWidget {
     this.onCategoryTap,
     this.onDealProductTap,
     this.onSearchSubmitted,
+    this.onSearchChanged,
+    this.onRetry,
     this.onMenuTap,
   });
 
@@ -86,7 +92,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
               const SizedBox(height: 12),
               AppText(widget.error ?? 'An error occurred'),
               const SizedBox(height: 12),
-              ElevatedButton(onPressed: () {}, child: const AppText('Retry')),
+              ElevatedButton(onPressed: widget.onRetry, child: const AppText('Retry')),
             ],
           ),
         ),
@@ -228,7 +234,10 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
         child: TextField(
           controller: _searchController,
           textInputAction: TextInputAction.search,
-          onChanged: (_) => setState(() {}),
+          onChanged: (value) {
+            setState(() {});
+            widget.onSearchChanged?.call(value);
+          },
           style: const TextStyle(fontSize: 14),
           decoration: InputDecoration(
             hintText: 'Search for groceries...',
@@ -254,6 +263,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
                       setState(() {
                         _searchController.clear();
                       });
+                      widget.onSearchChanged?.call('');
                     },
                   )
                 : null,
@@ -286,6 +296,7 @@ class _MobileHomeScreenState extends State<MobileHomeScreen> {
           else
             CategoryCarousel(
               categories: widget.categoryMap,
+              productCounts: widget.categoryCounts,
               onCategoryTap: (categoryName) {
                 widget.onCategoryTap?.call(categoryName);
               },

@@ -1,7 +1,7 @@
 class AppEnv {
   static const pushBaseUrl = String.fromEnvironment(
     'PUSH_BASE_URL',
-    defaultValue: 'https://aroun-shopping-website-ysi0.onrender.com/api/push',
+    defaultValue: 'https://aroun-shopping-website-5nnj.onrender.com/api/push',
   );
   const AppEnv._();
 
@@ -17,11 +17,11 @@ class AppEnv {
   static const String paymentBaseUrl = String.fromEnvironment(
     'PAYMENT_BASE_URL',
     defaultValue:
-        'https://aroun-shopping-website-ysi0.onrender.com/api/payment',
+        'https://aroun-shopping-website-5nnj.onrender.com/api/payment',
   );
 
   static const String ordersBaseUrl = String.fromEnvironment(
     'ORDERS_BASE_URL',
-    defaultValue: 'https://aroun-shopping-website-ysi0.onrender.com/api/orders',
+    defaultValue: 'https://aroun-shopping-website-5nnj.onrender.com/api/orders',
   );
 }

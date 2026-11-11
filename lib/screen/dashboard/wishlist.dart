@@ -4,6 +4,7 @@ import 'package:arunstore/categories/productdetail.dart';
 import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/model/wishlist_manager.dart';
 import 'package:arunstore/theme/app_theme.dart';
+import 'package:arunstore/widgets/product_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -231,36 +232,11 @@ class _WishlistPageState extends State<WishlistPage> {
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(16),
-      child: Image.network(
-        product.images[0],
+      child: ProductImage(
+        imageUrl: product.images[0],
         fit: BoxFit.contain,
         width: double.infinity,
         height: double.infinity,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: SizedBox(
-              width: 20,
-              height: 20,
-              child: CircularProgressIndicator(
-                strokeWidth: 2,
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            ),
-          );
-        },
-        errorBuilder: (_, _, _) {
-          return  Center(
-            child: Icon(
-              Icons.broken_image,
-              size: 40,
-              color: context.appForeground(AppColors.grey400),
-            ),
-          );
-        },
       ),
     );
   }

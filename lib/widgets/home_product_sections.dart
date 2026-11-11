@@ -23,13 +23,10 @@ class HomeProductSections extends StatelessWidget {
   Widget build(BuildContext context) {
     final search = query.trim().toLowerCase();
     if (search.isNotEmpty) {
-      final results = allProducts.where((product) {
-        return [
-          product.name,
-          product.category,
-          product.description,
-        ].any((value) => value?.toLowerCase().contains(search) ?? false);
-      }).toList();
+      // Search already ran against the complete backend catalogue. Catalogue
+      // card rows omit descriptions, so filtering locally would discard valid
+      // matches found only in a product description.
+      final results = allProducts;
 
       if (results.isEmpty) {
         return const Padding(
@@ -43,7 +40,7 @@ class HomeProductSections extends StatelessWidget {
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: categories.entries.map((entry) {
+      children: categories.entries.where((entry) => entry.value.isNotEmpty).map((entry) {
         return ProductCarousel(
           title: entry.key,
           products: entry.value.take(4).toList(),

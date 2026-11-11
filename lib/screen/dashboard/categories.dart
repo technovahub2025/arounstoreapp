@@ -4,6 +4,7 @@ import 'package:arunstore/model/categoriesmodel.dart';
 import 'package:arunstore/screen/dashboard/categorypage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:arunstore/widgets/product_image.dart';
 
 class CategoriesCarousel extends StatelessWidget {
   final Map<String, List<Product>> categories;
@@ -174,27 +175,10 @@ class CategoriesCarousel extends StatelessWidget {
       borderRadius: const BorderRadius.vertical(
         top: Radius.circular(12),
       ),
-      child: Image.network(
-        imageUrl,
+      child: ProductImage(
+        imageUrl: imageUrl,
         fit: BoxFit.cover,
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                      loadingProgress.expectedTotalBytes!
-                  : null,
-            ),
-          );
-        },
-        errorBuilder: (context, error, stackTrace) {
-          if (kDebugMode) {
-            print('Failed to load image: $imageUrl');
-            print('Error: $error');
-          }
-          return Center(
+        errorWidget: Center(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -214,8 +198,7 @@ class CategoriesCarousel extends StatelessWidget {
                 ),
               ],
             ),
-          );
-        },
+          ),
       ),
     );
   }
