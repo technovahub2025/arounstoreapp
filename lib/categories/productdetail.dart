@@ -57,7 +57,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   Widget build(BuildContext context) {
     final rupeeFormat = NumberFormat.currency(
       locale: 'en_IN',
-      symbol: 'â‚¹',
+      symbol: '₹',
       decimalDigits: 2,
     );
 
